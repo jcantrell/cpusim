@@ -1,0 +1,13 @@
+token types:
+	"load"
+	"store"
+	hex values
+	identifiers
+
+parse tree nodes:
+	statement_p
+	load_p
+	store_p
+	token_p
+
+

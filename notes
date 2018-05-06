@@ -1,0 +1,31 @@
+dump memory n
+store memory n m
+dump register n
+store register n
+
+word:
+4 bit ip
+20 bit address
+20 bit address
+20 bit address
+
+dump(), store(), memory(), register(), address(), value()
+
+dump_statement -> dump memory address | dump register address
+store_statement -> store memory address value
+    | store register address value
+statement -> dump_statement | store_statement
+
+logic:  constants   T,F
+        propositions    lowercase & digit string
+        connectives ~, &, V, ->, <->
+
+formula ->  constant | proposition | unary_formula | binary_formula
+constant -> "T" | "F"
+proposition -> [a-zA-Z0-9]+
+UnaryFormula -> leftparen unaryop formula rightparen
+binaryFormula -> leftparen binaryop formula rightparen
+leftparen -> "("
+rightparen -> ")"
+unaryip -> "\neq"
+binaryop -> "\Vec" | "\wedge" | "\rightarrow" | "\leftarrow"
