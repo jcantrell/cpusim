@@ -1,3 +1,6 @@
+#include "abstracter.h"
+#include "parser.h"
+
 bool abstracter(parse_node* in,ast_node* out)
 {
 	if (in != NULL)
@@ -25,8 +28,9 @@ bool abstracter(parse_node* in,ast_node* out)
 		}
 		for (int i=0;i<4;i++)
 			if (in->children[i])
-				abstracter(in->children[i],   );
+				abstracter(in->children[i], NULL  );
 	} else {
 		return false;
+	}
 	
 }
