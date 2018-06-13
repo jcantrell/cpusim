@@ -1,0 +1,98 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+MAX_ARGS	cpu.cpp	8;"	d	file:
+MAX_ARGS	cpu2.cpp	8;"	d	file:
+MAX_MEM_SIZE	cpu.cpp	9;"	d	file:
+MAX_MEM_SIZE	cpu2.cpp	9;"	d	file:
+MAX_STR_LEN	cpu.cpp	7;"	d	file:
+MAX_STR_LEN	cpu2.cpp	7;"	d	file:
+MAX_TOKEN_LEN	lexer.h	/^const int MAX_TOKEN_LEN = 50;$/;"	v
+abstracter	abstracter.cpp	/^bool abstracter(parse_node* in,ast_node* out)$/;"	f
+add	cpu.cpp	/^	int add(int a, int b, int dst)$/;"	f	class:cpu
+address_size	cpu.cpp	/^	int address_size;$/;"	m	class:cpu	file:
+af	cpu.cpp	/^	bool af;	\/\/ Auxiliary carry flag$/;"	m	struct:flags	file:
+ast_node	abstracter.h	/^struct ast_node$/;"	s
+ast_type	abstracter.h	/^enum ast_type {load_a, store_a, identifier_a, value_a};$/;"	g
+byte_size	cpu.cpp	/^	int byte_size;  $/;"	m	class:cpu	file:
+cf	cpu.cpp	/^	bool cf;	\/\/ Carry flag$/;"	m	struct:flags	file:
+children	id_tree.h	/^	id_node *children[2];$/;"	m	struct:id_node
+children	parser.h	/^	parse_node *children[4];$/;"	m	struct:parse_node
+cpu	cpu.cpp	/^	cpu(int byte_in, int address_in)$/;"	f	class:cpu
+cpu	cpu.cpp	/^class cpu$/;"	c	file:
+df	cpu.cpp	/^	bool df;	\/\/ Direction$/;"	m	struct:flags	file:
+div	cpu.cpp	/^	int div(int a, int b, int dst)$/;"	f	class:cpu
+flags	cpu.cpp	/^struct flags$/;"	s	file:
+getip	cpu.cpp	/^	int getip()$/;"	f	class:cpu
+head	lexer.h	/^	token * head;$/;"	m	class:token_stream
+id_node	id_tree.h	/^struct id_node$/;"	s
+identifier	lexer.cpp	/^bool identifier(char *s[], token *t)$/;"	f
+identifier_a	abstracter.h	/^enum ast_type {load_a, store_a, identifier_a, value_a};$/;"	e	enum:ast_type
+identifier_t	lexer.h	/^enum node_type {load_t,store_t,value_t,whitespace_t,identifier_t};$/;"	e	enum:node_type
+index	id_tree.h	/^	int index;$/;"	m	struct:id_node
+inf	cpu.cpp	/^	bool inf;	\/\/ Interrupt$/;"	m	struct:flags	file:
+insert	id_tree.h	/^void insert(id_node *tree, char *id)$/;"	f
+ip	cpu.cpp	/^	int ip;$/;"	m	class:cpu	file:
+land	cpu.cpp	/^	int land(int a, int b, int dst)$/;"	f	class:cpu
+len	lexer.h	/^    int len;$/;"	m	struct:token
+lnot	cpu.cpp	/^	int lnot(int a, int dst)$/;"	f	class:cpu
+load	cpu.cpp	/^	int load(int address, int value)$/;"	f	class:cpu
+load	lexer.cpp	/^bool load(char *s[], token* t)$/;"	f
+load_a	abstracter.h	/^enum ast_type {load_a, store_a, identifier_a, value_a};$/;"	e	enum:ast_type
+load_p	parser.h	/^enum parse_type {statement_p,load_p,store_p,token_p};$/;"	e	enum:parse_type
+load_statement	parser.cpp	/^bool load_statement( token **stream, parse_node **out)$/;"	f
+load_t	lexer.h	/^enum node_type {load_t,store_t,value_t,whitespace_t,identifier_t};$/;"	e	enum:node_type
+lor	cpu.cpp	/^	int lor(int a, int b, int dst)$/;"	f	class:cpu
+lshift	cpu.cpp	/^	int lshift(int a, int b)$/;"	f	class:cpu
+lxor	cpu.cpp	/^	int lxor(int a, int b, int dst)$/;"	f	class:cpu
+main	cpu.cpp	/^int main()$/;"	f
+main	cpu2.cpp	/^int main()$/;"	f
+main	main.cpp	/^int main()$/;"	f
+match	lexer.cpp	/^bool match(char *s[], const char* in)$/;"	f
+match	parser.cpp	/^bool match( token** stream, const token* compare, parse_node **out)$/;"	f
+memdump	cpu.cpp	/^	void memdump()$/;"	f	class:cpu
+mul	cpu.cpp	/^	int mul(int a, int b, int dst)$/;"	f	class:cpu
+next	lexer.h	/^    token* next;$/;"	m	struct:token
+node_type	lexer.h	/^enum node_type {load_t,store_t,value_t,whitespace_t,identifier_t};$/;"	g
+of	cpu.cpp	/^	bool of;	\/\/ Overflow$/;"	m	struct:flags	file:
+p	parser.h	/^	parse_type p;$/;"	m	struct:parse_node
+parse	lexer.cpp	/^token *parse(char *s[])$/;"	f
+parse_node	parser.h	/^struct parse_node$/;"	s
+parse_type	parser.h	/^enum parse_type {statement_p,load_p,store_p,token_p};$/;"	g
+parse_walk	parser.cpp	/^void parse_walk(parse_node * in)$/;"	f
+pf	cpu.cpp	/^	bool pf;	\/\/ parity flag$/;"	m	struct:flags	file:
+ram	cpu.cpp	/^	std::unordered_map<int, int> ram;$/;"	m	class:cpu	file:
+rshift	cpu.cpp	/^	int rshift(int a, int b)$/;"	f	class:cpu
+setip	cpu.cpp	/^	int setip(int in)$/;"	f	class:cpu
+sf	cpu.cpp	/^	bool sf;	\/\/ Sign flag$/;"	m	struct:flags	file:
+statement	parser.cpp	/^bool statement( token **stream, parse_node **out)$/;"	f
+statement_p	parser.h	/^enum parse_type {statement_p,load_p,store_p,token_p};$/;"	e	enum:parse_type
+status	cpu.cpp	/^	struct flags status;$/;"	m	class:cpu	typeref:struct:cpu::flags	file:
+store	lexer.cpp	/^bool store(char *s[], token *t)$/;"	f
+store_a	abstracter.h	/^enum ast_type {load_a, store_a, identifier_a, value_a};$/;"	e	enum:ast_type
+store_p	parser.h	/^enum parse_type {statement_p,load_p,store_p,token_p};$/;"	e	enum:parse_type
+store_statement	parser.cpp	/^bool store_statement( token **stream, parse_node ** out)$/;"	f
+store_t	lexer.h	/^enum node_type {load_t,store_t,value_t,whitespace_t,identifier_t};$/;"	e	enum:node_type
+sub	cpu.cpp	/^	int sub(int a, int b, int dst)$/;"	f	class:cpu
+t	abstracter.h	/^	ast_type t;$/;"	m	struct:ast_node
+t	parser.h	/^	token * t;$/;"	m	struct:parse_node
+tf	cpu.cpp	/^	bool tf;	\/\/ Trap$/;"	m	struct:flags	file:
+token	lexer.h	/^struct token$/;"	s
+token_p	parser.h	/^enum parse_type {statement_p,load_p,store_p,token_p};$/;"	e	enum:parse_type
+token_print	lexer.cpp	/^void token_print(token* t)$/;"	f
+token_stream	lexer.h	/^class token_stream$/;"	c
+type	lexer.h	/^    node_type type;$/;"	m	struct:token
+value	abstracter.h	/^	int value;$/;"	m	struct:ast_node
+value	id_tree.h	/^	char * value;$/;"	m	struct:id_node
+value	lexer.cpp	/^bool value(char *s[], token* t)$/;"	f
+value	lexer.h	/^    char value[MAX_TOKEN_LEN];$/;"	m	struct:token
+value_a	abstracter.h	/^enum ast_type {load_a, store_a, identifier_a, value_a};$/;"	e	enum:ast_type
+value_t	lexer.h	/^enum node_type {load_t,store_t,value_t,whitespace_t,identifier_t};$/;"	e	enum:node_type
+view	cpu.cpp	/^	int view(int address)$/;"	f	class:cpu
+whitespace	lexer.cpp	/^bool whitespace(char *s[], token* t)$/;"	f
+whitespace_t	lexer.h	/^enum node_type {load_t,store_t,value_t,whitespace_t,identifier_t};$/;"	e	enum:node_type
+zf	cpu.cpp	/^	bool zf;	\/\/ Zero flag$/;"	m	struct:flags	file:
+~cpu	cpu.cpp	/^	~cpu()$/;"	f	class:cpu

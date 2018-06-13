@@ -6,20 +6,6 @@
  *  store_statement -> store_t identifier_t value_t value_t
  */
 
-/*
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "lexer.h"
-
-enum parse_type {statement_p,load_p,store_p,token_p};
-struct parse_node
-{
-	parse_type p;
-	token * t;
-	parse_node *children[4];
-};
-*/
 #include "parser.h"
 
 bool match(token ** stream, const token * compare,parse_node ** out);
@@ -30,13 +16,15 @@ bool store_statement(token ** stream, parse_node **out);
 /*
  * INPUT:
  *      A string of tokens, s, and a token to be matched in s.
+ *
  * OUTPUT:
  *      True/False depending on whether the given token matched the first
  *      token in s.
+ *
  * DESCRIPTION:
- *      Determine if token, a string of n characters, matches the first n
- * characters in s. If so, advance s pparse the matched characters and return
- * true; otherwise, return false. 
+ *      Determine if token (a string of n characters), matches the first n
+ * 			characters in s. If so, advance s pparse the matched characters and 
+ * 			return true; otherwise, return false. 
  */
 bool match( token** stream, const token* compare, parse_node **out)
 {
@@ -217,26 +205,28 @@ void parse_walk(parse_node * in)
 			parse_walk(in->children[i]);
 }
 
-/*
-int main()
+int test()
 {
     char string[] = "store memory 0x661120 0xdeadbeef";
     char *s = string;
 
-	token *p = parse(&s);
+	//convert to token stream
+    token *p = parse(&s);
 
-	//Walk through token stream
 	token *j = p;
-	while (j!=NULL) {printf("%s\n",j->value); j = j->next;}
+    while (j!=NULL)
+    {
+		printf("%s\n",j->value);
+		j = j->next;
+    }
 
+	//convert token stream to parse tree
 	parse_node *a;
 
-	if (store_statement(&p,&a))
+	if (statement(&p,&a))
 		printf("true\n");
 
-	//walk the tree
 	parse_walk(a);
-
+    
     return 1;
 }
-*/

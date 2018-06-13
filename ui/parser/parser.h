@@ -13,3 +13,4 @@ struct parse_node
 
 extern bool statement(token **stream, parse_node **out);
 extern void parse_walk(parse_node *in);
+extern int test();
