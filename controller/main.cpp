@@ -5,6 +5,9 @@ int main()
 {
 	//TextUI t;
 	//t.user_loop();
-	test();
+	//test();
+	TextUI u;
+	UI* u2 = new TextUI;
+	((TextUI*) u2)->user_loop();
 	return 0;
 }

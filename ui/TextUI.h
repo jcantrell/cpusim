@@ -4,9 +4,10 @@
 #include <unordered_map>
 #include <iostream>
 
+#include "ui/UI.h"
 #include "model/cpu.h"
 
-class TextUI {
+class TextUI : public UI {
 	public:
 		int user_loop();
 };
