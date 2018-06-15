@@ -41,16 +41,6 @@ int TextUI::user_loop()
 	in_word = letter;
 	}
 
-	//printf("last letter is: %c %d len: %d\n", input[j], input[j], j);
-	//printf("last letter is: %c %d len: %d\n", 'T', 78, 1);
-
-/*
-	printf("args:\n");
-	for (int i=0;i<arg_count;i++)
-	printf(":%s:\n",args[i]);
-	printf("end args\n");
-*/
-
 	if (0==strcmp("create", input))
 	{
 		mycpu = new subleq(8,MAX_MEM_SIZE);
@@ -103,7 +93,21 @@ int TextUI::user_loop()
 	}
 	else if (0==strcmp("help",args[0]))
 	{
-		printf("");
+		string commands[9] = {
+			"help: display available commands\n"
+			"create: create a new cpu\n"
+			"memdump: dump the contents of RAM onto the screen\n"
+			"exit: quit the simulator\n"
+			"load <address> <value>: load a value into an address\n"
+			"view <address> <address>: view contents of an address range\n"
+			"viewip: view the value of the IP\n"
+			"setip: set the IP\n"
+			"step: execute the current instruction\n"
+		};
+		for (int i=0;i<9;i++)
+		{
+			printf(commands[i].c_str());
+		}
 	}
 	else if (0==strcmp("info",args[0]))
 	{
@@ -118,5 +122,6 @@ int TextUI::user_loop()
 		}
 		}
 	}
+		cout << "quitting" << endl;
 	return 0;
 }
