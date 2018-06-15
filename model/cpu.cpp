@@ -2,6 +2,7 @@
 
 cpu::cpu(int byte_in, int address_in)
 	{
+		flagint.i = 42; //magic number 101010
 	    byte_size = byte_in;
 	    address_size = address_in;
 	    ip = 0;
@@ -11,6 +12,67 @@ cpu::cpu(int byte_in, int address_in)
 cpu::~cpu()
 	{
 	}
+
+void cpu::step(int inst)
+	{
+	}
+
+string cpu::toString()
+{
+	string s = "";
+	s += "Byte width: " + to_string(byte_size) + "\n";
+	s += "Address size: " + to_string(address_size) + "\n";
+	s += "IP: " + to_string(ip) + "\n";
+	s += "Flags: " + to_string(flagint.i) + "\n";
+
+	s += "-----------------------------------------------\n";
+	s += "| OF | DF | INF | TF | SF | ZF | AF | PF | CF |\n";
+	s += "-----------------------------------------------\n";
+
+	s +=  "|  " + string(flagint.flags.of ? "1" : "0");
+	s += " |  " + string(flagint.flags.df ? "1" : "0");
+	s += " |   " + string(flagint.flags.inf ? "1" : "0");
+	s += " |  " + string(flagint.flags.tf ? "1" : "0");
+	s += " |  " + string(flagint.flags.sf ? "1" : "0");
+	s += " |  " + string(flagint.flags.zf ? "1" : "0");
+	s += " |  " + string(flagint.flags.af ? "1" : "0");
+	s += " |  " + string(flagint.flags.pf ? "1" : "0");
+	s += " |  " + string(flagint.flags.cf ? "1" : "0");
+	s += " |\n";
+	//s += " | " + DF | INF | TF | SF | ZF | AF | PF | CF |\n";
+	s += "-----------------------------------------------\n";
+
+/*
+	s += "CF: ";
+	s += (flagint.flags.cf ? "true" : "false");
+	s += "\n";
+	s += "PF: " + "----------------------------;
+	s += (flagint.flags.pf ? "true" : "false");
+	s += "\n";
+	s += "AF: "; 
+	s += (flagint.flags.af ? "true" : "false");
+	s += "\n";
+	s += "ZF: ";
+	s += (flagint.flags.zf ? "true" : "false");
+	s += "\n";
+	s += "SF: "; 
+	s += (flagint.flags.sf ? "true" : "false");
+	s += "\n";
+	s += "TF: "; 
+	s += (flagint.flags.tf ? "true" : "false");
+	s += "\n";
+	s += "INF: "; 
+	s += (flagint.flags.inf ? "true" : "false");
+	s += "\n";
+	s += "DF: "; 
+	s += (flagint.flags.df ? "true" : "false"); 
+	s += "\n";
+	s += "OF: ";
+	s += (flagint.flags.of ? "true" : "false"); 
+	s += "\n";
+*/
+	return s;
+}
 	
 void cpu::memdump()
 	{

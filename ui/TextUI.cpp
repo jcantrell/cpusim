@@ -5,7 +5,7 @@ int TextUI::user_loop()
 	char input[MAX_STR_LEN];
 	char *args[MAX_ARGS];
 	int arg_count=0;
-	cpu* mycpu;
+	cpu* mycpu = NULL;
 
 	while (1)
 	{
@@ -53,12 +53,15 @@ int TextUI::user_loop()
 
 	if (0==strcmp("create", input))
 	{
-		mycpu = new cpu(8,MAX_MEM_SIZE);
+		mycpu = new subleq(8,MAX_MEM_SIZE);
 		printf("cpu created\n");
 	} 
 	else if (0==strcmp("memdump",input)) 
 	{
-		mycpu->memdump();
+		if (mycpu == NULL)
+			printf("No cpu\n");
+		else
+			mycpu->memdump();
 	} 
 	else if (0==strcmp("exit",input))
 	{
@@ -97,34 +100,14 @@ int TextUI::user_loop()
 	{
 	    int inst = mycpu->view(mycpu->getip());
 
-	    switch (inst)
-	    {
-	        case 0: // subleq for now, until loading alternative
-	                // instruction sets is implemented
-	                
-	            {
-							/*
-	            int a = mycpu->view(mycpu->view(inst+1));
-	            int b = mycpu->view(mycpu->view(inst+2));
-	            int c = mycpu->view(inst+3);
-							*/
-							int a = mycpu->view(mycpu->view(mycpu->getip()+1));
-							int b = mycpu->view(mycpu->view(mycpu->getip()+2));
-							int c = mycpu->view(mycpu->getip()+3);
-	            printf("loaded %d %d %d\n", a, b, c);
-	            printf("diff is %d\n", b-a);
-
-	            mycpu->load( mycpu->view(inst+2), b-a);
-	            if (b-a <= 0)
-	                mycpu->setip(c);
-	            else
-	                mycpu->setip(inst+1);
-	            }
-	            break;
-
-	        default:
-	            break;
-	    }
+	}
+	else if (0==strcmp("help",args[0]))
+	{
+		printf("");
+	}
+	else if (0==strcmp("info",args[0]))
+	{
+		printf(mycpu->toString().c_str());
 	}
 	else
 	{

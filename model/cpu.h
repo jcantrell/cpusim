@@ -1,8 +1,11 @@
+#ifndef CPU_H
+#define CPU_H
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unordered_map>
 #include <iostream>
+#include <string>
 
 #define MAX_STR_LEN 512
 #define MAX_ARGS	32
@@ -12,15 +15,20 @@ using namespace std;
 
 struct flags
 {
-	bool cf;	// Carry flag
-	bool pf;	// parity flag
-	bool af;	// Auxiliary carry flag
-	bool zf;	// Zero flag
-	bool sf;	// Sign flag
-	bool tf;	// Trap
-	bool inf;	// Interrupt
-	bool df;	// Direction
-	bool of;	// Overflow
+	unsigned
+	cf:1,	// Carry flag
+	pf:1,	// parity flag
+	af:1,	// Auxiliary carry flag
+	zf:1,	// Zero flag
+	sf:1,	// Sign flag
+	tf:1,	// Trap
+	inf:1,	// Interrupt
+	df:1,	// Direction
+	of:1;	// Overflow
+};
+union flagsint {
+	flags flags;
+	unsigned i;
 };
 
 class cpu {
@@ -30,15 +38,21 @@ class cpu {
 	std::unordered_map<int, int> ram;
 	int ip;
 	struct flags status;
+	union flagsint flagint;
 
 	public:
 		cpu(int byte_in, int address_in);
 		~cpu();
+
 		void memdump();
 		int load(int address, int value);
 		int view(int address);
 		int getip();
 		int setip(int in);
+		string toString();
+		virtual void step(int inst);
+
+// CPU instructions
 		int add(int a, int b, int dst);
 		int sub(int a, int b, int dst);
 		int mul(int a, int b, int dst);
@@ -50,3 +64,4 @@ class cpu {
 		int lshift(int a, int b);
 		int rshift(int a, int b);
 };
+#endif

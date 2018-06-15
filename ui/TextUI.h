@@ -6,6 +6,7 @@
 
 #include "ui/UI.h"
 #include "model/cpu.h"
+#include "model/subleq.h"
 
 class TextUI : public UI {
 	public:
