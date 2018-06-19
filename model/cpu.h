@@ -33,12 +33,13 @@ union flagsint {
 
 class cpu {
 	private:
-	int byte_size;  
-	int address_size;
-	std::unordered_map<int, int> ram;
-	int ip;
-	struct flags status;
-	union flagsint flagint;
+		int byte_size;  
+		int address_size;
+		std::unordered_map<int, int> ram;
+		std::unordered_map<int, int> registers;
+		int ip;
+		struct flags status;
+		union flagsint flagint;
 
 	public:
 		cpu(int byte_in, int address_in);

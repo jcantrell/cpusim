@@ -113,6 +113,19 @@ void subleq::step(int inst)
         }
         break;
 
+      case 0x22: // ADDU
+        {
+                unsigned long base = (regvalue(b) + regvalue(c)) % width;
+                regstore(a, base);
+        }
+
+      case 0x: // STB
+        {
+                unsigned long base = (regvalue(b) + regvalue(c)) % width;
+                unsigned long value = view(base);
+                value = (value & 0xff)
+                memstore(base, value);
+
       default:
           break;
   }
