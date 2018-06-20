@@ -5,13 +5,17 @@ OBJ:=controller/main.o \
 			ui/parser/parser.o \
 			ui/parser/lexer.o \
 			model/cpu.o \
-			model/subleq.o
+			model/subleq.o \
+			model/mmix.o
 
 cpusim:	$(OBJ)
 	$(CC) $(CFLAGS) -o cpusim $(OBJ)
 
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@
+
+model/mmix.o: model/mmix.cpp model/mmix.h
+	$(CC) $(CFLAGS) -c -o $@ model/mmix.cpp
 
 controller/main.o: controller/main.cpp ui/TextUI.h
 	$(CC) $(CFLAGS) -c -o $@ controller/main.cpp
