@@ -1,4 +1,5 @@
 #include "mmix.h"
+#include <bitset>
 
 mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size)
 {
@@ -35,6 +36,64 @@ void mmix::wideMult(unsigned long long int a, unsigned long long int b,
   *result = ((((uint64_t) o2)<<32) | o1);
 }
 
+void mmix::wideDiv(unsigned long long int numerator_hi,
+                   unsigned long long int numerator_lo,
+                   unsigned long long int divisor,
+                   unsigned long long int *quotient,
+                   unsigned long long int *remainder
+                  )
+{
+  uint64_t a_hi = numerator_hi;
+  uint64_t a_lo = numerator_lo;
+  uint64_t b = divisor;
+
+// quotient
+  uint64_t q = a_lo << 1;
+
+  // remainder
+  uint64_t rem = a_hi;
+
+  uint64_t carry = a_lo >> 63;
+  uint64_t temp_carry = 0;
+  int i;
+
+  for(i = 0; i < 64; i++)
+  {
+    temp_carry = rem >> 63;
+    rem <<= 1;
+    rem |= carry;
+    carry = temp_carry;
+
+    if(carry == 0)
+    {
+      if(rem >= b)
+      {
+        carry = 1;
+      }
+      else
+      {
+        temp_carry = q >> 63;
+        q <<= 1;
+        q |= carry;
+        carry = temp_carry;
+        continue;
+      }
+    }
+
+    rem -= b;
+    rem -= (1 - carry);
+    carry = 1;
+    temp_carry = q >> 63;
+    q <<= 1;
+    q |= carry;
+    carry = temp_carry;
+  }
+
+  *quotient = q;
+  *remainder = rem;
+
+}
+
 unsigned long long int mmix::M(unsigned int size, unsigned long long address)
 {
   const unsigned int octasize = 8;
@@ -53,12 +112,28 @@ unsigned long long int mmix::M(unsigned int size, unsigned long long address)
   return value;
 }
 
+unsigned long long int mmix::M(unsigned int size, unsigned long long address,
+  unsigned long long int value)
+{
+  return 0;
+}
+
 unsigned long long int mmix::R(unsigned int reg)
 {
   return 0;
 }
 
 unsigned long long int mmix::R(unsigned int reg, unsigned long long value)
+{
+  return 0;
+}
+
+unsigned long long int mmix::g(unsigned int reg, unsigned long long value)
+{
+  return 0;
+}
+
+unsigned long long int mmix::g(unsigned int reg)
 {
   return 0;
 }
@@ -161,7 +236,7 @@ void mmix::step(int inst)
                 // and s(rR) <- s($Y) mod s($Z)
         R(x, (R(z) == 0) ? 0 : 
               (((long long int) R(y)) / ((signed long long) R(z))));
-        SR(rR, (R(z) == 0) ? R(y) :
+        g(rR, (R(z) == 0) ? R(y) :
               (((long long int) R(y)) % ((signed long long) R(z))));
         break;
       case ADDU: // u($X) <- (u($Y) + u($Z)) mod 2^64
@@ -174,32 +249,147 @@ void mmix::step(int inst)
         unsigned long long carry;
         unsigned long long result;
         wideMult(R(y), R(z), &carry, &result);
-        SR(rH, carry);
+        g(rH, carry);
         R(x, result);
         break;
       case DIVU: // u($X) <- floor(u(rD $Y) / u($Z))
                  // u(rR) <- u(rD $Y) mod u($Z), if u($Z) > u(rD);
                  //     otherwise $X <- rD, rR <- $Y
-        R(x, (R(z) > SR(rD)) ? (((SR(rD) << 64 ) & R(y)) / R(z)) : SR(rD) );
-        SR(rR, (R(z) > SR(rD)) ? (((SR(rD) << 64) & R(y)) % R(z)) : R(y) );
+        unsigned long long numerator_hi;
+        unsigned long long numerator_lo;
+        unsigned long long divisor;
+        unsigned long long quotient;
+        unsigned long long remainder;
+
+        numerator_hi = g(rD);
+        numerator_lo = R(y);
+        divisor = R(z);
+
+        if (divisor > numerator_hi)
+        {
+          wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
+          R(x, quotient);
+          g(rR, remainder);
+        } else {
+          R(x, numerator_hi);
+          g(rR, numerator_lo );
+        }
+  
         break;
-      case i2ADDU: // u($X) <- (u($Y) x 2 + u($Z)) mod 2^64
+
+      case i2ADDU: // u($X) <- (u($Y) x 2 + u($Z)) mod 2^4
         R(x, (R(y)*2 + R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
       case i4ADDU: // u($X) <- (u($Y) x 4 + u($Z)) mod 2^64
-        R(x, (R(y)*4 + R(u)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*4 + R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
       case i8ADDU: // u($X) <- (u($Y) x 8 + u($Z)) mod 2^64
-        R(x, (R(y)*8 + R(u)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*8 + R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
       case i16ADDU: // u($X) <- (u($Y) x 16 + u($Z)) mod 2^64
-        R(x, (R(y)*16 + R(u)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*16 + R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
       case NEG: // s($X) <- Y - s($Z)
         R(x, y - ( (unsigned long long) R(z)) );
         break;
       case NEGU: // u($X) <- (Y - u($Z)) mod 2^64
         R(x, y - R(z));
+        break;
+      case SL: // s($X) <- s($Y) x 2^u($Z)
+        R(x, R(y) << R(z));
+        break;
+      case SLU: // u($X) <- (u($Y) x 2^u($Z)) mod 2^64
+        R(x, R(y) << R(z));
+        break;
+      case SR: // s($X) <- floor( s($Y) / 2^u($Z) )
+        R(x, R(y) >> R(z) );
+        break;
+      case SRU: // u($X) <- floor( u($Y) / 2^u($Z) )
+        R(x, R(y) >> R(z) );
+        break;
+      case CMP: // s($X) <- [s($Y) > s($Z)] - [s($Y) < s($Z)]
+        R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+        break;
+      case CMPU: // s($X) <- [u($Y) > u($Z)] - [u($Y) < u($Z)]
+        R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+        break;
+      case CSN: // if s($Y) < 0, set $X <- $Z
+        R(x, ((R(y) < 0) ? R(z) : R(x)) );
+        break;
+      case CSZ: // if $Y = 0, set $X <- $Z
+        R(x, ((R(y) == 0) ? R(z) : R(x)) );
+        break;
+      case CSP: // if s($Y) > 0, set $X <- $Z
+        R(x, ((R(y) > 0) ? R(z) : R(x)) );
+        break;
+      case CSOD: // if s($Y) mod 2 == 1, set $X <- $Z
+        R(x, ( (R(y) & 0x01) ? R(z) : R(x)) );
+        break;
+      case CSNN: // if s($Y) >= 0, set $X <- $Z
+        R(x, ((R(y) >= 0) ? R(z) : R(x)) );
+        break;
+      case CSNZ: // if $Y != 0, set $X <- $Z
+        R(x, ((R(y) != 0) ? R(z) : R(x)) );
+        break;
+      case CSNP: // if s($Y) <= 0, set $X <- $Z
+        R(x, ((R(y) <= 0) ? R(z) : R(x)) );
+        break;
+      case CSEV: // if s($Y) mod 2 == 0, set $X <- $Z
+        R(x, ( (!(R(y) & 0x01)) ? R(z) : R(x)) );
+        break;
+      case ZSN: // $X <- $Z[s($Y) < 0]
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSZ: // $X <- $Z[$Y = 0]
+        R(x, ((R(y) == 0) ? R(z) : 0) );
+        break;
+      case ZSP: // $X <- $Z[s($Y) > 0]
+        R(x, ((R(y) > 0) ? R(z) : 0) );
+        break;
+      case ZSOD: // $X <- $Z[s($Y) mod 2 == 1]
+        R(x, ((R(y) & 0x01 ) ? R(z) : 0) );
+        break;
+      case ZSNN: // $X <- $Z[s($Y) >= 0]
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSNZ: // $X <- $Z[s($Y) != 0]
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSNP: // $X <- $Z[s($Y) <= 0]
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSEV: // $X <- $Zs($Y) mod 2 == 0]
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case AND: // v($X) <- v($Y) & v($Z)
+        R(x, R(y) & R(z));
+        break;
+      case OR: // v($X) <- v($Y) v v($Z)
+        R(x, R(y) | R(z));
+        break;
+      case XOR: // v($X) <-  v($Y) xor v($Z)
+        R(x, R(y) ^ R(z));
+        break;
+      case ANDN: // v($X) <- v($Y) v ~v($Z)
+        R(x, R(y) & ~R(z));
+        break;
+      case ORN: // v($X) <- v($Y) v ~v($Z)
+        R(x, R(y) | ~R(z));
+        break;
+      case NAND: // ~v($X) <- v($Y) & v($Z)
+        R(x, ~( R(y) & R(z)) );
+        break;
+      case NOR: // ~v($X) <- v($Y) v v($Z)
+        R(x, ~( R(y) | R(z)) );
+        break;
+      case NXOR: // ~v($X) <- v($Y) xor v($Z)
+        R(x, ~( R(y) ^ R(z)) );
+        break;
+      case MUX: // v($X) <- (v($Y) & v(rM)) | (v($Z) & ~v(rM))
+        R(x, (R(y) & g(rM)) | (R(z) & ~g(rM)) );
+        break;
+      case SADD: // s($X) <- s(sum(v($Y) & ~v($Z)))
+        R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
         break;
 
       default:

@@ -15,35 +15,54 @@ int main()
    dividend[6]= 0xCCDD;
    dividend[7]= 0x51E4;
 
-  uint64_t divisor = b;
+  uint64_t a_hi = 0x61C8864680B583EA;
+  uint64_t a_lo = 0x1BB32095CCDD51E4;
 
-  unsigned int i = 0;
-  uint64_t remainder = 0x0;
-  uint16_t out[8];
+// quotient
+  uint64_t q = a_lo << 1;
 
-  for (i=0;i<8;i++)
+  // remainder
+  uint64_t rem = a_hi;
+
+  uint64_t carry = a_lo >> 63;
+  uint64_t temp_carry = 0;
+  int i;
+
+  for(i = 0; i < 64; i++)
   {
-    printf("r[%d] = %llx\n", i, remainder);
-    printf("out[%d] = %llx\n", i, ((remainder << 16) + dividend[i])/divisor);
-    out[i] = ((remainder << 16) + dividend[i]) / divisor;
-    remainder = ((remainder << 16) + dividend[i]) % divisor;
+    temp_carry = rem >> 63;
+    rem <<= 1;
+    rem |= carry;
+    carry = temp_carry;
+
+    if(carry == 0)
+    {
+      if(rem >= b)
+      {
+        carry = 1;
+      }
+      else
+      {
+        temp_carry = q >> 63;
+        q <<= 1;
+        q |= carry;
+        carry = temp_carry;
+        continue;
+      }
+    }
+
+    rem -= b;
+    rem -= (1 - carry);
+    carry = 1;
+    temp_carry = q >> 63;
+    q <<= 1;
+    q |= carry;
+    carry = temp_carry;
   }
 
-  printf("Out: %u%u%u%u%u%u%u%u\n", 
-      out[0], out[1], out[2], out[3],
-      out[4], out[5], out[6], out[7]);
-  printf("Hex: %x%x%x%x%x%x%x%x\n", 
-      out[0], out[1], out[2], out[3],
-      out[4], out[5], out[6], out[7]);
-  printf("Hex: %x%x%x%x%x%x%x%x\n", 
-    dividend[0],
-    dividend[1],
-    dividend[2],
-    dividend[3],
-    dividend[4],
-    dividend[5],
-    dividend[6],
-    dividend[7]
-  );
+  printf("Numberator = %llx%llx\n", (long long unsigned int)a_hi, (long long unsigned int)a_lo);
+  printf("divisor = %llx\n", (long long unsigned int)b);
+  printf("quotient = %llx\n", (long long unsigned int)q);
+  printf("remainder = %llx\n", (long long unsigned int)rem);
   return 0;
 }

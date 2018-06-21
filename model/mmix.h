@@ -1,5 +1,5 @@
-#ifndef SUBLEQ_H
-#define SUBLEQ_H
+#ifndef MMIX_H
+#define MMIX_H
 
 #include "model/cpu.h"
 
@@ -40,6 +40,38 @@ class mmix : public cpu {
       i16ADDU = 0x2E,
       NEG = 0x34,
       NEGU = 0x36,
+      SL = 0x38,
+      SLU = 0x3A,
+      SR = 0x3C,
+      SRU = 0x3E,
+      CMP = 0x30,
+      CMPU = 0x32,
+      CSN = 0x60,
+      CSZ = 0x62,
+      CSP = 0x64,
+      CSOD = 0x66,
+      CSNN = 0x68,
+      CSNZ = 0x6A,
+      CSNP = 0x6C,
+      CSEV = 0x6E,
+      ZSN = 0x70,
+      ZSZ = 0x72,
+      ZSP = 0x74,
+      ZSOD = 0x76,
+      ZSNN = 0x78,
+      ZSNZ = 0x7A,
+      ZSNP = 0x7C,
+      ZSEV = 0x7E,
+      AND = 0xC8,
+      OR = 0xC0,
+      XOR = 0xC6,
+      ANDN = 0xCA,
+      ORN = 0xC2,
+      NAND = 0xCC,
+      NOR = 0xC4,
+      NXOR = 0xCE,
+      MUX = 0xD8,
+      SADD = 0xDA
     };
     enum special_registers {
       rA = 0x00,
@@ -79,8 +111,17 @@ class mmix : public cpu {
 		mmix(int byte_size, int address_size);
 		void step(int inst);
 
-    void wideMult(unsigned long long int a, unsigned long long int b,
-        unsigned long long int *carry, unsigned long long int *result);
+    void wideMult(unsigned long long int a, 
+                  unsigned long long int b,
+                  unsigned long long int *carry, 
+                  unsigned long long int *result
+                 );
+    void wideDiv(unsigned long long int numerator_hi,
+                 unsigned long long int numerator_lo,
+                 unsigned long long int divisor,
+                 unsigned long long int *quotient,
+                 unsigned long long int *remainder
+                );
     // Utility functions - see fascicle
     // Example: M_8(59) will give the octabyte at byte address 59,
     // by first rounding down to the nearest octabyte address
@@ -99,8 +140,8 @@ class mmix : public cpu {
     unsigned long long int R(unsigned int reg);
     unsigned long long int R(unsigned int reg, unsigned long long int value);
     // Load/store special registers
-    unsigned long long int SR(unsigned int reg);
-    unsigned long long int SR(unsigned int reg, unsigned long long int value);
+    unsigned long long int g(unsigned int reg);
+    unsigned long long int g(unsigned int reg, unsigned long long int value);
 };
 
 #endif

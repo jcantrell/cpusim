@@ -14,9 +14,6 @@ cpusim:	$(OBJ)
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@
 
-model/mmix.o: model/mmix.cpp model/mmix.h
-	$(CC) $(CFLAGS) -c -o $@ model/mmix.cpp
-
 controller/main.o: controller/main.cpp ui/TextUI.h
 	$(CC) $(CFLAGS) -c -o $@ controller/main.cpp
 
@@ -34,6 +31,9 @@ model/cpu.o: model/cpu.cpp model/cpu.h
 
 model/subleq.o: model/subleq.cpp model/subleq.h
 	$(CC) $(CFLAGS) -c -o $@ model/subleq.cpp
+
+model/mmix.o: model/mmix.cpp model/mmix.h
+	$(CC) $(CFLAGS) -c -o $@ model/mmix.cpp
 
 clean:
 	rm cpusim.exe
