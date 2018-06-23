@@ -71,7 +71,24 @@ class mmix : public cpu {
       NOR = 0xC4,
       NXOR = 0xCE,
       MUX = 0xD8,
-      SADD = 0xDA
+      SADD = 0xDA,
+      BDIF,
+      WDIF,
+      TDIF,
+      ODIF,
+      MOR,
+      MXOR,
+      FADD,
+      FSUB,
+      FMUL,
+      FDIV,
+      FREM,
+      FSQRT,
+      FINT,
+      FCMP,
+      FEQL,
+      FUN,
+      FCMPE
     };
     enum special_registers {
       rA = 0x00,

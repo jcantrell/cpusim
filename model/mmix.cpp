@@ -1,8 +1,15 @@
 #include "mmix.h"
 #include <bitset>
+#include <math.h>
 
 mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size)
 {
+}
+
+bool mmix::N(double x, double f, unsigned int e, float epsilon)
+{
+  double d = fabs(x-f);
+  return (d <= ((1<<(e-1022))*epsilon));
 }
 
 void mmix::wideMult(unsigned long long int a, unsigned long long int b,
@@ -140,10 +147,22 @@ unsigned long long int mmix::g(unsigned int reg)
 
 void mmix::step(int inst)
 {
-  unsigned long long int x = M(1, getip()+1); 
-  unsigned long long int y = M(1, getip()+2); 
-  unsigned long long int z = M(1, getip()+3); 
+  // Pre-fetch register numbers, and their values, for convenience
+  unsigned char x = M(1, getip()+1); 
+  unsigned char y = M(1, getip()+2); 
+  unsigned char z = M(1, getip()+3); 
   unsigned long long int target = getip()+1;
+
+  unsigned long long int xv = R(x);
+  unsigned long long int yv = R(y);
+  unsigned long long int zv = R(z);
+  long long int xs = R(x);
+  long long int ys = R(y);
+  long long int zs = R(z);
+  double fx = R(x);
+  double fy = R(y);
+  double fz = R(z);
+  double frE = R(rE);
 
   // A <- (u($Y) + u($Z)) mod 2^64
   unsigned long long int a = ( (y + z ) & 0xFFFFFFFFFFFFFFFF );
@@ -389,7 +408,207 @@ void mmix::step(int inst)
         R(x, (R(y) & g(rM)) | (R(z) & ~g(rM)) );
         break;
       case SADD: // s($X) <- s(sum(v($Y) & ~v($Z)))
-        R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
+        {
+        std::bitset<64> temp( R(y) & ~R(z) );
+        R(x, temp.count() );
+        //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
+        }
+        break;
+
+      case BDIF: // b($X) <- b($Y) .- b($Z)
+        {
+        unsigned long long int b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
+        unsigned long long int b1 = ((R(y)>> 8)&0xFF) - ((R(z)>> 8)&0xFF);
+        unsigned long long int b2 = ((R(y)>>16)&0xFF) - ((R(z)>>16)&0xFF);
+        unsigned long long int b3 = ((R(y)>>24)&0xFF) - ((R(z)>>24)&0xFF);
+        unsigned long long int b4 = ((R(y)>>32)&0xFF) - ((R(z)>>32)&0xFF);
+        unsigned long long int b5 = ((R(y)>>40)&0xFF) - ((R(z)>>40)&0xFF);
+        unsigned long long int b6 = ((R(y)>>48)&0xFF) - ((R(z)>>48)&0xFF);
+        unsigned long long int b7 = ((R(y)>>56)&0xFF) - ((R(z)>>56)&0xFF);
+        b0 = (b0 < 0) ? 0 : b0;
+        b1 = (b1 < 0) ? 0 : b1;
+        b2 = (b2 < 0) ? 0 : b2;
+        b3 = (b3 < 0) ? 0 : b3;
+        b4 = (b4 < 0) ? 0 : b4;
+        b5 = (b5 < 0) ? 0 : b5;
+        b6 = (b6 < 0) ? 0 : b6;
+        b7 = (b7 < 0) ? 0 : b7;
+        R(x, (b7<<56) & (b6<<48) & (b5<<40) & (b4<<32) & (b3<<24) & (b2<<16)
+              & (b1<<8) & (b0<<0) );
+        }
+        break;
+
+      case WDIF: // w($X) <- w($Y) - w($Z)
+        {
+        unsigned long long int w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
+        unsigned long long int w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
+        unsigned long long int w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
+        unsigned long long int w3 = ((R(y)>>48)&0xFFFF) - ((R(z)>>48)&0xFFFF);
+        w0 = (w0 < 0) ? 0 : w0;
+        w1 = (w0 < 0) ? 0 : w1;
+        w2 = (w0 < 0) ? 0 : w2;
+        w3 = (w0 < 0) ? 0 : w3;
+        R(x, (w3<<48)&(w2<<32)&(w1<<16)&(w0<<0) );
+        }
+        break;
+
+      case TDIF: // t($X) <- t($Y) - w($Z)
+        {
+        unsigned long long int t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
+        unsigned long long int t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
+        t0 = (t0 < 0) ? 0 : t0;
+        t1 = (t1 < 0) ? 0 : t1;
+        R(x, (t1<<32)&(t0<<0) );
+        }
+        break;
+
+      case ODIF: // u($X) <- u($Y) - u($Z)
+        {
+        uint64_t u0 = (R(y)) - R(z);
+        u0 = (u0 > R(y)) ? 0 : u0;
+        }
+        break;
+
+      case MOR: // m($X) <- m($Z) vx m($Y)
+        {
+        unsigned int r;
+        for (int i=0; i<64; i++)
+          for (int j=0; j<64; j++)
+          {
+            r = (R(z)>>i)&(R(y)>>i);
+            for (int k=2; k<=64;k++)
+              r = r | ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+        break;
+ 
+      case MXOR: // m($X) <- m($Z) xor x m($Y)
+        {
+        unsigned int r;
+        for (int i=0; i<8; i++)
+          for (int j=0; j<8; j++)
+          {
+            r = (R(z)>>i)&(R(y)>>i);
+            for (int k=1; k<8;k++)
+              r = r ^ ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+        break;
+
+      case FADD: // f($X) <- f($Y) + f($Z)
+        {
+        double t = ( *(double*)&yv + *(double*)&zv );
+        R(x, *(unsigned long long int *)&t );
+        }
+        break;
+
+      case FSUB: // f($X) <- f($Y) - f($Z)
+        {
+        double t = ( *(double*)&yv - *(double*)&zv );
+        R(x, *(unsigned long long int *)&t );
+        }
+        break;
+
+      case FMUL: // f($X) <- f($Y) * f($Z)
+        {
+        double t = ( *(double*)&yv * *(double*)&zv );
+        R(x, *(unsigned long long int *)&t );
+        }
+        break;
+
+      case FDIV: // f($X) <- f($Y) / f($Z)
+        {
+        double t = ( *(double*)&yv / *(double*)&zv );
+        R(x, *(unsigned long long int *)&t );
+        }
+        break;
+
+      case FREM: // f($X) <- f($Y) rem f($Z)
+        {
+        double t = fmod( *(double*)&yv , *(double*)&zv );
+        R(x, *(unsigned long long int *)&t );
+        }
+        break;
+
+      case FSQRT: // f($X) <-  f($Z)^(1/2)
+        {
+        double t = sqrt( *(double*)&zv );
+        R(x, *(unsigned long long int *)&t );
+        }
+        break;
+
+      case FINT: // f($X) <- int f($Z)
+        R(x, (unsigned long long int)( *(double*)&zv ));
+        break;
+
+      case FCMP: // s($X) <- [f($Y) > f($Z)] - [f($Y) < f($Z)]
+        R(x, ((*(double*)&yv > *(double*)&zv) ? 1 : 0) 
+           - ((*(double*)&yv < *(double*)&zv) ? 1 : 0) );
+        break;
+
+      case FEQL: // s($X) <- [f($Y) == f($Z)]
+        R(x, *(double*)&yv == *(double*)&zv );
+        break;
+
+      case FUN: // s($X) <- [f($Y) || f($Z)]
+        R(x, fy != fy || fz != fz );
+        break;
+
+      case FCMPE: // s($X) <- [f($Y) } f($Z) (f(rE))] - [f($Y) { f($Z) (f(rE))]
+        {
+        int e;
+        frexp(fy, &e);
+        R(x, (fy > fz && !N(fy, fz, e, frE)) -
+             (fy < fz && !N(fy, fz, e, frE)));
+        }
+        break;
+
+      case FEQLE: // s($X) <- [f($Y) ~= f($Z) (f(rE))]
+        {
+        int e;
+        frexp(fy, &e);
+        R(x, N(fy, fz, e, frE));
+        }
+        break;
+
+      case FUNE: // s($X) <- [f($Y) || f($Z) (f(rE))]
+        R(x, fy != fy || fz != fz || frE != frE);
+        break;
+
+      case FIX: // s($X) <- int f($Z)
+        R(x, (long long int) fz);
+        break;
+
+      case FIXU // u($X) <- (int f($Z)) mod 2^64
+        R(x, (unsigned long long int) fz);
+        break;
+
+      case FLOT: // f($X) <- s($Z)
+        R(x, (double) z);
+        break;
+
+      case FLOTU: // f($x) <- u($Z)
+        R(x, (double) z);
+        break;
+
+      case SFLOT: // f($X) <- f(T) <- s($Z)
+        R(x, (float) fz);
+        break;
+
+      case SFLOTU: // f($X) <- f(T) <- u($Z)
+        R(x, (float) fz);
+        break;
+
+      case LDSF: // f($X) <- f(M_4[A])
+        R(x, M(4, a));
+        break;
+ 
+      case STSF: // f(M_4[A]) <- f($X)
+        M(4, a, fx);
         break;
 
       default:
