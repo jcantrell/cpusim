@@ -88,7 +88,17 @@ class mmix : public cpu {
       FCMP,
       FEQL,
       FUN,
-      FCMPE
+      FCMPE,
+      FEQLE,
+      FUNE,
+      FIXU,
+      FLOT,
+      FLOTU = 0x02,
+      SFLOT,
+      LDSF,
+      STSF,
+      FIX,
+      SFLOTU = 0x0E
     };
     enum special_registers {
       rA = 0x00,
@@ -159,6 +169,8 @@ class mmix : public cpu {
     // Load/store special registers
     unsigned long long int g(unsigned int reg);
     unsigned long long int g(unsigned int reg, unsigned long long int value);
+
+    bool N(double, double, unsigned int, float);
 };
 
 #endif

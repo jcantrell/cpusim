@@ -583,7 +583,7 @@ void mmix::step(int inst)
         R(x, (long long int) fz);
         break;
 
-      case FIXU // u($X) <- (int f($Z)) mod 2^64
+      case FIXU: // u($X) <- (int f($Z)) mod 2^64
         R(x, (unsigned long long int) fz);
         break;
 
@@ -609,6 +609,99 @@ void mmix::step(int inst)
  
       case STSF: // f(M_4[A]) <- f($X)
         M(4, a, fx);
+        break;
+
+      case FLOTI: // f($X) <- s(Z)
+        R(x, (double) z);
+        break;
+
+      case FLOTUI:
+      case SFLOTI:
+      case SFLOTUI:
+      case MULI:
+      case MULUI:
+      case DIVI:
+      case DIVUI:
+      case ADDI:
+      case ADDUI:
+      case SUBI:
+      case SUBUI:
+      case i2ADDUI:
+      case i4ADDUI:
+      case i8ADDUI:
+      case i16ADDUI:
+      case CMPI:
+      case CMPUI:
+      case NEGI:
+      case NEGUI:
+      case SLI:
+      case SLUI:
+      case SRI:
+      case SRUI:
+      case CSNI:
+      case CSZI:
+      case CSPI:
+      case CSODI:
+      case CSNNI:
+      case CSNZI:
+      case CSNPI:
+      case CSEVI:
+      case ZSNI:
+      case ZSZI:
+      case ZSPI:
+      case ZSODI:
+      case ZSNNI:
+      case ZSNZI:
+      case ZSNPI:
+      case ZSEVI:
+      case LDBI:
+      case LDBIUI:
+      case LDWI:
+      case LDWUI:
+      case LDTI:
+      case LDTUI:
+      case LDOI:
+      case LDOUI:
+      case LDSFI:
+      case LDHTI:
+      case CSWAPI:
+      case LDUNCI:
+      case LDVTSI:
+      case PRELDI:
+      case PREGOI:
+      case GOI:
+      case STBI:
+      case STBUI:
+      case STWI:
+      case STWUI:
+      case STTI:
+      case STTUI:
+      case STOI:
+      case STOUI:
+      case STSFI:
+      case STHTI:
+      case STCOI:
+      case STUNCI:
+      case SYNCDI:
+      case PRESTI:
+      case SYNCIDI:
+      case PUSHGOI:
+      case ORI:
+      case ORNI:
+      case NORI:
+      case XORI:
+      case ANDI:
+      case ANDNI:
+      case NANDI:
+      case NXORI:
+      case BDIFI:
+      case WDIFI:
+      case TDIFI:
+      case ODIFI:
+      case MUXI:
+      case SADDI:
+      case MORI:
+      case MXORI:
         break;
 
       default:
