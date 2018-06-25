@@ -279,24 +279,29 @@ void mmix::step(int inst)
         R(x, (R(y) - R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
       case MULU: // u(rH $X) <- u($Y) x u($Z)
+        {
         unsigned long long carry;
         unsigned long long result;
         wideMult(R(y), R(z), &carry, &result);
         g(rH, carry);
         R(x, result);
+        }
         break;
 
       case MULUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
+        {
         unsigned long long carry;
         unsigned long long result;
         wideMult(R(y), z, &carry, &result);
         g(rH, carry);
         R(x, result);
+        }
         break;
 
       case DIVU: // u($X) <- floor(u(rD $Y) / u($Z))
                  // u(rR) <- u(rD $Y) mod u($Z), if u($Z) > u(rD);
                  //     otherwise $X <- rD, rR <- $Y
+        {
         unsigned long long numerator_hi;
         unsigned long long numerator_lo;
         unsigned long long divisor;
@@ -317,6 +322,7 @@ void mmix::step(int inst)
           g(rR, numerator_lo );
         }
   
+        }
         break;
 
       case i2ADDU: // u($X) <- (u($Y) x 2 + u($Z)) mod 2^4
@@ -524,57 +530,57 @@ void mmix::step(int inst)
 
       case FADD: // f($X) <- f($Y) + f($Z)
         {
-        double t = ( *(double*)&yv + *(double*)&zv );
+        double t = ( *(double*)&uy + *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
         break;
 
       case FSUB: // f($X) <- f($Y) - f($Z)
         {
-        double t = ( *(double*)&yv - *(double*)&zv );
+        double t = ( *(double*)&uy - *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
         break;
 
       case FMUL: // f($X) <- f($Y) * f($Z)
         {
-        double t = ( *(double*)&yv * *(double*)&zv );
+        double t = ( *(double*)&uy * *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
         break;
 
       case FDIV: // f($X) <- f($Y) / f($Z)
         {
-        double t = ( *(double*)&yv / *(double*)&zv );
+        double t = ( *(double*)&uy / *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
         break;
 
       case FREM: // f($X) <- f($Y) rem f($Z)
         {
-        double t = fmod( *(double*)&yv , *(double*)&zv );
+        double t = fmod( *(double*)&uy , *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
         break;
 
       case FSQRT: // f($X) <-  f($Z)^(1/2)
         {
-        double t = sqrt( *(double*)&zv );
+        double t = sqrt( *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
         break;
 
       case FINT: // f($X) <- int f($Z)
-        R(x, (unsigned long long int)( *(double*)&zv ));
+        R(x, (unsigned long long int)( *(double*)&uz ));
         break;
 
       case FCMP: // s($X) <- [f($Y) > f($Z)] - [f($Y) < f($Z)]
-        R(x, ((*(double*)&yv > *(double*)&zv) ? 1 : 0) 
-           - ((*(double*)&yv < *(double*)&zv) ? 1 : 0) );
+        R(x, ((*(double*)&uy > *(double*)&uz) ? 1 : 0) 
+           - ((*(double*)&uy < *(double*)&uz) ? 1 : 0) );
         break;
 
       case FEQL: // s($X) <- [f($Y) == f($Z)]
-        R(x, *(double*)&yv == *(double*)&zv );
+        R(x, *(double*)&uy == *(double*)&uz );
         break;
 
       case FUN: // s($X) <- [f($Y) || f($Z)]
@@ -614,12 +620,8 @@ void mmix::step(int inst)
         R(x, (double) sz);
         break;
 
-      case FLOTUI:
-        R(x, (double) z);
-        break;
-
       case FLOTU: // f($x) <- u($Z)
-        R(x, ufz);
+        R(x, (double) uz);
         break;
 
       case FLOTUI: // f($X) <- u(Z)
@@ -686,7 +688,7 @@ void mmix::step(int inst)
       case ZSNPI:
       case ZSEVI:
       case LDBI:
-      case LDBIUI:
+      case LDBUI:
       case LDWI:
       case LDWUI:
       case LDTI:
@@ -695,8 +697,7 @@ void mmix::step(int inst)
       case LDOUI:
       case LDSFI:
       case LDHTI:
-      case CSWAPI:
-      case LDUNCI:
+      case CSWAPI: case LDUNCI:
       case LDVTSI:
       case PRELDI:
       case PREGOI:

@@ -1,5 +1,5 @@
 CC=c++
-CFLAGS=-I.
+CFLAGS=-std=c++11 -I.
 OBJ:=controller/main.o \
 			ui/TextUI.o \
 			ui/parser/parser.o \

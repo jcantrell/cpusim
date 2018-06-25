@@ -13,7 +13,7 @@
 
 using namespace std;
 
-struct flags
+struct sflags
 {
 	unsigned
 	cf:1,	// Carry flag
@@ -27,7 +27,7 @@ struct flags
 	of:1;	// Overflow
 };
 union flagsint {
-	flags flags;
+	sflags flags;
 	unsigned i;
 };
 
@@ -38,7 +38,7 @@ class cpu {
 		std::unordered_map<int, int> ram;
 		std::unordered_map<int, int> registers;
 		int ip;
-		struct flags status;
+		struct sflags status;
 		union flagsint flagint;
 
 	public:
