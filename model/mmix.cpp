@@ -153,9 +153,9 @@ void mmix::step(int inst)
   unsigned char z = M(1, getip()+3); 
   unsigned long long int target = getip()+1;
 
-  unsigned long long int xv = R(x);
-  unsigned long long int yv = R(y);
-  unsigned long long int zv = R(z);
+  unsigned long long int ux = R(x);
+  unsigned long long int uy = R(y);
+  unsigned long long int uz = R(z);
   long long int xs = R(x);
   long long int ys = R(y);
   long long int zs = R(z);
@@ -588,6 +588,10 @@ void mmix::step(int inst)
         break;
 
       case FLOT: // f($X) <- s($Z)
+        R(x, (double) sz);
+        break;
+
+      case FLOTUI:
         R(x, (double) z);
         break;
 
@@ -615,7 +619,6 @@ void mmix::step(int inst)
         R(x, (double) z);
         break;
 
-      case FLOTUI:
       case SFLOTI:
       case SFLOTUI:
       case MULI:
