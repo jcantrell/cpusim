@@ -153,19 +153,19 @@ void mmix::step(int inst)
   unsigned char z = M(1, getip()+3); 
   unsigned long long int target = getip()+1;
 
-  unsigned long long int ux = R(x);
+  unsigned long long int ux = R(x); // unsigned values at the given addresses
   unsigned long long int uy = R(y);
   unsigned long long int uz = R(z);
-  long long int xs = R(x);
-  long long int ys = R(y);
-  long long int zs = R(z);
-  double fx = R(x);
+  long long int sx = R(x); // signed values
+  long long int sy = R(y);
+  long long int sz = R(z);
+  double fx = R(x); // signed double values
   double fy = R(y);
   double fz = R(z);
   double frE = R(rE);
 
   // A <- (u($Y) + u($Z)) mod 2^64
-  unsigned long long int a = ( (y + z ) & 0xFFFFFFFFFFFFFFFF );
+  unsigned long long int a = ( (uy + uz ) & 0xFFFFFFFFFFFFFFFF );
 
   switch (inst)
   {
@@ -245,12 +245,23 @@ void mmix::step(int inst)
       case ADD: // s($X) <- s($Y) + s($Z)
         R(x, ((long long int) R(y)) + ((signed long long) R(z)));
         break;
+      case ADDI: // s($X) <- s($Y) + s(Z)
+        R(x, ((long long int) R(y)) + ((signed long long) z));
+        break;
       case SUB: // s($X) <- s($Y) - s($Z)
         R(x, ((long long int) R(y)) - ((signed long long) R(z)));
+        break;
+      case SUBI: // s($X) <- s($Y) - s(Z)
+        R(x, ((long long int) R(y)) - ((signed long long) z));
         break;
       case MUL: // s($X) <- s($Y) x s($Z)
         R(x, ((long long int) R(y)) * ((signed long long) R(z)));
         break;
+
+      case MULI: // s($X) <- s($Y) x s(Z)
+        R(x, ((long long int) R(y)) * ((signed long long) z));
+        break;
+
       case DIV: // s($X) <- floor(s($Y) / s($Z)) such that ($Z != 0)
                 // and s(rR) <- s($Y) mod s($Z)
         R(x, (R(z) == 0) ? 0 : 
@@ -260,6 +271,9 @@ void mmix::step(int inst)
         break;
       case ADDU: // u($X) <- (u($Y) + u($Z)) mod 2^64
         R(x, a);
+        break;
+      case ADDUI: // u($X) <- (u($Y) + u(Z)) mod 2^64
+        R(x, (ux + z) & 0xFFFFFFFFFFFFFFFF);
         break;
       case SUBU: // u($X) <- (u($Y) - u($Z)) mod 2^64
         R(x, (R(y) - R(z)) & 0xFFFFFFFFFFFFFFFF);
@@ -271,6 +285,15 @@ void mmix::step(int inst)
         g(rH, carry);
         R(x, result);
         break;
+
+      case MULUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
+        unsigned long long carry;
+        unsigned long long result;
+        wideMult(R(y), z, &carry, &result);
+        g(rH, carry);
+        R(x, result);
+        break;
+
       case DIVU: // u($X) <- floor(u(rD $Y) / u($Z))
                  // u(rR) <- u(rD $Y) mod u($Z), if u($Z) > u(rD);
                  //     otherwise $X <- rD, rR <- $Y
@@ -596,6 +619,10 @@ void mmix::step(int inst)
         break;
 
       case FLOTU: // f($x) <- u($Z)
+        R(x, ufz);
+        break;
+
+      case FLOTUI: // f($X) <- u(Z)
         R(x, (double) z);
         break;
 
@@ -603,8 +630,16 @@ void mmix::step(int inst)
         R(x, (float) fz);
         break;
 
+      case SFLOTI: // f($X) <- f(T) <- s(Z)
+        R(x, (float) z);
+        break;
+
       case SFLOTU: // f($X) <- f(T) <- u($Z)
         R(x, (float) fz);
+        break;
+
+      case SFLOTUI: // f($X) <- f(T) <- u(Z)
+        R(x, (float) z);
         break;
 
       case LDSF: // f($X) <- f(M_4[A])
@@ -619,15 +654,8 @@ void mmix::step(int inst)
         R(x, (double) z);
         break;
 
-      case SFLOTI:
-      case SFLOTUI:
-      case MULI:
-      case MULUI:
       case DIVI:
       case DIVUI:
-      case ADDI:
-      case ADDUI:
-      case SUBI:
       case SUBUI:
       case i2ADDUI:
       case i4ADDUI:
