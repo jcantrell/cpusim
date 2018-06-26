@@ -151,6 +151,9 @@ void mmix::step(int inst)
   unsigned char x = M(1, getip()+1); 
   unsigned char y = M(1, getip()+2); 
   unsigned char z = M(1, getip()+3); 
+  unsigned long long int uxi = x;
+  unsigned long long int uyi = y;
+  unsigned long long int uzi = z;
   unsigned long long int target = getip()+1;
 
   unsigned long long int ux = R(x); // unsigned values at the given addresses
@@ -177,70 +180,139 @@ void mmix::step(int inst)
         R( x, ((long long int) M(1, a)) );
         break;
 
+      case LDBI: // s($X) <- s(M_1[A])
+        R( x, ((long long int) M(1, (uy + z))) );
+        break;
+
       case LDBU: // LDBU: u($X) <- u(M_1[A])
         R( x, M(1, a) );
+        break;
+
+      case LDBUI: // u($X) <- u(M_1[A])
+        R( x, M(1, (uy+z) ) );
         break;
 
       case LDW: // s($X) <- s(M_2[A])
         R( x, ((long long int) M(2, a)) );
         break;
 
+      case LDWI: // s($X) <- s(M_2[A])
+        R( x, ((long long int) M(2, uy+z)) );
+        break;
+
       case LDWU: // LDWU: u($X) <- u(M_2[A])
         R( x, M(2, a) );
+        break;
+  
+      case LDWUI: // u($X) <- u(M_2[A])
+        R( x, M(2, uy+z) );
         break;
 
       case LDT: // LDT: s($X) <- s(M_4[A])
         R( x, ((long long int) M(4, a)) );
         break;
 
+      case LDTI: // s($X) <- s(M_4[A])
+        R( x, ((long long int) M(4, uy+z)) );
+        break;
+
       case LDTU: // u($X) <- u(M_4[A])
         R( x, M(4, a) );
+        break;
+
+      case LDTUI: // u($X) <- u(M_4[A])
+        R( x, M(4, uy+z) );
         break;
 
       case LDO: // s($X) <- s(M_8[A])
         R( x, ((long long int) M(8, a)) );
         break;
 
+      case LDOI: // s($X) <- s(M_8[A])
+        R( x, ((long long int) M(8, uy+z)) );
+        break;
+
       case LDOU: // u($X) <- u(M_8[A])
         R( x, M(8, a) );
+        break;
+
+      case LDOUI: // u($X) <- u(M_8[A])
+        R( x, M(8, uy+z) );
         break;
 
       case LDHT: // u($X) <- u(M_4[A]) x 2^32
         R( x, (M(4, a) << 32));
         break;
 
+      case LDHTI: // u($X) <- u(M_4[A]) x 2^32
+        R( x, (M(4, uy+z) << 32));
+        break;
+
       case STB: // s(M_1[A]) <- s($X)
         M(1, a, (long long int) R(x));
+        break;
+
+      case STBI: // s(M_1[A]) <- s($X)
+        M(1, uy+z, (long long int) R(x));
         break;
 
       case STW: // s(M_2[A]) <- s($X)
         M(2, a, (long long int) R(x));
         break;
+
+      case STWI: // s(M_2[A]) <- s($X)
+        M(2, uy+z, (long long int) R(x));
+        break;
       
       case STT: // s(M_4[A] <- s($X)
         M(4, a, (long long int) R(x));
         break;
+      case STTI: // s(M_4[A] <- s($X)
+        M(4, uy+z, (long long int) R(x));
+        break;
       case STO: // s(M_8[A] <- s($X)
         M(8, a, (long long int) R(x));
+        break;
+      case STOI: // s(M_8[A] <- s($X)
+        M(8, uy+z, (long long int) R(x));
         break;
 
       case STBU: // u(M_1[A]) <- u($X) mod 2^8
         M(1, a, R(x));
         break;
+
+      case STBUI: // u(M_1[A]) <- u($X) mod 2^8
+        M(1, uy+z, R(x));
+        break;
       case STWU: // u(M_2[A]) <- u($X) mod 2^16
         M(2, a, R(x));
+        break;
+      case STWUI: // u(M_2[A]) <- u($X) mod 2^16
+        M(2, uy+z, R(x));
         break;
       case STTU: // u(M_4[A]) <- u($X) mod 2^32
         M(4, a, R(x));
         break;
+      case STTUI: // u(M_4[A]) <- u($X) mod 2^32
+        M(4, uy+z, R(x));
+        break;
       case STOU: // u(M_8[A]) <- u($X)
         M(8, a, R(x));
+        break;
+      case STOUI: // u(M_8[A]) <- u($X)
+        M(8, uy+z, R(x));
         break;
       case STHT: // u(M_4[A]) <- floor( u($X) / 2^32 )
         M(4, a, ((R(x) & 0xFFFFFFFF00000000) >> 16));
         break;
+      case STHTI: // u(M_4[A]) <- floor( u($X) / 2^32 )
+        M(4, uy+z, ((R(x) & 0xFFFFFFFF00000000) >> 16));
+        break;
       case STCO: // u(M_8[A]) <- X
         M(8, a, x);
+        break;
+      case STCOI: // u(M_8[A]) <- X
+        M(8, uy+z, x);
         break;
       case ADD: // s($X) <- s($Y) + s($Z)
         R(x, ((long long int) R(y)) + ((signed long long) R(z)));
@@ -269,6 +341,14 @@ void mmix::step(int inst)
         g(rR, (R(z) == 0) ? R(y) :
               (((long long int) R(y)) % ((signed long long) R(z))));
         break;
+
+      case DIVI: // s($X) <- floor(s($Y) / s(Z) such that (Z != 0)
+                // and s(rR) <- s($Y) mod s(Z)
+        R(x, (z == 0) ? 0 :
+              (((long long int) R(y)) / ((signed long long) z)));
+        g(rR, (z == 0) ? R(y) :
+              (((long long int) R(y)) % ((signed long long) z)));
+        break;
       case ADDU: // u($X) <- (u($Y) + u($Z)) mod 2^64
         R(x, a);
         break;
@@ -277,6 +357,9 @@ void mmix::step(int inst)
         break;
       case SUBU: // u($X) <- (u($Y) - u($Z)) mod 2^64
         R(x, (R(y) - R(z)) & 0xFFFFFFFFFFFFFFFF);
+        break;
+      case SUBUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
+        R(x, (R(y) - z) & 0xFFFFFFFFFFFFFFFF);
         break;
       case MULU: // u(rH $X) <- u($Y) x u($Z)
         {
@@ -325,120 +408,266 @@ void mmix::step(int inst)
         }
         break;
 
+      case DIVUI: // u($X) <- floor(u(rD $Y) / u(Z))
+                  // u(rR) <- u(rD $Y) mod u(Z), if u(Z) > u(rD);
+                  //    otherwise $X <- rD, rR <- $Y
+        {
+        unsigned long long numerator_hi;
+        unsigned long long numerator_lo;
+        unsigned long long divisor;
+        unsigned long long quotient;
+        unsigned long long remainder;
+
+        numerator_hi = g(rD);
+        numerator_lo = R(y);
+        divisor = z;
+
+        if (divisor > numerator_hi)
+        {
+          wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
+          R(x, quotient);
+          g(rR, remainder);
+        } else {
+          R(x, numerator_hi);
+          g(rR, numerator_lo );
+        }
+  
+        }
+        break;
+
       case i2ADDU: // u($X) <- (u($Y) x 2 + u($Z)) mod 2^4
         R(x, (R(y)*2 + R(z)) & 0xFFFFFFFFFFFFFFFF);
+        break;
+      case i2ADDUI: // u($X) <- (u($Y) x 2 + u(Z)) mod 2^4
+        R(x, (R(y)*2 + z) & 0xFFFFFFFFFFFFFFFF);
         break;
       case i4ADDU: // u($X) <- (u($Y) x 4 + u($Z)) mod 2^64
         R(x, (R(y)*4 + R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
+      case i4ADDUI: // u($X) <- (u($Y) x 4 + u(Z)) mod 2^64
+        R(x, (R(y)*4 + z) & 0xFFFFFFFFFFFFFFFF);
+        break;
       case i8ADDU: // u($X) <- (u($Y) x 8 + u($Z)) mod 2^64
         R(x, (R(y)*8 + R(z)) & 0xFFFFFFFFFFFFFFFF);
+        break;
+      case i8ADDUI: // u($X) <- (u($Y) x 8 + u(Z)) mod 2^64
+        R(x, (R(y)*8 + z) & 0xFFFFFFFFFFFFFFFF);
         break;
       case i16ADDU: // u($X) <- (u($Y) x 16 + u($Z)) mod 2^64
         R(x, (R(y)*16 + R(z)) & 0xFFFFFFFFFFFFFFFF);
         break;
+      case i16ADDUI: // u($X) <- (u($Y) x 16 + u(Z)) mod 2^64
+        R(x, (R(y)*16 + z) & 0xFFFFFFFFFFFFFFFF);
+        break;
       case NEG: // s($X) <- Y - s($Z)
         R(x, y - ( (unsigned long long) R(z)) );
+        break;
+      case NEGI: // s($X) <- Y - s(Z)
+        R(x, y - ( (unsigned long long) z) );
         break;
       case NEGU: // u($X) <- (Y - u($Z)) mod 2^64
         R(x, y - R(z));
         break;
+      case NEGUI: // u($X) <- (Y - u(Z)) mod 2^64
+        R(x, y - z);
+        break;
       case SL: // s($X) <- s($Y) x 2^u($Z)
         R(x, R(y) << R(z));
+        break;
+      case SLI: // s($X) <- s($Y) x 2^u(Z)
+        R(x, R(y) << z);
         break;
       case SLU: // u($X) <- (u($Y) x 2^u($Z)) mod 2^64
         R(x, R(y) << R(z));
         break;
+      case SLUI: // u($X) <- (u($Y) x 2^u(Z)) mod 2^64
+        R(x, R(y) << z);
+        break;
       case SR: // s($X) <- floor( s($Y) / 2^u($Z) )
         R(x, R(y) >> R(z) );
+        break;
+      case SRI: // s($X) <- floor( s($Y) / 2^u(Z) )
+        R(x, R(y) >> z );
         break;
       case SRU: // u($X) <- floor( u($Y) / 2^u($Z) )
         R(x, R(y) >> R(z) );
         break;
+      case SRUI: // u($X) <- floor( u($Y) / 2^u(Z) )
+        R(x, R(y) >> z );
+        break;
       case CMP: // s($X) <- [s($Y) > s($Z)] - [s($Y) < s($Z)]
         R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+        break;
+      case CMPI: // s($X) <- [s($Y) > s(Z)] - [s($Y) < s(Z)]
+        R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
         break;
       case CMPU: // s($X) <- [u($Y) > u($Z)] - [u($Y) < u($Z)]
         R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
         break;
+      case CMPUI: // s($X) <- [u($Y) > u(Z)] - [u($Y) < u(Z)]
+        R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
+        break;
       case CSN: // if s($Y) < 0, set $X <- $Z
         R(x, ((R(y) < 0) ? R(z) : R(x)) );
+        break;
+      case CSNI: // if s($Y) < 0, set $X <- Z
+        R(x, ((R(y) < 0) ? z : R(x)) );
         break;
       case CSZ: // if $Y = 0, set $X <- $Z
         R(x, ((R(y) == 0) ? R(z) : R(x)) );
         break;
+      case CSZI: // if $Y = 0, set $X <- Z
+        R(x, ((R(y) == 0) ? z : R(x)) );
+        break;
       case CSP: // if s($Y) > 0, set $X <- $Z
         R(x, ((R(y) > 0) ? R(z) : R(x)) );
+        break;
+      case CSPI: // if s($Y) > 0, set $X <- Z
+        R(x, ((R(y) > 0) ? z : R(x)) );
         break;
       case CSOD: // if s($Y) mod 2 == 1, set $X <- $Z
         R(x, ( (R(y) & 0x01) ? R(z) : R(x)) );
         break;
+      case CSODI: // if s($Y) mod 2 == 1, set $X <- Z
+        R(x, ( (R(y) & 0x01) ? z : R(x)) );
+        break;
       case CSNN: // if s($Y) >= 0, set $X <- $Z
         R(x, ((R(y) >= 0) ? R(z) : R(x)) );
+        break;
+      case CSNNI: // if s($Y) >= 0, set $X <- Z
+        R(x, ((R(y) >= 0) ? z : R(x)) );
         break;
       case CSNZ: // if $Y != 0, set $X <- $Z
         R(x, ((R(y) != 0) ? R(z) : R(x)) );
         break;
+      case CSNZI: // if $Y != 0, set $X <- Z
+        R(x, ((R(y) != 0) ? z : R(x)) );
+        break;
       case CSNP: // if s($Y) <= 0, set $X <- $Z
         R(x, ((R(y) <= 0) ? R(z) : R(x)) );
+        break;
+      case CSNPI: // if s($Y) <= 0, set $X <- Z
+        R(x, ((R(y) <= 0) ? z : R(x)) );
         break;
       case CSEV: // if s($Y) mod 2 == 0, set $X <- $Z
         R(x, ( (!(R(y) & 0x01)) ? R(z) : R(x)) );
         break;
+      case CSEVI: // if s($Y) mod 2 == 0, set $X <- Z
+        R(x, ( (!(R(y) & 0x01)) ? z : R(x)) );
+        break;
       case ZSN: // $X <- $Z[s($Y) < 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSNI: // $X <- Z[s($Y) < 0]
+        R(x, ((R(y) < 0) ? z : 0) );
         break;
       case ZSZ: // $X <- $Z[$Y = 0]
         R(x, ((R(y) == 0) ? R(z) : 0) );
         break;
+      case ZSZI: // $X <- Z[$Y = 0]
+        R(x, ((R(y) == 0) ? z : 0) );
+        break;
       case ZSP: // $X <- $Z[s($Y) > 0]
         R(x, ((R(y) > 0) ? R(z) : 0) );
+        break;
+      case ZSPI: // $X <- Z[s($Y) > 0]
+        R(x, ((R(y) > 0) ? z : 0) );
         break;
       case ZSOD: // $X <- $Z[s($Y) mod 2 == 1]
         R(x, ((R(y) & 0x01 ) ? R(z) : 0) );
         break;
+      case ZSODI: // $X <- Z[s($Y) mod 2 == 1]
+        R(x, ((R(y) & 0x01 ) ? z : 0) );
+        break;
       case ZSNN: // $X <- $Z[s($Y) >= 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSNNI: // $X <- Z[s($Y) >= 0]
+        R(x, ((R(y) < 0) ? z : 0) );
         break;
       case ZSNZ: // $X <- $Z[s($Y) != 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
         break;
+      case ZSNZI: // $X <- Z[s($Y) != 0]
+        R(x, ((R(y) < 0) ? z : 0) );
+        break;
       case ZSNP: // $X <- $Z[s($Y) <= 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
+        break;
+      case ZSNPI: // $X <- Z[s($Y) <= 0]
+        R(x, ((R(y) < 0) ? z : 0) );
         break;
       case ZSEV: // $X <- $Zs($Y) mod 2 == 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
         break;
+      case ZSEVI: // $X <- Zs($Y) mod 2 == 0]
+        R(x, ((R(y) < 0) ? z : 0) );
+        break;
       case AND: // v($X) <- v($Y) & v($Z)
         R(x, R(y) & R(z));
+        break;
+      case ANDI: // v($X) <- v($Y) & v(Z)
+        R(x, R(y) & z);
         break;
       case OR: // v($X) <- v($Y) v v($Z)
         R(x, R(y) | R(z));
         break;
+      case ORI: // v($X) <- v($Y) v v(Z)
+        R(x, R(y) | z);
+        break;
       case XOR: // v($X) <-  v($Y) xor v($Z)
         R(x, R(y) ^ R(z));
+        break;
+      case XORI: // v($X) <-  v($Y) xor v(Z)
+        R(x, R(y) ^ z);
         break;
       case ANDN: // v($X) <- v($Y) v ~v($Z)
         R(x, R(y) & ~R(z));
         break;
+      case ANDNI: // v($X) <- v($Y) v ~v(Z)
+        R(x, R(y) & ~z);
+        break;
       case ORN: // v($X) <- v($Y) v ~v($Z)
         R(x, R(y) | ~R(z));
+        break;
+      case ORNI: // v($X) <- v($Y) v ~v(Z)
+        R(x, R(y) | ~z);
         break;
       case NAND: // ~v($X) <- v($Y) & v($Z)
         R(x, ~( R(y) & R(z)) );
         break;
+      case NANDI: // ~v($X) <- v($Y) & v(Z)
+        R(x, ~( R(y) & z) );
+        break;
       case NOR: // ~v($X) <- v($Y) v v($Z)
         R(x, ~( R(y) | R(z)) );
+        break;
+      case NORI: // ~v($X) <- v($Y) v v(Z)
+        R(x, ~( R(y) | z) );
         break;
       case NXOR: // ~v($X) <- v($Y) xor v($Z)
         R(x, ~( R(y) ^ R(z)) );
         break;
+      case NXORI: // ~v($X) <- v($Y) xor v(Z)
+        R(x, ~( R(y) ^ z) );
+        break;
       case MUX: // v($X) <- (v($Y) & v(rM)) | (v($Z) & ~v(rM))
         R(x, (R(y) & g(rM)) | (R(z) & ~g(rM)) );
+        break;
+      case MUXI: // v($X) <- (v($Y) & v(rM)) | (v(Z) & ~v(rM))
+        R(x, (R(y) & g(rM)) | (z & ~g(rM)) );
         break;
       case SADD: // s($X) <- s(sum(v($Y) & ~v($Z)))
         {
         std::bitset<64> temp( R(y) & ~R(z) );
+        R(x, temp.count() );
+        //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
+        }
+        break;
+
+      case SADDI: // s($X) <- s(sum(v($Y) & ~v(Z)))
+        {
+        std::bitset<64> temp( R(y) & ~z );
         R(x, temp.count() );
         //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
         }
@@ -467,12 +696,49 @@ void mmix::step(int inst)
         }
         break;
 
+      case BDIFI: // b($X) <- b($Y) .- b(Z)
+        {
+        unsigned long long int b0 = ((R(y)>> 0)&0xFF) - ((uzi>> 0)&0xFF);
+        unsigned long long int b1 = ((R(y)>> 8)&0xFF) - ((uzi>> 8)&0xFF);
+        unsigned long long int b2 = ((R(y)>>16)&0xFF) - ((uzi>>16)&0xFF);
+        unsigned long long int b3 = ((R(y)>>24)&0xFF) - ((uzi>>24)&0xFF);
+        unsigned long long int b4 = ((R(y)>>32)&0xFF) - ((uzi>>32)&0xFF);
+        unsigned long long int b5 = ((R(y)>>40)&0xFF) - ((uzi>>40)&0xFF);
+        unsigned long long int b6 = ((R(y)>>48)&0xFF) - ((uzi>>48)&0xFF);
+        unsigned long long int b7 = ((R(y)>>56)&0xFF) - ((uzi>>56)&0xFF);
+        b0 = (b0 < 0) ? 0 : b0;
+        b1 = (b1 < 0) ? 0 : b1;
+        b2 = (b2 < 0) ? 0 : b2;
+        b3 = (b3 < 0) ? 0 : b3;
+        b4 = (b4 < 0) ? 0 : b4;
+        b5 = (b5 < 0) ? 0 : b5;
+        b6 = (b6 < 0) ? 0 : b6;
+        b7 = (b7 < 0) ? 0 : b7;
+        R(x, (b7<<56) & (b6<<48) & (b5<<40) & (b4<<32) & (b3<<24) & (b2<<16)
+              & (b1<<8) & (b0<<0) );
+        }
+        break;
+
       case WDIF: // w($X) <- w($Y) - w($Z)
         {
         unsigned long long int w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
         unsigned long long int w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
         unsigned long long int w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
         unsigned long long int w3 = ((R(y)>>48)&0xFFFF) - ((R(z)>>48)&0xFFFF);
+        w0 = (w0 < 0) ? 0 : w0;
+        w1 = (w0 < 0) ? 0 : w1;
+        w2 = (w0 < 0) ? 0 : w2;
+        w3 = (w0 < 0) ? 0 : w3;
+        R(x, (w3<<48)&(w2<<32)&(w1<<16)&(w0<<0) );
+        }
+        break;
+
+      case WDIFI: // w($X) <- w($Y) - w(Z)
+        {
+        unsigned long long int w0 = ((R(y)>> 0)&0xFFFF) - ((uzi>> 0)&0xFFFF);
+        unsigned long long int w1 = ((R(y)>>16)&0xFFFF) - ((uzi>>16)&0xFFFF);
+        unsigned long long int w2 = ((R(y)>>32)&0xFFFF) - ((uzi>>32)&0xFFFF);
+        unsigned long long int w3 = ((R(y)>>48)&0xFFFF) - ((uzi>>48)&0xFFFF);
         w0 = (w0 < 0) ? 0 : w0;
         w1 = (w0 < 0) ? 0 : w1;
         w2 = (w0 < 0) ? 0 : w2;
@@ -491,9 +757,26 @@ void mmix::step(int inst)
         }
         break;
 
+      case TDIFI: // t($X) <- t($Y) - w(Z)
+        {
+        unsigned long long int t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((uzi>> 0)&0xFFFFFFFF);
+        unsigned long long int t1 = ((R(y)>>32)&0xFFFFFFFF) - ((uzi>>32)&0xFFFFFFFF);
+        t0 = (t0 < 0) ? 0 : t0;
+        t1 = (t1 < 0) ? 0 : t1;
+        R(x, (t1<<32)&(t0<<0) );
+        }
+        break;
+
       case ODIF: // u($X) <- u($Y) - u($Z)
         {
         uint64_t u0 = (R(y)) - R(z);
+        u0 = (u0 > R(y)) ? 0 : u0;
+        }
+        break;
+
+      case ODIFI: // u($X) <- u($Y) - u(Z)
+        {
+        uint64_t u0 = (R(y)) - z;
         u0 = (u0 > R(y)) ? 0 : u0;
         }
         break;
@@ -512,6 +795,21 @@ void mmix::step(int inst)
           }
         }
         break;
+
+      case MORI: // m($X) <- m(Z) vx m($Y)
+        {
+        unsigned int r;
+        for (int i=0; i<64; i++)
+          for (int j=0; j<64; j++)
+          {
+            r = (z>>i)&(R(y)>>i);
+            for (int k=2; k<=64;k++)
+              r = r | ( (z>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+        break;
  
       case MXOR: // m($X) <- m($Z) xor x m($Y)
         {
@@ -522,6 +820,21 @@ void mmix::step(int inst)
             r = (R(z)>>i)&(R(y)>>i);
             for (int k=1; k<8;k++)
               r = r ^ ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+        break;
+
+      case MXORI: // m($X) <- m(Z) xor x m($Y)
+        {
+        unsigned int r;
+        for (int i=0; i<8; i++)
+          for (int j=0; j<8; j++)
+          {
+            r = (z>>i)&(R(y)>>i);
+            for (int k=1; k<8;k++)
+              r = r ^ ( (z>>(i+8*k)) & (R(y)>>(k+8*j)) );
             r=r&1;
             R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
           }
@@ -647,93 +960,34 @@ void mmix::step(int inst)
       case LDSF: // f($X) <- f(M_4[A])
         R(x, M(4, a));
         break;
+
+      case LDSFI: // f($X) <- f(M_4[A])
+        R(x, M(4, uy+z));
+        break;
  
       case STSF: // f(M_4[A]) <- f($X)
         M(4, a, fx);
+        break;
+
+      case STSFI: // f(M_4[A]) <- f($X)
+        M(4, uy+z, fx);
         break;
 
       case FLOTI: // f($X) <- s(Z)
         R(x, (double) z);
         break;
 
-      case DIVI:
-      case DIVUI:
-      case SUBUI:
-      case i2ADDUI:
-      case i4ADDUI:
-      case i8ADDUI:
-      case i16ADDUI:
-      case CMPI:
-      case CMPUI:
-      case NEGI:
-      case NEGUI:
-      case SLI:
-      case SLUI:
-      case SRI:
-      case SRUI:
-      case CSNI:
-      case CSZI:
-      case CSPI:
-      case CSODI:
-      case CSNNI:
-      case CSNZI:
-      case CSNPI:
-      case CSEVI:
-      case ZSNI:
-      case ZSZI:
-      case ZSPI:
-      case ZSODI:
-      case ZSNNI:
-      case ZSNZI:
-      case ZSNPI:
-      case ZSEVI:
-      case LDBI:
-      case LDBUI:
-      case LDWI:
-      case LDWUI:
-      case LDTI:
-      case LDTUI:
-      case LDOI:
-      case LDOUI:
-      case LDSFI:
-      case LDHTI:
-      case CSWAPI: case LDUNCI:
+      case CSWAPI: 
+      case LDUNCI:
       case LDVTSI:
       case PRELDI:
       case PREGOI:
       case GOI:
-      case STBI:
-      case STBUI:
-      case STWI:
-      case STWUI:
-      case STTI:
-      case STTUI:
-      case STOI:
-      case STOUI:
-      case STSFI:
-      case STHTI:
-      case STCOI:
       case STUNCI:
       case SYNCDI:
       case PRESTI:
       case SYNCIDI:
       case PUSHGOI:
-      case ORI:
-      case ORNI:
-      case NORI:
-      case XORI:
-      case ANDI:
-      case ANDNI:
-      case NANDI:
-      case NXORI:
-      case BDIFI:
-      case WDIFI:
-      case TDIFI:
-      case ODIFI:
-      case MUXI:
-      case SADDI:
-      case MORI:
-      case MXORI:
         break;
 
       default:
