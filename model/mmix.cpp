@@ -4,6 +4,7 @@
 
 mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size)
 {
+  register_stack_top = 0;
 }
 
 bool mmix::N(double x, double f, unsigned int e, float epsilon)
@@ -145,8 +146,27 @@ unsigned long long int mmix::g(unsigned int reg)
   return 0;
 }
 
+void mmix::push(unsigned char reg)
+{
+  for (int i=0;i<=reg;i++)
+  {
+    M(register_stack_top, R(i));
+    register_stack_top++;
+  }
+}
+
+void mmix::pop(unsigned char reg)
+{
+  for (int i=0;i<=reg;i++)
+  {
+    R(i, M(8, register_stack_top-1));
+    register_stack_top--;
+  }
+}
+
 void mmix::step(int inst)
 {
+  unsigned int stepsize = 4;
   // Pre-fetch register numbers, and their values, for convenience
   unsigned char x = M(1, getip()+1); 
   unsigned char y = M(1, getip()+2); 
@@ -154,7 +174,7 @@ void mmix::step(int inst)
   unsigned long long int uxi = x;
   unsigned long long int uyi = y;
   unsigned long long int uzi = z;
-  unsigned long long int target = getip()+1;
+  unsigned long long int target = getip()+stepsize;
 
   unsigned long long int ux = R(x); // unsigned values at the given addresses
   unsigned long long int uy = R(y);
@@ -169,6 +189,7 @@ void mmix::step(int inst)
 
   // A <- (u($Y) + u($Z)) mod 2^64
   unsigned long long int a = ( (uy + uz ) & 0xFFFFFFFFFFFFFFFF );
+  long long int ra = 4*( (uy<<8) & uz);
 
   switch (inst)
   {
@@ -977,17 +998,328 @@ void mmix::step(int inst)
         R(x, (double) z);
         break;
 
+      case SETH: // u($X) <- YZ x2^48
+        R(x, ((uyi<<8) & uzi) << 48);
+        break;
+
+      case SETMH: // u($X) <- YZ x2^32
+        R(x, ((uyi<<8) & uzi) << 32);
+        break;
+
+      case SETML: // u($Z) <- YZ
+        R(x, ((uyi<<8) & uzi));
+        break;
+
+      case SETL: // u($X) <- YZ x2^16
+        R(x, ((uyi<<8) & uzi) << 16);
+        break;
+
+      case INCH:  // u($X) <- ( u($X) + YZ x2^48) mod 2^64
+        R(x, R(x) + (((uyi<<8) & uzi) << 48) );
+        break;
+
+      case INCMH: // u($X) <- ( u($X) + YZ x2^32) mod 2^64
+        R(x, R(x) + (((uyi<<8) & uzi) << 32) );
+        break;
+
+      case INCML: // u($X) <- ( u($X) + YZ x2^16) mod 2^64
+        R(x, R(x) + (((uyi<<8) & uzi) << 16) );
+        break;
+        
+      case INCL: // u($X) <- ( u($X) + YZ) mod 2^64
+        R(x, ux + ((uyi<<8) & uzi) );
+        break;
+
+      case ORH: // v($X) <- v($X) v v(YZ << 48)
+        R(x, ux | (((uyi<<8) & uzi)<<48) );
+        break;
+
+      case ORMH: // v($X) <- v($X) v v(YZ << 32)
+        R(x, ux | (((uyi<<8) & uzi)<<32) );
+        break;
+
+      case ORML: // v($X) <- v($X) v v(YZ << 16)
+        R(x, ux | (((uyi<<8) & uzi)<<16) );
+        break;
+
+      case ORL: // v($X) <- v($X) v v(YZ)
+        R(x, ux | ((uyi<<8) & uzi) );
+        break;
+
+      case ANDNH: // v($X) <- v($X) ^ ~v(YZ << 48)
+        R(x, ux & ~(((uyi<<8) & uzi)<<48) );
+        break;
+
+      case ANDNMH: // v($X) <- v($X) ^ ~v(YZ<<32)
+        R(x, ux & ~(((uyi<<8) & uzi)<<32) );
+        break;
+
+      case ANDNML: // v($X) <- v($X) ^ ~v(YZ<<16)
+        R(x, ux & ~(((uyi<<8) & uzi)<<16) );
+        break;
+
+      case ANDNL: // v($X) <- v($X) ^ ~v(YZ)
+        R(x, ux & ~((uyi<<8) & uzi) );
+        break;
+      
+      case GO: // u($X) <- @+4, then @<-A
+        R(x, target);
+        target = a;
+        break;
+
+      case BN: // if s($X) < 0, set @ <- RA
+        target = ( ( sx < 0 ) ? ra : target );
+        break;
+
+      case BZ: // if $X = 0, set @ <- RA
+        target = ( ( uz == 0 ) ? ra : target );
+        break;
+
+      case BP: // if s($X) = 0, set @ <- RA
+        target = ( ( sz > 0 ) ? ra : target );
+        break;
+
+      case BOD: // if s($X) mod 2 == 1, set @ <- RA
+        target = ( ( (uz & 1) == 1 ) ? ra : target );
+        break;
+
+      case BNN: // if s($X) >= 0, set @ <- RA
+        target = ( ( sz >= 0 ) ? ra : target );
+        break;
+
+      case BNZ: // if s($X) != 0, set @ <- RA
+        target = ( ( sz != 0 ) ? ra : target );
+        break;
+
+      case BNP: // if s($X) <= 0, set @ <- RA
+        target = ( ( sz <= 0 ) ? ra : target );
+        break;
+
+      case BEV: // if s($X) mod 2 == 0, set @ <- RA
+        target = ( ( (uz & 1) == 0 ) ? ra : target );
+        break;
+
+      case PBN: // if s($X) < 0, set @ <- RA
+        target = ( ( sx < 0 ) ? ra : target );
+        break;
+
+      case PBZ: // if $X = 0, set @ <- RA
+        target = ( ( uz == 0 ) ? ra : target );
+        break;
+
+      case PBP: // if s($X) = 0, set @ <- RA
+        target = ( ( sz > 0 ) ? ra : target );
+        break;
+
+      case PBOD: // if s($X) mod 2 == 1, set @ <- RA
+        target = ( ( (uz & 1) == 1 ) ? ra : target );
+        break;
+
+      case PBNN: // if s($X) >= 0, set @ <- RA
+        target = ( ( sz >= 0 ) ? ra : target );
+        break;
+
+      case PBNZ: // if s($X) != 0, set @ <- RA
+        target = ( ( sz != 0 ) ? ra : target );
+        break;
+
+      case PBNP: // if s($X) <= 0, set @ <- RA
+        target = ( ( sz <= 0 ) ? ra : target );
+        break;
+
+      case PBEV: // if s($X) mod 2 == 0, set @ <- RA
+        target = ( ( (uz & 1) == 0 ) ? ra : target );
+        break;
+
+      case JMPB: 
+        target = -1*ra;
+        break;
+
+      case BNB: // if s($X) < 0, set @ <- -RA
+        target = ( ( sx < 0 ) ? -1*ra : target );
+        break;
+
+      case BZB: // if $X = 0, set @ <- -RA
+        target = ( ( uz == 0 ) ? -1*ra : target );
+        break;
+
+      case BPB: // if s($X) = 0, set @ <- -RA
+        target = ( ( sz > 0 ) ? -1*ra : target );
+        break;
+
+      case BODB: // if s($X) mod 2 == 1, set @ <- -RA
+        target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
+        break;
+
+      case BNNB: // if s($X) >= 0, set @ <- -RA
+        target = ( ( sz >= 0 ) ? -1*ra : target );
+        break;
+
+      case BNZB: // if s($X) != 0, set @ <- -RA
+        target = ( ( sz != 0 ) ? -1*ra : target );
+        break;
+
+      case BNPB: // if s($X) <= 0, set @ <- -RA
+        target = ( ( sz <= 0 ) ? -1*ra : target );
+        break;
+
+      case BEVB: // if s($X) mod 2 == 0, set @ <- -RA
+        target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
+        break;
+
+      case PBNB: // if s($X) < 0, set @ <- -RA
+        target = ( ( sx < 0 ) ? -1*ra : target );
+        break;
+
+      case PBZB: // if $X = 0, set @ <- -RA
+        target = ( ( uz == 0 ) ? -1*ra : target );
+        break;
+
+      case PBPB: // if s($X) = 0, set @ <- -RA
+        target = ( ( sz > 0 ) ? -1*ra : target );
+        break;
+
+      case PBODB: // if s($X) mod 2 == 1, set @ <- -RA
+        target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
+        break;
+
+      case PBNNB: // if s($X) >= 0, set @ <- -RA
+        target = ( ( sz >= 0 ) ? -1*ra : target );
+        break;
+
+      case PBNZB: // if s($X) != 0, set @ <- -RA
+        target = ( ( sz != 0 ) ? -1*ra : target );
+        break;
+
+      case PBNPB: // if s($X) <= 0, set @ <- -RA
+        target = ( ( sz <= 0 ) ? -1*ra : target );
+        break;
+
+      case PBEVB: // if s($X) mod 2 == 0, set @ <- -RA
+        target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
+        break;
+
+      case PUSHJ: // push(X) and set rJ<-@+4, then set @<-RA
+        push(x);
+        R(rJ, target+4);
+        target = ra;
+        break;
+
+      case PUSHJB: // push(X) and set rJ<-@+4, then set @<-RA
+        push(x);
+        R(rJ, -1*(target+4));
+        target = ra;
+        break;
+
+      case PUSHGO: // push(X) and set rJ<-@+4, then set @<-A
+        push(x);
+        R(rJ, target+4);
+        target = a;
+        break;
+
+      case POP: // pop(X), then @<-rJ+4*YZ
+        pop(x);
+        target = R(rJ)+4*((y<<8) & z);
+        break;
+
+      case SAVE: // u($X) <- context
+        push(255);
+        R(x, register_stack_top);
+        break;
+
+      case UNSAVE: // context<- u($Z)
+        pop(255);
+        R(x, register_stack_top);
+        break;
+
+      case LDUNC: // s($X) <- s(M_8[A])
+        R( x, ((long long int) M(8, a)) );
+        break;
+
+      case STUNC: // s(M_8[A]) <- s($X)
+        M(8, a, (long long int) R(x));
+        break;
+
+      case PRELD: 
+        break;
+
+      case PREST:
+        break;
+
+      case PREGO:
+        break;
+
+      case SYNCID:
+        break;
+
+      case SYNCD:
+        break;
+
+      case SYNC:
+        break;
+
+      case CSWAP: // if u(M_8[A] == u(rP), set u(M_8[A]) <- u($X) and
+                  // u($X) <- 1. Otherwise set u(rP) <- u(M_8[A]) and
+                  // u($X) <- 0
+        if (M(8, a) == R(rP)) {
+          M(8,a,R(x));
+          R(x,1);
+        } else {
+          R(rP, M(8,a));
+          R(x, 0);
+        }
+        break;
+
+      case LDVTS: 
       case CSWAPI: 
+        break;
+
       case LDUNCI:
+        R( x, ((long long int) M(8, a)) );
+        break;
+
       case LDVTSI:
       case PRELDI:
       case PREGOI:
       case GOI:
-      case STUNCI:
+        break;
+
+      case STUNCI: // s(M_8[A] <- s($X)
+        M(8, uy+z, (long long int) R(x));
+        break;
+
       case SYNCDI:
       case PRESTI:
       case SYNCIDI:
       case PUSHGOI:
+        break;
+
+      case TRIP:
+      case TRAP:
+      case RESUME:
+        break;
+
+      case GET: // u($X) <- u(g[Z]), where 0 <= Z < 32
+        R(x, g(z));
+        break;
+
+      case PUT: // u(g[X]) <- u($Z), where 0 <= X < 32
+        g(x, R(z));
+        break;
+
+      case PUTI: // u(g[X]) <- u(Z), where 0 <= X < 32
+        g(x, z);
+        break;
+
+      case GETA: // u($X) <- RA
+        R(x, ra);
+        break;
+
+      case GETAB: // u($X) <- RA
+        R(x, -1*ra);
+        break;
+
+      case SWYM:
         break;
 
       default:
