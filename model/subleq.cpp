@@ -1,6 +1,6 @@
 #include "subleq.h"
 
-subleq::subleq(int byte_in, int address_in) : cpu(byte_in, address_in)
+subleq::subleq(int byte_in, int address_in) : cpu(byte_in, address_in, 0)
 {
 }
 

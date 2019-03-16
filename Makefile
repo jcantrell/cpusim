@@ -36,5 +36,5 @@ model/mmix.o: model/mmix.cpp model/mmix.h
 	$(CC) $(CFLAGS) -c -o $@ model/mmix.cpp
 
 clean:
-	rm cpusim.exe
+	find . -name "*.exe" -type f -delete
 	find . -name "*.o" -type f -delete

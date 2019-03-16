@@ -1,12 +1,12 @@
 #include "model/cpu.h"
 
-cpu::cpu(int byte_in, int address_in)
+cpu::cpu(int byte_in, int address_in, unsigned int reg_count)
 	{
-		flagint.i = 42; //magic number 101010
-	    byte_size = byte_in;
-	    address_size = address_in;
-	    ip = 0;
-	    status = {0};
+    flagint.i = 42; //magic number 101010
+    byte_size = byte_in;
+    address_size = address_in;
+    ip = 0;
+    status = {0};
 	}
 
 cpu::~cpu()
@@ -164,3 +164,14 @@ int cpu::view(int address)
 	    ram[a] = ram[a]>>ram[b];
 	    return 0;
 	}
+
+int cpu::regs(int address)
+{
+    return registers[address];
+}
+
+int cpu::regs(int address, int value)
+{
+    registers[address] = value;
+    return registers[address];
+}

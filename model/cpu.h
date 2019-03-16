@@ -42,9 +42,10 @@ class cpu {
 		union flagsint flagint;
 
 	public:
-		cpu(int byte_in, int address_in);
+		cpu(int byte_in, int address_in, unsigned int reg_count);
 		~cpu();
 
+// Control methods
 		void memdump();
 		int load(int address, int value);
 		int view(int address);
@@ -52,6 +53,8 @@ class cpu {
 		int setip(int in);
 		string toString();
 		virtual void step(int inst);
+    int regs(int address);
+    int regs(int address, int value);
 
 // CPU instructions
 		int add(int a, int b, int dst);

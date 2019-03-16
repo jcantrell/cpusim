@@ -2,7 +2,7 @@
 #include <bitset>
 #include <math.h>
 
-mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size)
+mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size,32)
 {
   register_stack_top = 0;
 }
@@ -102,13 +102,137 @@ void mmix::wideDiv(unsigned long long int numerator_hi,
 
 }
 
-unsigned long long int mmix::M(unsigned int size, unsigned long long address)
+void
+mmix::loadfile(string &filename)
+{
+  ifstream in;
+  in.open(filename);
+
+  if (!in)
+    return;
+
+    union {
+      uint32_t num;
+      char ar[4];
+    } tetra;
+//  uint32_t tetra;
+  //char tetra[4];
+  char x,y,z;
+  const unsigned int escape = 0x98;
+  unsigned int lambda = 0;
+    uint64_t address;
+  bool escape_flag = false;
+  do 
+  {
+//    lambda = loader_step(in, lambda, tetra[0], tetra[1], tetra[2], tetra[3]);
+    in >> tetra.num;
+    x = (tetra.num & 0x00FF0000)>>16;
+    y = (tetra.num & 0x0000FF00)>>8;
+    z = (tetra.num & 0x000000FF)>>0;
+
+	  if (escape == tetra.ar[0] && escape_flag)
+	  {
+      switch (tetra.ar[1])
+      {
+        case lop_quote:
+          escape_flag = true;
+          break;
+
+        case lop_loc:
+          {
+          uint64_t address = (uint64_t)y<<56;
+          uint64_t offset = 0;
+          in >> tetra.num;
+          offset = tetra.num;
+          if (z==2)
+          {
+            offset = offset<<32;
+            in >> tetra.num;
+            offset = offset&tetra.num;
+          }
+          lambda = address & offset;
+          }
+          break;
+
+        case lop_skip: 
+          lambda += ((y<<8) & z);
+          break;
+
+        case lop_fixo:
+          {
+          uint64_t address = 0;
+          for (;z!=0;z--)
+          {
+            in >> tetra.num;
+            address = address&((uint64_t)(tetra.num)<<32);
+          }
+          address += (((uint64_t)y)<<56);
+          M(8, address, lambda);
+          }
+          break;
+
+        case lop_fixr:
+        {
+          uint64_t delta = ((uint64_t)y<<32)&z;
+          address = lambda - 4*delta;
+          load(address+2,y);
+          load(address+3,z);
+        }
+          break;
+        case lop_fixrx:
+          {
+          union {
+            uint64_t num;
+            char ch[8];
+          } delta;
+          in >> delta.num;
+          delta.num = 
+            ( (delta.ch[0] == 1) ? ((delta.num ^ 0x00FFFFFF)-(1<<z)) : delta.num );
+          uint64_t P = lambda - 4*delta.num;
+          M(8, P, lambda);
+          }
+          break;
+        case lop_file:
+          break;
+        case lop_line:
+          break;
+        case lop_spec:
+          break;
+        case lop_pre:
+          break;
+        case lop_post:
+          break;
+        default:
+          //error: invalid loader command
+          return;
+      }
+    } else {
+      escape_flag = false;
+      M(4, lambda, tetra.num);
+      lambda = (lambda/4)*(4+1);
+	  }
+  
+  } while (!in.eof());
+	
+  in.close();
+  return;
+}
+
+// Get value of memory at given address.
+// Use size to determine whether to return byte, wyde, tetra, or octa
+unsigned long long int
+mmix::M(unsigned int size,
+        unsigned long long address)
 {
   const unsigned int octasize = 8;
   unsigned char octabyte[octasize];
   unsigned long long int base = address % size;
+
+  // Load data into byte array
   for (int i=0;i<octasize;i++)
     octabyte[i] = view(base + i);
+
+  // Copy data in byte array to 64-bit int
   unsigned long long int value = 0;
   for (int i=0;i<octasize;i++)
   {
@@ -120,30 +244,65 @@ unsigned long long int mmix::M(unsigned int size, unsigned long long address)
   return value;
 }
 
-unsigned long long int mmix::M(unsigned int size, unsigned long long address,
-  unsigned long long int value)
+unsigned long long int
+mmix::M( unsigned int size,
+         unsigned long long address,
+         unsigned long long int value)
 {
+  const unsigned int octasize = 8;
+  unsigned char octabyte[octasize];
+  unsigned long long int base = address % size;
+
+  // Load data into byte array
+  for (int i=0;i<octasize;i++)
+    octabyte[i] = view(base + i);
+
+  // Copy data in byte array to 64-bit int
+  unsigned long long int retvalue = 0;
+  for (int i=0;i<octasize;i++)
+  {
+    retvalue & octabyte[octasize-(i+1)];
+    retvalue <<= 8;
+  }
+  retvalue = retvalue & (0xFF << (size - 1) );
+  printf("Value is: %llu\n", retvalue);
+
+  // Load new value into byte array
+  char *value_array = static_cast<char*>(static_cast<void*>(&value));
+  for (int i=0;i<octasize;i++)
+    octabyte[i] = value_array[i];
+
+  // Copy data in byte array to memory
+  for (int i=0;i<octasize;i++)
+    load(base+i,octabyte[i]);
+
   return 0;
 }
 
 unsigned long long int mmix::R(unsigned int reg)
 {
-  return 0;
+  //return registers[reg];
+  return regs(reg);
 }
 
 unsigned long long int mmix::R(unsigned int reg, unsigned long long value)
 {
-  return 0;
+  unsigned long long int ret = regs(reg); // registers[reg];
+  //registers[reg] = value;
+  regs(reg, value);
+  return ret;
 }
 
 unsigned long long int mmix::g(unsigned int reg, unsigned long long value)
 {
-  return 0;
+  unsigned long long int ret = globals[reg];
+  globals[reg] = value;
+  return ret;
 }
 
 unsigned long long int mmix::g(unsigned int reg)
 {
-  return 0;
+  return globals[reg];
 }
 
 void mmix::push(unsigned char reg)

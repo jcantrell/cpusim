@@ -43,7 +43,13 @@ int TextUI::user_loop()
 
 	if (0==strcmp("create", input))
 	{
-		mycpu = new subleq(8,MAX_MEM_SIZE);
+    if (0==strcmp("subleq", args[1]))
+    {
+		  mycpu = new subleq(8,MAX_MEM_SIZE);
+    } else if (0==strcmp("mmix", args[1]))
+    {
+      mycpu = new mmix(8, 65536);
+    }
 		printf("cpu created\n");
 	} 
 	else if (0==strcmp("memdump",input)) 
@@ -94,24 +100,24 @@ int TextUI::user_loop()
 	else if (0==strcmp("help",args[0]))
 	{
 		string commands[9] = {
-			"help: display available commands\n"
-			"create: create a new cpu\n"
+			"help:    display available commands\n"
+			"create <cpu>:  create a new cpu\n"
 			"memdump: dump the contents of RAM onto the screen\n"
-			"exit: quit the simulator\n"
+			"exit:    quit the simulator\n"
 			"load <address> <value>: load a value into an address\n"
 			"view <address> <address>: view contents of an address range\n"
-			"viewip: view the value of the IP\n"
-			"setip: set the IP\n"
-			"step: execute the current instruction\n"
+			"viewip:  view the value of the IP\n"
+			"setip:   set the IP\n"
+			"step:    execute the current instruction\n"
 		};
 		for (int i=0;i<9;i++)
 		{
-			printf(commands[i].c_str());
+			printf("%s",commands[i].c_str());
 		}
 	}
 	else if (0==strcmp("info",args[0]))
 	{
-		printf(mycpu->toString().c_str());
+		printf("%s",mycpu->toString().c_str());
 	}
 	else
 	{
