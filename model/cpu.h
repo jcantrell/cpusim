@@ -26,6 +26,7 @@ struct sflags
 	df:1,	// Direction
 	of:1;	// Overflow
 };
+
 union flagsint {
 	sflags flags;
 	unsigned i;
@@ -55,6 +56,7 @@ class cpu {
 		virtual void step(int inst);
     int regs(int address);
     int regs(int address, int value);
+    int loadimage(string filename);
 
 // CPU instructions
 		int add(int a, int b, int dst);

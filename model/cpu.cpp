@@ -1,4 +1,5 @@
 #include "model/cpu.h"
+#include <fstream>
 
 cpu::cpu(int byte_in, int address_in, unsigned int reg_count)
 	{
@@ -79,7 +80,7 @@ void cpu::memdump()
 	    for (int i=0; i<address_size;i+=16)
 	    {
 	        printf("%x: ", i);
-          for (int j=0;j<16;j++)
+          for (int j=0;j<16 && i+j < address_size;j++)
           {
             if (j % 2 == 0)
               printf(" ");
@@ -88,6 +89,31 @@ void cpu::memdump()
 	        printf("\n");
 	    }
 	}
+
+int cpu::loadimage(string filename)
+{
+  std::cout << "loading file " << filename << std::endl;
+  std::ifstream infile(filename, std::ifstream::binary);
+  if (!infile)
+  {
+    printf("No such file\n");
+    return 1;
+  }  
+
+  infile.seekg(0, infile.end);
+  int file_length = infile.tellg();
+  std::cout << "file length: " << int(file_length) << std::endl;
+  infile.seekg(0, infile.beg);
+
+  if (file_length > address_size)
+    file_length = address_size;
+  std::cout << "file length: " << int(file_length) << std::endl;
+
+  char buffer[file_length];
+  infile.read(buffer, file_length);
+  for (int i=0;i<file_length;i++)
+    ram[i] = buffer[i];
+}
 
 int cpu::load(int address, int value)
 	{

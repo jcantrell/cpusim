@@ -21,7 +21,9 @@ int TextUI::user_loop()
 	for (int i=0; input[i]!='\0'; i++)
 	{
 	bool letter = ((input[i] >= 'a' && input[i] <= 'z')
-	    || (input[i] >= '0' && input[i] <= '9'));
+	    || (input[i] >= '0' && input[i] <= '9')
+      || (input[i] == '/')
+      || (input[i] =='.'));
 	
 	//printf("char is %c %d %s %s\n",input[i],input[i],
 	//    (in_word?"true":"false"),(letter?"true":"false"));
@@ -125,7 +127,8 @@ int TextUI::user_loop()
 	}
 	else if (0==strcmp("help",args[0]))
 	{
-		string commands[9] = {
+    int command_count = 10;
+		string commands[command_count] = {
 			"help:    display available commands\n"
 			"create <cpu>:  create a new cpu\n"
 			"memdump: dump the contents of RAM onto the screen\n"
@@ -135,8 +138,9 @@ int TextUI::user_loop()
 			"viewip:  view the value of the IP\n"
 			"setip:   set the IP\n"
 			"step:    execute the current instruction\n"
+      "loadimg <path>: load a binary image file\n"
 		};
-		for (int i=0;i<9;i++)
+		for (int i=0;i<command_count;i++)
 		{
 			printf("%s",commands[i].c_str());
 		}
@@ -150,7 +154,14 @@ int TextUI::user_loop()
 	}
   else if (0==strcmp("loadimg",args[0]))
   {
-    
+		for (int i=0;i<arg_count;i++)
+		{
+		    printf("    %d :%s:\n", i, args[i]);
+		}
+		if (mycpu == NULL)
+			printf("No cpu\n");
+    else
+	    mycpu->loadimage(args[1]);
   }
 	else
 	{
