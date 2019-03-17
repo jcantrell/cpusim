@@ -46,12 +46,18 @@ int TextUI::user_loop()
     if (0==strcmp("subleq", args[1]))
     {
 		  mycpu = new subleq(8,MAX_MEM_SIZE);
-    } else if (0==strcmp("mmix", args[1]))
+		  printf("cpu created\n");
+    } 
+    else if (0==strcmp("mmix", args[1]))
     {
       mycpu = new mmix(8, 65536);
+		  printf("cpu created\n");
     }
-		printf("cpu created\n");
-	} 
+    else
+    {
+      continue;
+    }
+	}
 	else if (0==strcmp("memdump",input)) 
 	{
 		if (mycpu == NULL)
@@ -65,10 +71,18 @@ int TextUI::user_loop()
 	}
 	else if (0==strcmp("load",args[0]))
 	{
+		if (mycpu == NULL)
+			printf("No cpu\n");
+    else
 	    mycpu->load(atoi(args[1]), atoi(args[2]));
 	}
 	else if (0==strcmp("view",args[0]))
 	{
+		if (mycpu == NULL)
+    {
+			printf("No cpu\n");
+      continue;
+    }
 	    int address1 = atoi(args[1]);
 	    int address2 = address1;
 
@@ -86,16 +100,28 @@ int TextUI::user_loop()
 	}
 	else if (0==strcmp("viewip",args[0]))
 	{
+		if (mycpu == NULL)
+			printf("No cpu\n");
+    else
 	    printf("%x\n",mycpu->getip());
 	}
 	else if (0==strcmp("setip",args[0]))
 	{
+		if (mycpu == NULL)
+			printf("No cpu\n");
+    else
 	    mycpu->setip(atoi(args[1]));
 	}
 	else if (0==strcmp("step",args[0]))
 	{
-	    int inst = mycpu->view(mycpu->getip());
+		if (mycpu == NULL)
+    {
+			printf("No cpu\n");
+      continue;
+    }
 
+	  int inst = mycpu->view(mycpu->getip());
+	  mycpu->step(inst);
 	}
 	else if (0==strcmp("help",args[0]))
 	{
@@ -117,8 +143,15 @@ int TextUI::user_loop()
 	}
 	else if (0==strcmp("info",args[0]))
 	{
-		printf("%s",mycpu->toString().c_str());
+		if (mycpu == NULL)
+			printf("No cpu\n");
+    else
+		  printf("%s",mycpu->toString().c_str());
 	}
+  else if (0==strcmp("loadimg",args[0]))
+  {
+    
+  }
 	else
 	{
 		printf("Unrecognized command\n");
@@ -126,7 +159,7 @@ int TextUI::user_loop()
 		{
 		    printf("    %d :%s:\n", i, args[i]);
 		}
-		}
+	}
 	}
 		cout << "quitting" << endl;
 	return 0;

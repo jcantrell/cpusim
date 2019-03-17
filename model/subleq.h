@@ -6,7 +6,7 @@
 class subleq : public cpu {
 	public:
 		subleq(int byte_in, int address_in);
-		void step(int inst);
+		virtual void step(int inst);
 };
 
 #endif

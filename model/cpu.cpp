@@ -76,9 +76,16 @@ string cpu::toString()
 	
 void cpu::memdump()
 	{
-	    for (int i=0; i<address_size; i++)
+	    for (int i=0; i<address_size;i+=16)
 	    {
-	        printf("%x: %x\n", i, ram[i]);
+	        printf("%x: ", i);
+          for (int j=0;j<16;j++)
+          {
+            if (j % 2 == 0)
+              printf(" ");
+	          printf("%02x", ram[i+j]);
+          }
+	        printf("\n");
 	    }
 	}
 
@@ -101,6 +108,7 @@ int cpu::view(int address)
 
 	int cpu::setip(int in)
 	{
+    printf("setting ip to %d\n",in);
 	    ip = in;
 			return ip;
 	}

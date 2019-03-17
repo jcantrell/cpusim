@@ -1,4 +1,4 @@
-/*  This file is the RDP for the generic CPU commands
+/*  This file is the recursive descent parser for the generic CPU commands
  *  Grammar is as follows:
  *
  *  statement -> load_statement | store_statement
@@ -216,8 +216,8 @@ int test()
 	token *j = p;
     while (j!=NULL)
     {
-		printf("%s\n",j->value);
-		j = j->next;
+		  printf("%s\n",j->value);
+		  j = j->next;
     }
 
 	//convert token stream to parse tree
