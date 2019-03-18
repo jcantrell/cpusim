@@ -4,9 +4,9 @@ OBJ:=controller/main.o \
 			ui/TextUI.o \
 			ui/parser/parser.o \
 			ui/parser/lexer.o \
-			model/cpu.o \
-			model/subleq.o \
-			model/mmix.o
+			model/cpu/cpu.o \
+			model/subleq/subleq.o \
+			model/mmix/mmix.o
 
 cpusim:	$(OBJ)
 	$(CC) $(CFLAGS) -o bin/cpusim $(OBJ)
@@ -26,15 +26,17 @@ ui/parser/parser.o: ui/parser/parser.cpp ui/parser/parser.h
 ui/parser/lexer.o: ui/parser/lexer.cpp ui/parser/lexer.h
 	$(CC) $(CFLAGS) -c -o $@ ui/parser/lexer.cpp
 
-model/cpu.o: model/cpu.cpp model/cpu.h
-	$(CC) $(CFLAGS) -c -o $@ model/cpu.cpp
+model/cpu/cpu.o: model/cpu/cpu.cpp model/cpu/cpu.h
+	$(CC) $(CFLAGS) -c -o $@ model/cpu/cpu.cpp
 
-model/subleq.o: model/subleq.cpp model/subleq.h
-	$(CC) $(CFLAGS) -c -o $@ model/subleq.cpp
+model/subleq/subleq.o: model/subleq/subleq.cpp model/subleq/subleq.h
+	$(CC) $(CFLAGS) -c -o $@ model/subleq/subleq.cpp
 
-model/mmix.o: model/mmix.cpp model/mmix.h
-	$(CC) $(CFLAGS) -c -o $@ model/mmix.cpp
+model/mmix/mmix.o: model/mmix/mmix.cpp model/mmix/mmix.h
+	$(CC) $(CFLAGS) -c -o $@ model/mmix/mmix.cpp
 
 clean:
-	find . -name "*.exe" -type f -delete
 	find . -name "*.o" -type f -delete
+	find . -name "*.exe" -type f -delete
+	find . -name "*.mmo" -type f -delete
+	find . -name "*.img" -type f -delete

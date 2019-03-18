@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include "model/cpu.h"
+#include "model/cpu/cpu.h"
 
 class mmix : public cpu {
   private:
@@ -14,13 +14,17 @@ class mmix : public cpu {
     std::unordered_map<int, int> special_registers;
     std::unordered_map<int, int> globals;
     enum inst {
-#include "model/opcodes_mmix.h"
+#include "model/mmix/opcodes_mmix.h"
     };
     enum special_registers {
-#include "model/special_registers_mmix.h"
+#include "model/mmix/special_registers_mmix.h"
     };
     enum loader_opcodes {
-#include "model/loader_opcodes.h"
+#include "model/mmix/loader_opcodes.h"
+    };
+    enum sys_calls {
+      Halt, Fopen, Fclose, Fread, Fgets, Fgetws, Fwrite, Fputs,
+      Fputws, Fseek, Ftell
     };
 	public:
 		mmix(int byte_size, int address_size);

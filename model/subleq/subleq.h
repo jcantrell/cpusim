@@ -1,7 +1,7 @@
 #ifndef SUBLEQ_H
 #define SUBLEQ_H
 
-#include "model/cpu.h"
+#include "model/cpu/cpu.h"
 
 class subleq : public cpu {
 	public:

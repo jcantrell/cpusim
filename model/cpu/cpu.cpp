@@ -1,4 +1,4 @@
-#include "model/cpu.h"
+#include "model/cpu/cpu.h"
 #include <fstream>
 
 cpu::cpu(int byte_in, int address_in, unsigned int reg_count)

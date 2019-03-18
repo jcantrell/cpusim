@@ -12,7 +12,8 @@ int TextUI::user_loop()
 	arg_count = 0;
 
 	printf(":");
-	fgets(input, MAX_STR_LEN, stdin);
+	if (fgets(input, MAX_STR_LEN, stdin) == NULL)
+    exit(1);
 
 	int j;
 	bool in_word = false;

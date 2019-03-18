@@ -111,10 +111,11 @@ mmix::loadfile(string &filename)
   if (!in)
     return;
 
-    union {
+    union tetra_union {
       uint32_t num;
       char ar[4];
-    } tetra;
+    };
+    union tetra_union tetra;
 //  uint32_t tetra;
   //char tetra[4];
   char x,y,z;
@@ -193,14 +194,48 @@ mmix::loadfile(string &filename)
           }
           break;
         case lop_file:
+          {
+          //Y = file number, Z = tetra count of bytes of filename
+          }
           break;
         case lop_line:
+          {
+          //YZ = line number
+          }
           break;
         case lop_spec:
+          //YZ = type. Subsequent tetras, until next loader operation
+          //other than lop_quote, comprise the special data.
           break;
         case lop_pre:
+          //Y = mmo format version (currently 1)
+          //Z = # of subsequent tetras providing useful info
+          //    if Z>0, the first tetra is timestamp of file creation
           break;
         case lop_post:
+          //load rG with value of Z (must be >= 32)
+          //$G,$G+1,...,$255 set to values of next (256-G)*2 tetras
+          {
+          special_registers[rG] = z;
+          for (int i=0;i<=(256-G)*2;i+=2)
+          {
+            union tetra_union t1;
+            union tetra_union t2;
+            in >> t1.num;
+            in >> t2.num;
+            R(z+i, (unsigned long long)t1.num<<32 & (unsigned long long)t2.num);
+          }
+          }
+          break;
+        case lop_stab:
+          {
+          // indicates start of user-defined symbols
+          }
+          break;
+        case lop_end:
+          {
+          // indicates end of user-defined symbols (and end of mmo file)
+          }
           break;
         default:
           //error: invalid loader command
@@ -1455,6 +1490,44 @@ void mmix::step(int inst)
 
       case TRIP:
       case TRAP:
+        // MMIX simulators seem to implement 10 traps for basic i/o
+        // the idea is that the NNIX kernel would implement all the trap
+        // functions in a proper system.
+
+        switch (y) {
+        case Halt:
+          return;
+          break;
+        case Fopen:
+          break;
+        case Fclose:
+          break;
+        case Fread:
+          break;
+        case Fgets:
+          break;
+        case Fgetws:
+          break;
+        case Fwrite:
+          break;
+        case Fputs:
+          if (z == 1)          
+            for (int i=0; M(1,R(255) + i)  != '\0'; i++)
+            {
+              printf( "%c", (char)M(1,R(255) + i) );
+            }
+          break;
+        case Fputws:
+          break;
+        case Fseek:
+          break;
+        case Ftell:
+          break;
+        default:
+          break;
+        }
+        break;
+
       case RESUME:
         break;
 
