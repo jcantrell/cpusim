@@ -49,12 +49,12 @@ int TextUI::user_loop()
     if (0==strcmp("subleq", args[1]))
     {
 		  mycpu = new subleq(8,MAX_MEM_SIZE);
-		  printf("cpu created\n");
+		  printf("subleq cpu created\n");
     } 
     else if (0==strcmp("mmix", args[1]))
     {
       mycpu = new mmix(8, 65536);
-		  printf("cpu created\n");
+		  printf("mmix cpu created\n");
     }
     else
     {
@@ -163,6 +163,10 @@ int TextUI::user_loop()
 			printf("No cpu\n");
     else
 	    mycpu->loadimage(args[1]);
+  }
+  else if (0==strcmp("loadobject",args[0]))
+  {
+    mycpu->loadobject(string(args[1]));
   }
 	else
 	{

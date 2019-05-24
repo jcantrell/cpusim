@@ -5,9 +5,9 @@
 #include <iostream>
 
 #include "ui/UI.h"
-#include "model/cpu.h"
-#include "model/subleq.h"
-#include "model/mmix.h"
+#include "model/cpu/cpu.h"
+#include "model/subleq/subleq.h"
+#include "model/mmix/mmix.h"
 
 class TextUI : public UI {
 	public:

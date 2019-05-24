@@ -57,6 +57,7 @@ class cpu {
     int regs(int address);
     int regs(int address, int value);
     int loadimage(string filename);
+    virtual void loadobject(string filename);
 
 // CPU instructions
 		int add(int a, int b, int dst);

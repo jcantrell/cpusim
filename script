@@ -1,0 +1,4 @@
+create mmix
+loadobject tests/hello.mmo
+memdump
+exit

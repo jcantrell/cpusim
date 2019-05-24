@@ -18,6 +18,10 @@ void cpu::step(int inst)
 	{
 	}
 
+void cpu::loadobject(string filename)
+{
+}
+
 string cpu::toString()
 {
 	string s = "";
@@ -47,8 +51,7 @@ string cpu::toString()
 	s += "CF: ";
 	s += (flagint.flags.cf ? "true" : "false");
 	s += "\n";
-	s += "PF: " + "----------------------------;
-	s += (flagint.flags.pf ? "true" : "false");
+	s += "PF: " + "----------------------------; s += (flagint.flags.pf ? "true" : "false");
 	s += "\n";
 	s += "AF: "; 
 	s += (flagint.flags.af ? "true" : "false");
@@ -75,18 +78,43 @@ string cpu::toString()
 	return s;
 }
 	
+// Print hex dump of memory contents to screen
+// TODO: Properly format cells with leading 0xF
+// TODO: Summarize long areas of zeroes
 void cpu::memdump()
 	{
+    char string_out[1000];
+    char buffer[1000];
+    int zero_count = 0;
+    bool print_line = true;
 	    for (int i=0; i<address_size;i+=16)
 	    {
-	        printf("%x: ", i);
+          std::string line_out;
+          print_line=true;
+          for (int j=0;j<1000;j++)
+            string_out[j] = 0;
+	        sprintf(buffer, "%x: ", i);
+          strcat(string_out,buffer);
+          bool line_is_zero = true;
           for (int j=0;j<16 && i+j < address_size;j++)
           {
+            line_is_zero = line_is_zero && (ram[i+j] == 0);
             if (j % 2 == 0)
-              printf(" ");
-	          printf("%02x", ram[i+j]);
+            {
+              sprintf(buffer,"%s"," ");
+              strcat(string_out,buffer);
+            }
+	          sprintf(buffer,"%02x", (unsigned char)ram[i+j]);
+            strcat(string_out,buffer);
           }
-	        printf("\n");
+	        sprintf(buffer,"%s","\n");
+          strcat(string_out,buffer);
+
+          zero_count = ( line_is_zero ? zero_count+1 : 0);
+          print_line = ( (zero_count > 1) ? false : true );
+
+          if (print_line)
+            printf("%s",string_out);
 	    }
 	}
 
@@ -113,6 +141,7 @@ int cpu::loadimage(string filename)
   infile.read(buffer, file_length);
   for (int i=0;i<file_length;i++)
     ram[i] = buffer[i];
+  return 0;
 }
 
 int cpu::load(int address, int value)

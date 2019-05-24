@@ -1,3 +1,4 @@
+mmo_escape = 0x98,
 lop_quote = 0x00,
 lop_loc = 0x01,
 lop_skip = 0x02,

@@ -68,6 +68,9 @@ class mmix : public cpu {
 
     // Is one double in the neighborhood of another?
     bool N(double, double, unsigned int, float);
+
+    // load a .mmo file
+    void loadobject(string filename);
 };
 
 #endif

@@ -3,7 +3,7 @@
 #include <fstream>      // std::ifstream
 
 int main () {
-  std::ifstream is ("tests/subleq.img", std::ifstream::binary);
+  std::ifstream is ("hello.mmo", std::ifstream::binary);
   if (is) {
     // get length of file:
     is.seekg (0, is.end);

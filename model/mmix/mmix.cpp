@@ -1,6 +1,7 @@
 #include "mmix.h"
 #include <bitset>
 #include <math.h>
+#include <iomanip>
 
 mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size,32)
 {
@@ -102,54 +103,113 @@ void mmix::wideDiv(unsigned long long int numerator_hi,
 
 }
 
+// This function implements the mmix loader
 void
-mmix::loadfile(string &filename)
+mmix::loadobject(string filename)
 {
-  ifstream in;
-  in.open(filename);
-
+  std::cout << "loading file " << filename << std::endl;
+  std::ifstream in(filename, std::ifstream::binary);
   if (!in)
-    return;
-
-    union tetra_union {
-      uint32_t num;
-      char ar[4];
-    };
-    union tetra_union tetra;
-//  uint32_t tetra;
-  //char tetra[4];
-  char x,y,z;
-  const unsigned int escape = 0x98;
-  unsigned int lambda = 0;
-    uint64_t address;
-  bool escape_flag = false;
-  do 
   {
-//    lambda = loader_step(in, lambda, tetra[0], tetra[1], tetra[2], tetra[3]);
-    in >> tetra.num;
+    printf("No such file\n");
+    return;
+  }  
+
+  union tetra_union {
+    uint32_t num;
+    char ar[4];
+  };
+  union tetra_union tetra;
+  char op,x,y,z;
+
+  unsigned int lambda = 0;
+  uint64_t address;
+  bool quoted_flag = false;
+  while (!in.eof())
+  {
+// lambda = loader_step(in, lambda, tetra[0], tetra[1], tetra[2], tetra[3]);
+    in.read(tetra.ar,4);
+/*
+    std::cout << "loaded " << std::hex << setfill('0')
+              << std::setw(8) << tetra.num << "\n";
+*/
+    std::cout << "Tetra: " 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[0] 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[1] 
+              << " " 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[2] 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[3] 
+              << "\n";
+    
+/*
+    op =(tetra.num & 0xFF000000)>>16;
     x = (tetra.num & 0x00FF0000)>>16;
     y = (tetra.num & 0x0000FF00)>>8;
     z = (tetra.num & 0x000000FF)>>0;
+*/
+    op = tetra.ar[0];
+    x = tetra.ar[1];
+    y = tetra.ar[2];
+    z = tetra.ar[3];
 
-	  if (escape == tetra.ar[0] && escape_flag)
+/*
+    cout << "mmo_escape: " 
+         << std::hex << setfill('0') << std::setw(2)
+         << (int)(unsigned char)mmo_escape 
+         << " and op: " 
+         << std::hex << setfill('0') << std::setw(2)
+         << (int)(unsigned char)tetra.ar[0] 
+         << " and equivalencr: " 
+          << ((char)mmo_escape == tetra.ar[0])
+         << " and quoted_flag: " << quoted_flag
+         << " and not quoted_flag: " << !quoted_flag
+         << " and boolean: " 
+          << (((char)mmo_escape == tetra.ar[0]) && !quoted_flag) 
+          << "\n";
+*/
+
+	  if (((char)mmo_escape == tetra.ar[0]) && !quoted_flag)
 	  {
+      cout << "switching on: "
+           << std::hex << setfill('0') << std::setw(2)
+          << (int)(unsigned char)tetra.ar[1] << "\n";
       switch (tetra.ar[1])
       {
         case lop_quote:
-          escape_flag = true;
+          quoted_flag = true;
           break;
 
         case lop_loc:
           {
+          cout << "lop_loc called\n";
           uint64_t address = (uint64_t)y<<56;
           uint64_t offset = 0;
-          in >> tetra.num;
-          offset = tetra.num;
+          union tetra_union addr1;
+          union tetra_union addr2;
+          in.read(addr1.ar,4);
+          //in >> tetra.num;
+          //offset = tetra1.num; // reverse this (little-endian)
+          offset = (
+              (addr1.ar[0]<<24) 
+            & (addr1.ar[1]<<16) 
+            & (addr1.ar[2]<<8)
+            & (addr1.ar[3])
+          );
           if (z==2)
           {
             offset = offset<<32;
-            in >> tetra.num;
-            offset = offset&tetra.num;
+            //in >> tetra.num;
+            in.read(addr2.ar,4);
+            offset = offset & (
+              (addr2.ar[0]<<24) 
+            & (addr2.ar[1]<<16) 
+            & (addr2.ar[2]<<8)
+            & (addr2.ar[3])
+            );
           }
           lambda = address & offset;
           }
@@ -216,13 +276,16 @@ mmix::loadfile(string &filename)
           //load rG with value of Z (must be >= 32)
           //$G,$G+1,...,$255 set to values of next (256-G)*2 tetras
           {
+          cout << "lop_post called\n";
           special_registers[rG] = z;
           for (int i=0;i<=(256-G)*2;i+=2)
           {
             union tetra_union t1;
             union tetra_union t2;
-            in >> t1.num;
-            in >> t2.num;
+            //in >> t1.num;
+            in.read(t1.ar,4);
+            //in >> t2.num;
+            in.read(t2.ar,4);
             R(z+i, (unsigned long long)t1.num<<32 & (unsigned long long)t2.num);
           }
           }
@@ -239,15 +302,27 @@ mmix::loadfile(string &filename)
           break;
         default:
           //error: invalid loader command
+          cout << "Invalid loader op: " << tetra.ar[1];
           return;
       }
     } else {
-      escape_flag = false;
+      quoted_flag = false;
+      cout    << "saving "
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[0] 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[1] 
+              << " " 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[2] 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)tetra.ar[3] 
+              << " to " << lambda << "\n";
       M(4, lambda, tetra.num);
-      lambda = (lambda/4)*(4+1);
+      lambda = (lambda/4)*4+4;
 	  }
   
-  } while (!in.eof());
+  }
 	
   in.close();
   return;
@@ -275,7 +350,7 @@ mmix::M(unsigned int size,
     value <<= 8;
   }
   value = value & (0xFF << (size - 1) );
-  printf("Value is: %llu\n", value);
+  printf("M1: Value is: %llu\n", value);
   return value;
 }
 
@@ -300,7 +375,7 @@ mmix::M( unsigned int size,
     retvalue <<= 8;
   }
   retvalue = retvalue & (0xFF << (size - 1) );
-  printf("Value is: %llu\n", retvalue);
+  //printf("M2: Value is: %llu\n", retvalue);
 
   // Load new value into byte array
   char *value_array = static_cast<char*>(static_cast<void*>(&value));
