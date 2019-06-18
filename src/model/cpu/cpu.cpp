@@ -87,8 +87,10 @@ void cpu::memdump()
     char buffer[1000];
     int zero_count = 0;
     bool print_line = true;
+    cout << "address size is " << address_size;
 	    for (int i=0; i<address_size;i+=16)
 	    {
+        cout << "i is " << i;
           std::string line_out;
           print_line=true;
           for (int j=0;j<1000;j++)
