@@ -9,7 +9,7 @@ OBJ:=controller/main.o \
 			model/mmix/mmix.o
 
 cpusim:	$(OBJ)
-	$(CC) $(CFLAGS) -o bin/cpusim $(OBJ)
+	$(CC) $(CFLAGS) -o ../bin/cpusim $(OBJ)
 
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@

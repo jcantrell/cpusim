@@ -177,6 +177,9 @@ mmix::loadobject(string filename)
       cout << "switching on: "
            << std::hex << setfill('0') << std::setw(2)
           << (int)(unsigned char)tetra.ar[1] << "\n";
+      //cout << "lop_post is: "
+      //     << std::hex << setfill('0') << std::setw(2)
+      //     << (int)(unsigned char)lop_post << "\n";
       switch (tetra.ar[1])
       {
         case lop_quote:

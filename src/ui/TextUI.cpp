@@ -44,6 +44,7 @@ int TextUI::user_loop()
 	in_word = letter;
 	}
 
+  printf("Entered text: %s\n", input);
 	if (0==strcmp("create", input))
 	{
     if (0==strcmp("subleq", args[1]))
