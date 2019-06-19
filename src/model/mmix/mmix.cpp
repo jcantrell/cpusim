@@ -174,12 +174,9 @@ mmix::loadobject(string filename)
 
 	  if (((char)mmo_escape == tetra.ar[0]) && !quoted_flag)
 	  {
-      cout << "switching on: "
-           << std::hex << setfill('0') << std::setw(2)
-          << (int)(unsigned char)tetra.ar[1] << "\n";
-      //cout << "lop_post is: "
-      //     << std::hex << setfill('0') << std::setw(2)
-      //     << (int)(unsigned char)lop_post << "\n";
+//      cout << "switching on: "
+//           << std::hex << setfill('0') << std::setw(2)
+//          << (int)(unsigned char)tetra.ar[1] << "\n";
       switch (tetra.ar[1])
       {
         case lop_quote:
@@ -322,6 +319,13 @@ mmix::loadobject(string filename)
               << (int) (unsigned char)tetra.ar[3] 
               << " to " << lambda << "\n";
       M(4, lambda, tetra.num);
+      unsigned long long v = M(4, lambda);
+      cout << "value at " 
+              << std::hex << setfill('0') << std::setw(2)
+              << lambda
+              << " is "
+              << std::hex << setfill('0') << std::setw(2)
+              << v << "\n";
       lambda = (lambda/4)*4+4;
 	  }
   
@@ -353,7 +357,7 @@ mmix::M(unsigned int size,
     value <<= 8;
   }
   value = value & (0xFF << (size - 1) );
-  printf("M1: Value is: %llu\n", value);
+  printf("M1: At %llu, Value is: %llu\n", address, value);
   return value;
 }
 

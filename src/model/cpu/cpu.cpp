@@ -88,9 +88,11 @@ void cpu::memdump()
     int zero_count = 0;
     bool print_line = true;
     cout << "address size is " << address_size;
+    //for (int i=0; i<address_size;i++)
+	    //printf("%02x", (unsigned char)ram[i]);
 	    for (int i=0; i<address_size;i+=16)
 	    {
-        cout << "i is " << i;
+        //cout << "i is " << i;
           std::string line_out;
           print_line=true;
           for (int j=0;j<1000;j++)
@@ -148,8 +150,10 @@ int cpu::loadimage(string filename)
 
 int cpu::load(int address, int value)
 	{
+      std::cout << "loading " << value << " to " << address << "\n";
 	    int ret = ram[address];
 	    ram[address] = value;
+      std::cout << "loaded " << ram[address] << " to " << address << "\n";
 	    return ret;
 	}
 
