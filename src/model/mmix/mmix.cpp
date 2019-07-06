@@ -122,7 +122,7 @@ mmix::loadobject(string filename)
   union tetra_union tetra;
   char op,x,y,z;
 
-  unsigned int lambda = 0;
+  uint64_t lambda = 0;
   uint64_t address;
   bool quoted_flag = false;
   while (!in.eof())
@@ -195,10 +195,40 @@ mmix::loadobject(string filename)
           //offset = tetra1.num; // reverse this (little-endian)
           offset = (
               (addr1.ar[0]<<24) 
-            & (addr1.ar[1]<<16) 
-            & (addr1.ar[2]<<8)
-            & (addr1.ar[3])
+            | (addr1.ar[1]<<16) 
+            | (addr1.ar[2]<<8)
+            | (addr1.ar[3])
+/*
+              (((uint64_t) (unsigned char)(addr1.ar[0]))<<24) 
+            & (((uint64_t) (unsigned char)(addr1.ar[1]))<<16) 
+            & (((uint64_t) (unsigned char)(addr1.ar[2]))<<8)
+            & (((uint64_t) (unsigned char)(addr1.ar[3])))
+*/
           );
+          cout << "loaded first tetra of address: "
+               << std::hex << setfill('0') << std::setw(8)
+               << offset << '\n' 
+
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[0]) 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[1])
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[2]) 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[3]) 
+/*
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[0]<<24) 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[1]<<16)
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[2]<<8) 
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)(addr1.ar[3]) 
+*/
+          << endl;
+          cout << "end first tetra" << endl;
           if (z==2)
           {
             offset = offset<<32;
@@ -206,12 +236,24 @@ mmix::loadobject(string filename)
             in.read(addr2.ar,4);
             offset = offset & (
               (addr2.ar[0]<<24) 
-            & (addr2.ar[1]<<16) 
-            & (addr2.ar[2]<<8)
-            & (addr2.ar[3])
+            | (addr2.ar[1]<<16) 
+            | (addr2.ar[2]<<8)
+            | (addr2.ar[3])
             );
+            cout << "loaded second tetra of address: "
+                 << std::hex << setfill('0') << std::setw(8)
+                 << offset << endl;
           }
-          lambda = address & offset;
+          lambda = address | offset;
+          cout << "address: " 
+                << std::hex << setfill('0') << std::setw(8)
+                << address << endl
+                << "offset: " 
+                << std::hex << setfill('0') << std::setw(8)
+                << offset << endl
+                << "lambda: " 
+                << std::hex << setfill('0') << std::setw(8)
+                << lambda << endl;
           }
           break;
 
@@ -236,6 +278,7 @@ mmix::loadobject(string filename)
         {
           uint64_t delta = ((uint64_t)y<<32)&z;
           address = lambda - 4*delta;
+          cout << "case lop_fixr\n";
           load(address+2,y);
           load(address+3,z);
         }
@@ -256,6 +299,9 @@ mmix::loadobject(string filename)
         case lop_file:
           {
           //Y = file number, Z = tetra count of bytes of filename
+          for (;z>0;z--) {
+            in.read(tetra.ar,4);
+          }
           }
           break;
         case lop_line:
@@ -271,6 +317,11 @@ mmix::loadobject(string filename)
           //Y = mmo format version (currently 1)
           //Z = # of subsequent tetras providing useful info
           //    if Z>0, the first tetra is timestamp of file creation
+          {
+          for (;z > 0;z--) {
+            in.read(tetra.ar,4);
+          }
+          }
           break;
         case lop_post:
           //load rG with value of Z (must be >= 32)
@@ -293,6 +344,7 @@ mmix::loadobject(string filename)
         case lop_stab:
           {
           // indicates start of user-defined symbols
+          cout << "lop_stab called\n";
           }
           break;
         case lop_end:
@@ -308,6 +360,9 @@ mmix::loadobject(string filename)
     } else {
       quoted_flag = false;
       cout    << "saving "
+              << std::hex << setfill('0') << std::setw(4)
+              << tetra.num
+/*
               << std::hex << setfill('0') << std::setw(2)
               << (int) (unsigned char)tetra.ar[0] 
               << std::hex << setfill('0') << std::setw(2)
@@ -317,6 +372,7 @@ mmix::loadobject(string filename)
               << (int) (unsigned char)tetra.ar[2] 
               << std::hex << setfill('0') << std::setw(2)
               << (int) (unsigned char)tetra.ar[3] 
+*/
               << " to " << lambda << "\n";
       M(4, lambda, tetra.num);
       unsigned long long v = M(4, lambda);
@@ -357,7 +413,7 @@ mmix::M(unsigned int size,
     value <<= 8;
   }
   value = value & (0xFF << (size - 1) );
-  printf("M1: At %llu, Value is: %llu\n", address, value);
+  //printf("M1: At %llu, Value is: %llu\n", address, value);
   return value;
 }
 
@@ -368,15 +424,27 @@ mmix::M( unsigned int size,
 {
   const unsigned int octasize = 8;
   unsigned char octabyte[octasize];
-  unsigned long long int base = address % size;
+  unsigned long long int base = address - (address % size);
+  cout << "base is "
+            << std::hex << setfill('0') << std::setw(2)
+            << (int) (unsigned char)(base)
+        << " size is "
+            << std::hex << setfill('0') << std::setw(2)
+            << (unsigned int)(size)
+        << " address is "
+            << std::hex << setfill('0') << std::setw(16)
+            << (unsigned long long)(address)
+        << " value is "
+            << std::hex << setfill('0') << std::setw(8)
+            << (int) (unsigned char)(value);
 
   // Load data into byte array
-  for (int i=0;i<octasize;i++)
+  for (int i=0;i<size;i++)
     octabyte[i] = view(base + i);
 
   // Copy data in byte array to 64-bit int
   unsigned long long int retvalue = 0;
-  for (int i=0;i<octasize;i++)
+  for (int i=0;i<size;i++)
   {
     retvalue & octabyte[octasize-(i+1)];
     retvalue <<= 8;
@@ -386,12 +454,20 @@ mmix::M( unsigned int size,
 
   // Load new value into byte array
   char *value_array = static_cast<char*>(static_cast<void*>(&value));
-  for (int i=0;i<octasize;i++)
+  for (int i=0;i<size;i++)
     octabyte[i] = value_array[i];
 
   // Copy data in byte array to memory
-  for (int i=0;i<octasize;i++)
+  for (int i=0;i<size;i++)
+  {
+    cout << "M: calling load with "
+              << std::hex << setfill('0') << std::setw(2)
+              << (base+i)
+        << " and "
+              << std::hex << setfill('0') << std::setw(2)
+              << (int) (unsigned char)octabyte[i] ;
     load(base+i,octabyte[i]);
+  }
 
   return 0;
 }

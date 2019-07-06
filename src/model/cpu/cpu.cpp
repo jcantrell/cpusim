@@ -1,7 +1,7 @@
 #include "model/cpu/cpu.h"
 #include <fstream>
 
-cpu::cpu(int byte_in, int address_in, unsigned int reg_count)
+cpu::cpu(int byte_in, Address address_in, unsigned int reg_count)
 	{
     flagint.i = 42; //magic number 101010
     byte_size = byte_in;
@@ -26,7 +26,7 @@ string cpu::toString()
 {
 	string s = "";
 	s += "Byte width: " + to_string(byte_size) + "\n";
-	s += "Address size: " + to_string(address_size) + "\n";
+	s += "Address size: " + address_size.asString() + "\n";
 	s += "IP: " + to_string(ip) + "\n";
 	s += "Flags: " + to_string(flagint.i) + "\n";
 
@@ -90,14 +90,15 @@ void cpu::memdump()
     cout << "address size is " << address_size;
     //for (int i=0; i<address_size;i++)
 	    //printf("%02x", (unsigned char)ram[i]);
-	    for (int i=0; i<address_size;i+=16)
+      Address i;
+	    for (i=0; i<address_size;i+=16)
 	    {
         //cout << "i is " << i;
           std::string line_out;
           print_line=true;
           for (int j=0;j<1000;j++)
             string_out[j] = 0;
-	        sprintf(buffer, "%x: ", i);
+	        sprintf(buffer, "%s: ", i.asString().c_str());
           strcat(string_out,buffer);
           bool line_is_zero = true;
           for (int j=0;j<16 && i+j < address_size;j++)
@@ -148,7 +149,7 @@ int cpu::loadimage(string filename)
   return 0;
 }
 
-int cpu::load(int address, int value)
+int cpu::load(Address address, int value)
 	{
       std::cout << "loading " << value << " to " << address << "\n";
 	    int ret = ram[address];
@@ -157,7 +158,7 @@ int cpu::load(int address, int value)
 	    return ret;
 	}
 
-int cpu::view(int address)
+int cpu::view(Address address)
 	{
 	    return ram[address];
 	}

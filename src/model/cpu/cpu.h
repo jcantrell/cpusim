@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <string>
+#include <model/cpu/Address.h>
 
 #define MAX_STR_LEN 512
 #define MAX_ARGS	32
@@ -32,24 +33,25 @@ union flagsint {
 	unsigned i;
 };
 
+
 class cpu {
 	private:
 		int byte_size;  
-		int address_size;
-		std::unordered_map<int, int> ram;
-		std::unordered_map<int, int> registers;
+		Address address_size;
+		std::unordered_map<Address, Morsel> ram;
+		std::unordered_map<Address, Morsel> registers;
 		int ip;
 		struct sflags status;
 		union flagsint flagint;
 
 	public:
-		cpu(int byte_in, int address_in, unsigned int reg_count);
+		cpu(int byte_in, Address address_in, unsigned int reg_count);
 		~cpu();
 
 // Control methods
 		void memdump();
-		int load(int address, int value);
-		int view(int address);
+		int load(Address address, int value);
+		int view(Address address);
 		int getip();
 		int setip(int in);
 		string toString();

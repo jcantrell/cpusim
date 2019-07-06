@@ -14,6 +14,11 @@ cpusim:	$(OBJ)
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@
 
+test: ../bin/cpusim
+	cd tests && mmixal hello.mms
+	cat script | ../bin/cpusim
+
+
 controller/main.o: controller/main.cpp ui/TextUI.h
 	$(CC) $(CFLAGS) -c -o $@ controller/main.cpp
 
