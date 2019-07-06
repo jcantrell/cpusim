@@ -2,7 +2,6 @@
 #define FAKEMORSEL_H
 #include <boost/dynamic_bitset.hpp>
 
-
 class fakemorsel
 {
   private:

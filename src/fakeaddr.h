@@ -1,7 +1,6 @@
 #ifndef FAKEADDR_H
 #define FAKEADDR_H
 #include "./fakemorsel.h"
-using namespace std;
 
 class fakeaddr
 {
@@ -11,6 +10,7 @@ class fakeaddr
     fakemorsel hashValue() const {return m;}
 };
 
+namespace std {
   template <>
   struct hash<fakeaddr>
   {
@@ -19,4 +19,5 @@ class fakeaddr
       return (hash<fakemorsel>()(key.hashValue()));
     }
   };
+}
 #endif
