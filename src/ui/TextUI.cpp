@@ -49,12 +49,12 @@ int TextUI::user_loop()
 	{
     if (0==strcmp("subleq", args[1]))
     {
-		  mycpu = new subleq(8,MAX_MEM_SIZE);
+		  mycpu = new subleq(8,Address(MAX_MEM_SIZE));
 		  printf("subleq cpu created\n");
     } 
     else if (0==strcmp("mmix", args[1]))
     {
-      mycpu = new mmix(8, 65536);
+      mycpu = new mmix(8, Address(65536));
 		  printf("mmix cpu created\n");
     }
     else
@@ -78,7 +78,14 @@ int TextUI::user_loop()
 		if (mycpu == NULL)
 			printf("No cpu\n");
     else
-	    mycpu->load(atoi(args[1]), atoi(args[2]));
+    {
+      Morsel value;
+      value = atoi(args[2]);
+      Address addr;
+      addr = atoi(args[1]);
+	    //mycpu->load(atoi(args[1]), atoi(args[2]));
+      mycpu->load(addr,value);
+    }
 	}
 	else if (0==strcmp("view",args[0]))
 	{
@@ -95,11 +102,13 @@ int TextUI::user_loop()
 	        address2 = atoi(args[2]);
 	    }
 
-	    int value;
-	    for (int i=address1; i<=address2; i++)
+	    Morsel value;
+      Address i;
+      i=address1;
+	    for (i=address1; i<=address2; i++)
 	    {
 	        value = mycpu->view(i);
-	        printf("%x: %x\n", i, value);
+	        printf("%s: %s\n", i.asString().c_str(), value.asString().c_str());
 	    }
 	}
 	else if (0==strcmp("viewip",args[0]))
@@ -107,14 +116,14 @@ int TextUI::user_loop()
 		if (mycpu == NULL)
 			printf("No cpu\n");
     else
-	    printf("%x\n",mycpu->getip());
+	    printf("%s\n",mycpu->getip().asString().c_str());
 	}
 	else if (0==strcmp("setip",args[0]))
 	{
 		if (mycpu == NULL)
 			printf("No cpu\n");
     else
-	    mycpu->setip(atoi(args[1]));
+	    mycpu->setip(Address(atoi(args[1])));
 	}
 	else if (0==strcmp("step",args[0]))
 	{
@@ -124,7 +133,7 @@ int TextUI::user_loop()
       continue;
     }
 
-	  int inst = mycpu->view(mycpu->getip());
+	  Morsel inst = mycpu->view(mycpu->getip());
 	  mycpu->step(inst);
 	}
 	else if (0==strcmp("help",args[0]))

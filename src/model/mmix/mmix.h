@@ -11,8 +11,8 @@ class mmix : public cpu {
     unsigned char L;
     unsigned char G;
     unsigned long long int register_stack_top;
-    std::unordered_map<int, int> special_registers;
-    std::unordered_map<int, int> globals;
+    boost::unordered_map<int, int> special_registers;
+    boost::unordered_map<int, int> globals;
     enum inst {
 #include "model/mmix/opcodes_mmix.h"
     };
@@ -27,7 +27,7 @@ class mmix : public cpu {
       Fputws, Fseek, Ftell
     };
 	public:
-		mmix(int byte_size, int address_size);
+		mmix(int byte_size, Address address_size);
 		void step(int inst);
     void loadfile(string &filename);
 
@@ -55,8 +55,10 @@ class mmix : public cpu {
     // stores the given value there
     unsigned long long int M(
       unsigned int size, 
-      unsigned long long address,
-      unsigned long long value
+//      unsigned long long address,
+      Address address,
+      //unsigned long long value
+      Morsel value
     );
 
     // Load/store registers

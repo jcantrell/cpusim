@@ -14,7 +14,7 @@ cpu::~cpu()
 	{
 	}
 
-void cpu::step(int inst)
+void cpu::step(Morsel inst)
 	{
 	}
 
@@ -27,7 +27,7 @@ string cpu::toString()
 	string s = "";
 	s += "Byte width: " + to_string(byte_size) + "\n";
 	s += "Address size: " + address_size.asString() + "\n";
-	s += "IP: " + to_string(ip) + "\n";
+	s += "IP: " + ip.asString() + "\n";
 	s += "Flags: " + to_string(flagint.i) + "\n";
 
 	s += "-----------------------------------------------\n";
@@ -101,7 +101,8 @@ void cpu::memdump()
 	        sprintf(buffer, "%s: ", i.asString().c_str());
           strcat(string_out,buffer);
           bool line_is_zero = true;
-          for (int j=0;j<16 && i+j < address_size;j++)
+          Address j;
+          for (j=0;j<16 && i+j < address_size;j++)
           {
             line_is_zero = line_is_zero && (ram[i+j] == 0);
             if (j % 2 == 0)
@@ -109,7 +110,8 @@ void cpu::memdump()
               sprintf(buffer,"%s"," ");
               strcat(string_out,buffer);
             }
-	          sprintf(buffer,"%02x", (unsigned char)ram[i+j]);
+	          //sprintf(buffer,"%02x", (unsigned char)ram[i+j]);
+	          sprintf(buffer,"%s", ram[i+j].asString().c_str());
             strcat(string_out,buffer);
           }
 	        sprintf(buffer,"%s","\n");
@@ -139,108 +141,114 @@ int cpu::loadimage(string filename)
   infile.seekg(0, infile.beg);
 
   if (file_length > address_size)
-    file_length = address_size;
+    file_length = address_size.asInt();
   std::cout << "file length: " << int(file_length) << std::endl;
 
   char buffer[file_length];
   infile.read(buffer, file_length);
-  for (int i=0;i<file_length;i++)
-    ram[i] = buffer[i];
+  //Address i;
+  int i;
+  for (i=0;i<file_length;i++)
+  {
+    Address i_addr;
+    i_addr = i;
+    ram[i_addr] = buffer[i];
+  }
   return 0;
 }
 
-int cpu::load(Address address, int value)
+Morsel cpu::load(Address address, Morsel value)
 	{
       std::cout << "loading " << value << " to " << address << "\n";
-	    int ret = ram[address];
+	    Morsel ret = ram[address];
 	    ram[address] = value;
       std::cout << "loaded " << ram[address] << " to " << address << "\n";
 	    return ret;
 	}
 
-int cpu::view(Address address)
+Morsel& cpu::view(Address address)
 	{
 	    return ram[address];
 	}
 	
-	int cpu::getip()
+	Address cpu::getip()
 	{
 	    return ip;
 	}
 
-	int cpu::setip(int in)
+	Address cpu::setip(Address in)
 	{
-    printf("setting ip to %d\n",in);
+    printf("setting ip to %s\n",in.asString().c_str());
 	    ip = in;
 			return ip;
 	}
 
 	/* Arithmetic operations */
-	int cpu::add(int a, int b, int dst)
+	int cpu::add(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] + ram[b];
 	    return 0;
 	}
-	int cpu::sub(int a, int b, int dst)
+	int cpu::sub(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] - ram[b];
 	    return 0;
 	}
 
-	int cpu::mul(int a, int b, int dst)
+	int cpu::mul(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] + ram[b];
 	    return 0;
 	}
 
-	int cpu::div(int a, int b, int dst)
+	int cpu::div(Address a, Address b, Address dst)
 	{
-	    ram[dst] = (ram[b] == 0? 0 : ram[a]/ram[b]);
+	    ram[dst] = (ram[b] == 0? Morsel(0) : ram[a]/ram[b]);
 	    return 0;
 	}
 
 	/* Bitwise logic operations */
-	int cpu::land(int a, int b, int dst)
+	int cpu::land(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] & ram[b];
 	    return 0;
 	}
 
-	int cpu::lor(int a, int b, int dst)
+	int cpu::lor(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] | ram[b];
 	    return 0;
 	}
 
-	int cpu::lnot(int a, int dst)
+	int cpu::lnot(Address a, Address dst)
 	{
 	    ram[dst] = ~ram[a];
 	    return 0;
 	}
 
-	int cpu::lxor(int a, int b, int dst)
+	int cpu::lxor(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] ^ ram[b];
 	    return 0;
 	}
 
-	int cpu::lshift(int a, int b)
+	int cpu::lshift(Address a, Address b)
 	{
 	    ram[a] = ram[a]<<ram[b];
 	    return 0;
 	}
-	int cpu::rshift(int a, int b)
+	int cpu::rshift(Address a, Address b)
 	{
 	    ram[a] = ram[a]>>ram[b];
 	    return 0;
 	}
 
-int cpu::regs(int address)
+Morsel cpu::regs(Address address)
 {
     return registers[address];
 }
 
-int cpu::regs(int address, int value)
+Morsel cpu::regs(Address address, Morsel value)
 {
     registers[address] = value;
     return registers[address];

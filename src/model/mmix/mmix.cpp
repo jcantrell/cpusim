@@ -3,7 +3,7 @@
 #include <math.h>
 #include <iomanip>
 
-mmix::mmix(int byte_size, int address_size) : cpu(byte_size, address_size,32)
+mmix::mmix(int byte_size, Address address_size) : cpu(byte_size, address_size,32)
 {
   register_stack_top = 0;
 }
@@ -122,8 +122,10 @@ mmix::loadobject(string filename)
   union tetra_union tetra;
   char op,x,y,z;
 
-  uint64_t lambda = 0;
-  uint64_t address;
+  //uint64_t lambda = 0;
+  Address lambda;
+  lambda = 0;
+  Address address;
   bool quoted_flag = false;
   while (!in.eof())
   {
@@ -145,38 +147,13 @@ mmix::loadobject(string filename)
               << (int) (unsigned char)tetra.ar[3] 
               << "\n";
     
-/*
-    op =(tetra.num & 0xFF000000)>>16;
-    x = (tetra.num & 0x00FF0000)>>16;
-    y = (tetra.num & 0x0000FF00)>>8;
-    z = (tetra.num & 0x000000FF)>>0;
-*/
     op = tetra.ar[0];
     x = tetra.ar[1];
     y = tetra.ar[2];
     z = tetra.ar[3];
 
-/*
-    cout << "mmo_escape: " 
-         << std::hex << setfill('0') << std::setw(2)
-         << (int)(unsigned char)mmo_escape 
-         << " and op: " 
-         << std::hex << setfill('0') << std::setw(2)
-         << (int)(unsigned char)tetra.ar[0] 
-         << " and equivalencr: " 
-          << ((char)mmo_escape == tetra.ar[0])
-         << " and quoted_flag: " << quoted_flag
-         << " and not quoted_flag: " << !quoted_flag
-         << " and boolean: " 
-          << (((char)mmo_escape == tetra.ar[0]) && !quoted_flag) 
-          << "\n";
-*/
-
 	  if (((char)mmo_escape == tetra.ar[0]) && !quoted_flag)
 	  {
-//      cout << "switching on: "
-//           << std::hex << setfill('0') << std::setw(2)
-//          << (int)(unsigned char)tetra.ar[1] << "\n";
       switch (tetra.ar[1])
       {
         case lop_quote:
@@ -186,24 +163,17 @@ mmix::loadobject(string filename)
         case lop_loc:
           {
           cout << "lop_loc called\n";
-          uint64_t address = (uint64_t)y<<56;
-          uint64_t offset = 0;
+          address = ((uint64_t)y<<56);
+          Address offset; offset = 0;
           union tetra_union addr1;
           union tetra_union addr2;
           in.read(addr1.ar,4);
-          //in >> tetra.num;
           //offset = tetra1.num; // reverse this (little-endian)
           offset = (
               (addr1.ar[0]<<24) 
             | (addr1.ar[1]<<16) 
             | (addr1.ar[2]<<8)
             | (addr1.ar[3])
-/*
-              (((uint64_t) (unsigned char)(addr1.ar[0]))<<24) 
-            & (((uint64_t) (unsigned char)(addr1.ar[1]))<<16) 
-            & (((uint64_t) (unsigned char)(addr1.ar[2]))<<8)
-            & (((uint64_t) (unsigned char)(addr1.ar[3])))
-*/
           );
           cout << "loaded first tetra of address: "
                << std::hex << setfill('0') << std::setw(8)
@@ -217,16 +187,6 @@ mmix::loadobject(string filename)
               << (int) (unsigned char)(addr1.ar[2]) 
               << std::hex << setfill('0') << std::setw(2)
               << (int) (unsigned char)(addr1.ar[3]) 
-/*
-              << std::hex << setfill('0') << std::setw(2)
-              << (int) (unsigned char)(addr1.ar[0]<<24) 
-              << std::hex << setfill('0') << std::setw(2)
-              << (int) (unsigned char)(addr1.ar[1]<<16)
-              << std::hex << setfill('0') << std::setw(2)
-              << (int) (unsigned char)(addr1.ar[2]<<8) 
-              << std::hex << setfill('0') << std::setw(2)
-              << (int) (unsigned char)(addr1.ar[3]) 
-*/
           << endl;
           cout << "end first tetra" << endl;
           if (z==2)
@@ -263,20 +223,24 @@ mmix::loadobject(string filename)
 
         case lop_fixo:
           {
-          uint64_t address = 0;
+          Address address;
+          address = 0;
           for (;z!=0;z--)
           {
             in >> tetra.num;
             address = address&((uint64_t)(tetra.num)<<32);
           }
           address += (((uint64_t)y)<<56);
-          M(8, address, lambda);
+          M(8, address, lambda.asMorsel());
           }
           break;
 
         case lop_fixr:
         {
-          uint64_t delta = ((uint64_t)y<<32)&z;
+          Address delta;
+          delta = y;
+          delta = (delta<<32)&z;
+          //uint64_t delta = ((uint64_t)y<<32)&z;
           address = lambda - 4*delta;
           cout << "case lop_fixr\n";
           load(address+2,y);
@@ -419,8 +383,11 @@ mmix::M(unsigned int size,
 
 unsigned long long int
 mmix::M( unsigned int size,
-         unsigned long long address,
-         unsigned long long int value)
+//         unsigned long long address,
+         Address address,
+         //unsigned long long int value)
+         Address value
+)
 {
   const unsigned int octasize = 8;
   unsigned char octabyte[octasize];

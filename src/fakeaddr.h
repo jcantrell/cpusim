@@ -8,8 +8,10 @@ class fakeaddr
     fakemorsel m;
   public:
     fakemorsel hashValue() const {return m;}
+    bool operator==(const fakeaddr &rhs) const { return m==rhs.m; }
 };
 
+/*
 namespace std {
   template <>
   struct hash<fakeaddr>
@@ -20,4 +22,5 @@ namespace std {
     }
   };
 }
+*/
 #endif

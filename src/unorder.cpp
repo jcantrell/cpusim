@@ -1,8 +1,8 @@
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include "./fakeaddr.h"
 #include "./fakemorsel.h"
 
-std::unordered_map<fakeaddr, fakemorsel> ram;
+boost::unordered_map<fakeaddr, fakemorsel> ram;
 int main()
 {
   return 0;

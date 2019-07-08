@@ -1,41 +1,53 @@
 #include "subleq.h"
 
-subleq::subleq(int byte_in, int address_in) : cpu(byte_in, address_in, 0)
+subleq::subleq(int byte_in, Address address_in) : cpu(byte_in, address_in, 0)
 {
   printf("subleq constructor called!\n");
 }
 
-void subleq::step(int inst)
+void subleq::step(Morsel inst)
 {
   printf("subleq step called!\n");
-	    switch (inst)
-	    {
-	        case 0: // subleq for now, until loading alternative
+	    //switch (inst)
+	    //{
+      if (inst == 0)
+      {
+	        //case 0: // subleq for now, until loading alternative
 	                // instruction sets is implemented
 	                
 	            {
-							int a = view(view(getip()+1));
-							int b = view(view(getip()+2));
-							int c = view(getip()+3);
-	            printf("loaded %d %d %d\n", a, b, c);
-	            printf("diff is %d\n", b-a);
+							Morsel a = view(Address(view(getip()+1)));
+							Morsel b = view(Address(view(getip()+2)));
+							Morsel c = view(getip()+3);
+	            printf("loaded %s %s %s\n", 
+                a.asString().c_str(), b.asString().c_str(), 
+                c.asString().c_str());
+	            printf("diff is %s\n", (b-a).asString().c_str());
 
-	            load( view(inst+2), b-a);
+/*
+              Morsel instCopy(inst);
+              Morsel t_inst = instCopy+2;
+              Morsel t_view = view(instCopy+2);
+              Address t_addr(t_view);
+              Morsel t_diff;
+              t_diff = b-a;
+              load( t_addr, t_diff );
+*/
+
+	            load( Address(view(Address(inst+2))), b-a);
 /*
 	            if (b-a <= 0)
 	                mycpu->setip(c);
 	            else
 	                mycpu->setip(inst+1);
 */
-	            printf("c is %d\n", c);
-	            printf("inst+1 is %d\n", inst+1);
+	            printf("c is %s\n", c.asString().c_str());
+	            printf("inst+1 is %s\n", (inst+1).asString().c_str());
 							setip( b-a <= 0 ? c : inst+1 );
-	            printf("ip is %d\n", getip());
+	            printf("ip is %s\n", getip().asString().c_str());
 	            }
 
-	            break;
 
-	        default:
-	            break;
+      } else {
 	    }
 }

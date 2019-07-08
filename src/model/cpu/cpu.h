@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unordered_map>
+//#include <unordered_map>
 #include <iostream>
 #include <string>
-#include <model/cpu/Address.h>
+#include "model/cpu/Address.h"
+#include <boost/unordered_map.hpp>
 
 #define MAX_STR_LEN 512
 #define MAX_ARGS	32
@@ -38,9 +39,9 @@ class cpu {
 	private:
 		int byte_size;  
 		Address address_size;
-		std::unordered_map<Address, Morsel> ram;
-		std::unordered_map<Address, Morsel> registers;
-		int ip;
+		boost::unordered_map<Address, Morsel> ram;
+		boost::unordered_map<Address, Morsel> registers;
+		Address ip;
 		struct sflags status;
 		union flagsint flagint;
 
@@ -50,27 +51,27 @@ class cpu {
 
 // Control methods
 		void memdump();
-		int load(Address address, int value);
-		int view(Address address);
-		int getip();
-		int setip(int in);
+		Morsel load(Address address, Morsel value);
+		Morsel& view(Address address);
+		Address getip();
+		Address setip(Address in);
 		string toString();
-		virtual void step(int inst);
-    int regs(int address);
-    int regs(int address, int value);
+		virtual void step(Morsel inst);
+    Morsel regs(Address address);
+    Morsel regs(Address address, Morsel value);
     int loadimage(string filename);
     virtual void loadobject(string filename);
 
 // CPU instructions
-		int add(int a, int b, int dst);
-		int sub(int a, int b, int dst);
-		int mul(int a, int b, int dst);
-		int div(int a, int b, int dst);
-		int land(int a, int b, int dst);
-		int lor(int a, int b, int dst);
-		int lnot(int a, int dst);
-		int lxor(int a, int b, int dst);
-		int lshift(int a, int b);
-		int rshift(int a, int b);
+		int add(Address a, Address b, Address dst);
+		int sub(Address a, Address b, Address dst);
+		int mul(Address a, Address b, Address dst);
+		int div(Address a, Address b, Address dst);
+		int land(Address a, Address b, Address dst);
+		int lor(Address a, Address b, Address dst);
+		int lnot(Address a, Address dst);
+		int lxor(Address a, Address b, Address dst);
+		int lshift(Address a, Address b);
+		int rshift(Address a, Address b);
 };
 #endif
