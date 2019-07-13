@@ -6,7 +6,8 @@ OBJ:=controller/main.o \
 			ui/parser/lexer.o \
 			model/cpu/cpu.o \
 			model/subleq/subleq.o \
-			model/mmix/mmix.o
+			model/mmix/mmix.o \
+			model/cpu/Address.o
 
 cpusim:	$(OBJ)
 	$(CC) $(CFLAGS) -o ../bin/cpusim $(OBJ)
@@ -31,7 +32,7 @@ ui/parser/parser.o: ui/parser/parser.cpp ui/parser/parser.h
 ui/parser/lexer.o: ui/parser/lexer.cpp ui/parser/lexer.h
 	$(CC) $(CFLAGS) -c -o $@ ui/parser/lexer.cpp
 
-model/cpu/cpu.o: model/cpu/cpu.cpp model/cpu/cpu.h
+model/cpu/cpu.o: model/cpu/cpu.cpp model/cpu/cpu.h model/cpu/Address.cpp
 	$(CC) $(CFLAGS) -c -o $@ model/cpu/cpu.cpp
 
 model/subleq/subleq.o: model/subleq/subleq.cpp model/subleq/subleq.h

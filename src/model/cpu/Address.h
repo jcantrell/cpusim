@@ -8,131 +8,39 @@ class Address {
   private:
     Morsel m;
   public:
-  Address()
-  {
-  }
-  Address(const Address &other)
-  {
-    m = other.m;
-  }
-  Address(Morsel in)
-  {
-    m = in;
-  }
-  Address& operator=(int in) {
-    m = in;
-    return *this;
-  }
-  int asInt() const
-  {
-    return m.asInt();
-  }
-  string asString() const
-  {
-    return "";
-  }
-  friend std::ostream& operator<<(std::ostream& stream, const Address& addr) {
-    stream << addr.asString() ;
-    return stream;
-  }
-  Address operator*(const Address& other)
-  {
-    Address lhs(this*);
-    lhs.m = m * other.m;
-  }
-  Address operator<<(int other)
-  {
-    Address result(*this);
-    result.m = result.m << other;
-    return result;
-  }
-  bool operator<(Address other)
-  {
-    return m < other.m;
-  }
-  bool operator<(int other)
-  {
-    return m < other;
-  }
-  bool operator>(int other)
-  {
-    return m > other;
-  }
-  bool operator<=(int other)
-  {
-    return m < other || m == other;
-  }
-  friend bool operator>(int other, Address rhs) {
-    return other > rhs.m;
-  }
-  Address operator+(int in)
-  {
-    Address result;
-    result = in;
-    result = result + *this;
-    return result;
-  }
-  Address operator+(Address other)
-  {
-    Address result;
-    result.m = m + other.m;
-    return result;
-  }
-  Address& operator+=(int in)
-  {
-    m = m + in;
-    return *this;
-  }
-  Address& operator++(int) 
-  {
-    m++;
-    return *this;
-  }
-  Address operator%(int in)
-  {
-    Address result;
-    result = in;
-    result.m = m % result.m;
-    return result;
-  }
-  bool operator==(const Address& other) const
-  {
-    return m == other.m;
-  }
-  bool operator==(int other)
-  {
-    Address otherAddr;
-    otherAddr = other;
-    return *this == otherAddr;
-  }
-  size_t hashVal()
-  {
-    return m.hashVal();
-  }
-  Address operator&(Address& other)
-  {
-    Address result(*this);
-    result.m = result.m & other.m;
-    return result;
-  }
-  Address operator&(uint64_t other)
-  {
-    Address otherAddr;
-    otherAddr = other;
-    Address result;
-    result = (*this) & otherAddr;
-    return result;
-  }
-  Address operator|(Address& other)
-  {
-    Address result(*this);
-    result.m = result.m | other.m;
-    return result;
-  }
-  Morsel asMorsel()
-  {
-    return m;
-  }
+  Address();
+  Address(const Address &other);
+  Address(Morsel in);
+  Address& operator=(int in);
+  int asInt() const;
+  string asString() const;
+  friend std::ostream& operator<<(std::ostream& stream, const Address& addr);
+  Address operator*(const Address& other);
+  friend Address operator*(int lhs, const Address& rhs);
+  Address operator*(int in);
+  Address operator<<(int other);
+  bool operator<(Address other);
+  bool operator<(int other);
+  bool operator>(int other);
+  bool operator<=(int other);
+  friend bool operator>(int other, Address rhs);
+  Address operator+(int in);
+  Address operator+(Address other);
+  Address& operator+=(int in);
+  Address operator-(Address other);
+  Address operator-(uint64_t other);
+  Address& operator++(int) ;
+  Address operator%(int in);
+  bool operator==(const Address& other) const;
+  bool operator==(int other);
+  bool operator<=(Morsel in);
+  size_t hashVal();
+  Address operator&(Address& other);
+  Address operator&(uint64_t other);
+  Address operator|(Address& other);
+  Morsel asMorsel();
+  Address operator/(Address& other);
+  Address operator/(int rhs);
 };
 
 /*
@@ -156,12 +64,14 @@ namespace boost {
   }
 }
 */
-
+  size_t hash_value(Address const& in);
+#if 0
   size_t hash_value(Address const& in)
   {
     size_t hash = boost::hash_value(in.asInt());
     return hash;
   }
+#endif
 
 /*
 

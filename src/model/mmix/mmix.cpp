@@ -14,10 +14,10 @@ bool mmix::N(double x, double f, unsigned int e, float epsilon)
   return (d <= ((1<<(e-1022))*epsilon));
 }
 
-void mmix::wideMult(unsigned long long int a, unsigned long long int b,
-    unsigned long long int *carry, unsigned long long int *result)
+void mmix::wideMult(Morsel a, Morsel b,
+    Morsel *carry, Morsel *result)
 {
-  uint64_t mask = 0x00000000FFFFFFFF;
+  Morsel mask;mask = 0x00000000FFFFFFFF;
 
 /* Multiply two 64-bit unsigned integers
  * by splitting them into 32-bit chunks
@@ -30,40 +30,40 @@ void mmix::wideMult(unsigned long long int a, unsigned long long int b,
  * -------------
  */
 
-  uint64_t ac = (a>>32) * (b>>32);
-  uint64_t ad = (a&mask) * (b>>32);
-  uint64_t bc = (a>>32) * (b&mask);
-  uint64_t bd = (a&mask) * (b&mask);
-  uint32_t o1 = bd & mask; // o1 = bd % 2^32
-  uint64_t t1 = (bd>>32) + (bc&mask) + (ad&mask);
-  uint32_t o2 = t1 & mask; // o2 = t1 % 2^32
-  uint64_t t2 = (t1>>32) + (bc>>32) + (ad>>32) + (ac&mask);
-  uint32_t o3 = t2 & mask;
-  uint32_t o4 = (ac>>32) + (t2>>32);
+  Morsel ac = (a>>32) * (b>>32);
+  Morsel ad = (a&mask) * (b>>32);
+  Morsel bc = (a>>32) * (b&mask);
+  Morsel bd = (a&mask) * (b&mask);
+  Morsel o1 = bd & mask; // o1 = bd % 2^32
+  Morsel t1 = (bd>>32) + (bc&mask) + (ad&mask);
+  Morsel o2 = t1 & mask; // o2 = t1 % 2^32
+  Morsel t2 = (t1>>32) + (bc>>32) + (ad>>32) + (ac&mask);
+  Morsel o3 = t2 & mask;
+  Morsel o4 = (ac>>32) + (t2>>32);
 
-  *carry  = ((((uint64_t) o4)<<32) | o3);
-  *result = ((((uint64_t) o2)<<32) | o1);
+  *carry  = ((o4<<32) | o3);
+  *result = ((o2<<32) | o1);
 }
 
-void mmix::wideDiv(unsigned long long int numerator_hi,
-                   unsigned long long int numerator_lo,
-                   unsigned long long int divisor,
-                   unsigned long long int *quotient,
-                   unsigned long long int *remainder
+void mmix::wideDiv(Morsel numerator_hi,
+                   Morsel numerator_lo,
+                   Morsel divisor,
+                   Morsel *quotient,
+                   Morsel *remainder
                   )
 {
-  uint64_t a_hi = numerator_hi;
-  uint64_t a_lo = numerator_lo;
-  uint64_t b = divisor;
+  Morsel a_hi = numerator_hi;
+  Morsel a_lo = numerator_lo;
+  Morsel b = divisor;
 
-// quotient
-  uint64_t q = a_lo << 1;
+  // quotient
+  Morsel q = a_lo << 1;
 
   // remainder
-  uint64_t rem = a_hi;
+  Morsel rem = a_hi;
 
-  uint64_t carry = a_lo >> 63;
-  uint64_t temp_carry = 0;
+  Morsel carry = a_lo >> 63;
+  Morsel temp_carry = 0;
   int i;
 
   for(i = 0; i < 64; i++)
@@ -100,7 +100,6 @@ void mmix::wideDiv(unsigned long long int numerator_hi,
 
   *quotient = q;
   *remainder = rem;
-
 }
 
 // This function implements the mmix loader
@@ -256,8 +255,9 @@ mmix::loadobject(string filename)
           in >> delta.num;
           delta.num = 
             ( (delta.ch[0] == 1) ? ((delta.num ^ 0x00FFFFFF)-(1<<z)) : delta.num );
-          uint64_t P = lambda - 4*delta.num;
-          M(8, P, lambda);
+          Address P;
+          P = lambda - 4*delta.num;
+          M(8, P, lambda.asMorsel());
           }
           break;
         case lop_file:
@@ -301,7 +301,8 @@ mmix::loadobject(string filename)
             in.read(t1.ar,4);
             //in >> t2.num;
             in.read(t2.ar,4);
-            R(z+i, (unsigned long long)t1.num<<32 & (unsigned long long)t2.num);
+            //R(z+i, (unsigned long long)t1.num<<32 & (unsigned long long)t2.num);
+            R(Morsel(z+i), Morsel(t1.num)<<32 & Morsel(t2.num));
           }
           }
           break;
@@ -339,7 +340,7 @@ mmix::loadobject(string filename)
 */
               << " to " << lambda << "\n";
       M(4, lambda, tetra.num);
-      unsigned long long v = M(4, lambda);
+      Morsel v = M(4, lambda);
       cout << "value at " 
               << std::hex << setfill('0') << std::setw(2)
               << lambda
@@ -357,41 +358,46 @@ mmix::loadobject(string filename)
 
 // Get value of memory at given address.
 // Use size to determine whether to return byte, wyde, tetra, or octa
-unsigned long long int
+Morsel
 mmix::M(unsigned int size,
-        unsigned long long address)
+        Address address)
 {
   const unsigned int octasize = 8;
-  unsigned char octabyte[octasize];
-  unsigned long long int base = address % size;
+  Morsel octabyte[octasize];
+  Address base = address % size;
 
   // Load data into byte array
   for (int i=0;i<octasize;i++)
     octabyte[i] = view(base + i);
 
   // Copy data in byte array to 64-bit int
-  unsigned long long int value = 0;
+  Morsel value = 0;
   for (int i=0;i<octasize;i++)
   {
     value & octabyte[octasize-(i+1)];
     value <<= 8;
   }
-  value = value & (0xFF << (size - 1) );
+  Morsel temp;
+  temp = (Morsel(0xFF) << Morsel(size - 1) );
+  Morsel temp2;
+  temp2 = value & temp;
   //printf("M1: At %llu, Value is: %llu\n", address, value);
   return value;
 }
 
-unsigned long long int
+Morsel
 mmix::M( unsigned int size,
 //         unsigned long long address,
          Address address,
          //unsigned long long int value)
-         Address value
+         Morsel value
 )
 {
   const unsigned int octasize = 8;
-  unsigned char octabyte[octasize];
-  unsigned long long int base = address - (address % size);
+  Morsel octabyte[octasize];
+  Address base;
+  base = address - (address % size);
+/*
   cout << "base is "
             << std::hex << setfill('0') << std::setw(2)
             << (int) (unsigned char)(base)
@@ -404,19 +410,25 @@ mmix::M( unsigned int size,
         << " value is "
             << std::hex << setfill('0') << std::setw(8)
             << (int) (unsigned char)(value);
+*/
 
   // Load data into byte array
   for (int i=0;i<size;i++)
     octabyte[i] = view(base + i);
 
   // Copy data in byte array to 64-bit int
-  unsigned long long int retvalue = 0;
+  //unsigned long long int retvalue = 0;
+  Morsel retvalue;
+  retvalue = 0;
   for (int i=0;i<size;i++)
   {
     retvalue & octabyte[octasize-(i+1)];
     retvalue <<= 8;
   }
-  retvalue = retvalue & (0xFF << (size - 1) );
+  Morsel temp;
+  
+  temp = (Morsel(0xFF) << Morsel(size - 1) );
+  retvalue = retvalue & temp;
   //printf("M2: Value is: %llu\n", retvalue);
 
   // Load new value into byte array
@@ -432,53 +444,53 @@ mmix::M( unsigned int size,
               << (base+i)
         << " and "
               << std::hex << setfill('0') << std::setw(2)
-              << (int) (unsigned char)octabyte[i] ;
+              << octabyte[i] ;
     load(base+i,octabyte[i]);
   }
 
   return 0;
 }
 
-unsigned long long int mmix::R(unsigned int reg)
+Morsel mmix::R(Address reg)
 {
   //return registers[reg];
   return regs(reg);
 }
 
-unsigned long long int mmix::R(unsigned int reg, unsigned long long value)
+Morsel mmix::R(Address reg, Morsel value)
 {
-  unsigned long long int ret = regs(reg); // registers[reg];
+  Morsel ret = regs(reg); // registers[reg];
   //registers[reg] = value;
   regs(reg, value);
   return ret;
 }
 
-unsigned long long int mmix::g(unsigned int reg, unsigned long long value)
+Morsel mmix::g(Address reg, Morsel value)
 {
-  unsigned long long int ret = globals[reg];
+  Morsel ret = globals[reg];
   globals[reg] = value;
   return ret;
 }
 
-unsigned long long int mmix::g(unsigned int reg)
+Morsel mmix::g(Address reg)
 {
   return globals[reg];
 }
 
-void mmix::push(unsigned char reg)
+void mmix::push(Morsel reg)
 {
-  for (int i=0;i<=reg;i++)
+  for (Address i(0);i<=reg;i++)
   {
     M(register_stack_top, R(i));
     register_stack_top++;
   }
 }
 
-void mmix::pop(unsigned char reg)
+void mmix::pop(Morsel reg)
 {
   for (int i=0;i<=reg;i++)
   {
-    R(i, M(8, register_stack_top-1));
+    R(Address(i), M(8, Morsel(register_stack_top-1)));
     register_stack_top--;
   }
 }
@@ -487,134 +499,134 @@ void mmix::step(int inst)
 {
   unsigned int stepsize = 4;
   // Pre-fetch register numbers, and their values, for convenience
-  unsigned char x = M(1, getip()+1); 
-  unsigned char y = M(1, getip()+2); 
-  unsigned char z = M(1, getip()+3); 
-  unsigned long long int uxi = x;
-  unsigned long long int uyi = y;
-  unsigned long long int uzi = z;
-  unsigned long long int target = getip()+stepsize;
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+  Address target = getip()+stepsize;
 
-  unsigned long long int ux = R(x); // unsigned values at the given addresses
-  unsigned long long int uy = R(y);
-  unsigned long long int uz = R(z);
-  long long int sx = R(x); // signed values
-  long long int sy = R(y);
-  long long int sz = R(z);
-  double fx = R(x); // signed double values
-  double fy = R(y);
-  double fz = R(z);
-  double frE = R(rE);
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
 
   // A <- (u($Y) + u($Z)) mod 2^64
-  unsigned long long int a = ( (uy + uz ) & 0xFFFFFFFFFFFFFFFF );
-  long long int ra = 4*( (uy<<8) & uz);
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+  Morsel ra = 4*( (uy<<8) & uz);
 
   switch (inst)
   {
       case JMP: // JMP
-        target = ( (x<<16) & (y<<8) & (z<<0) );
+        target = Address( (x<<16) & (y<<8) & (z<<0) );
         break;
 
       case LDB: // LDB: s($X) <- s(M_1[A])
-        R( x, ((long long int) M(1, a)) );
+        R(x, M(1, a));
         break;
 
       case LDBI: // s($X) <- s(M_1[A])
-        R( x, ((long long int) M(1, (uy + z))) );
+        R(x, M(1, (uy + z)));
         break;
 
       case LDBU: // LDBU: u($X) <- u(M_1[A])
-        R( x, M(1, a) );
+        R(x, M(1, a));
         break;
 
       case LDBUI: // u($X) <- u(M_1[A])
-        R( x, M(1, (uy+z) ) );
+        R(x, M(1, (uy+z)));
         break;
 
       case LDW: // s($X) <- s(M_2[A])
-        R( x, ((long long int) M(2, a)) );
+        R(x, M(2, a));
         break;
 
       case LDWI: // s($X) <- s(M_2[A])
-        R( x, ((long long int) M(2, uy+z)) );
+        R(x, M(2, uy+z));
         break;
 
       case LDWU: // LDWU: u($X) <- u(M_2[A])
-        R( x, M(2, a) );
+        R(x, M(2, a) );
         break;
   
       case LDWUI: // u($X) <- u(M_2[A])
-        R( x, M(2, uy+z) );
+        R(x, M(2, uy+z) );
         break;
 
       case LDT: // LDT: s($X) <- s(M_4[A])
-        R( x, ((long long int) M(4, a)) );
+        R(x, (M(4, a)) );
         break;
 
       case LDTI: // s($X) <- s(M_4[A])
-        R( x, ((long long int) M(4, uy+z)) );
+        R(x, (M(4, uy+z)) );
         break;
 
       case LDTU: // u($X) <- u(M_4[A])
-        R( x, M(4, a) );
+        R(x, M(4, a) );
         break;
 
       case LDTUI: // u($X) <- u(M_4[A])
-        R( x, M(4, uy+z) );
+        R(x, M(4, uy+z) );
         break;
 
       case LDO: // s($X) <- s(M_8[A])
-        R( x, ((long long int) M(8, a)) );
+        R(x, (M(8, a)) );
         break;
 
       case LDOI: // s($X) <- s(M_8[A])
-        R( x, ((long long int) M(8, uy+z)) );
+        R(x, (M(8, uy+z)) );
         break;
 
       case LDOU: // u($X) <- u(M_8[A])
-        R( x, M(8, a) );
+        R(x, M(8, a) );
         break;
 
       case LDOUI: // u($X) <- u(M_8[A])
-        R( x, M(8, uy+z) );
+        R(x, M(8, uy+z) );
         break;
 
       case LDHT: // u($X) <- u(M_4[A]) x 2^32
-        R( x, (M(4, a) << 32));
+        R(x, (M(4, a) << 32));
         break;
 
       case LDHTI: // u($X) <- u(M_4[A]) x 2^32
-        R( x, (M(4, uy+z) << 32));
+        R(x, (M(4, uy+z) << 32));
         break;
 
       case STB: // s(M_1[A]) <- s($X)
-        M(1, a, (long long int) R(x));
+        M(1, a, R(x));
         break;
 
       case STBI: // s(M_1[A]) <- s($X)
-        M(1, uy+z, (long long int) R(x));
+        M(1, uy+z, R(x));
         break;
 
       case STW: // s(M_2[A]) <- s($X)
-        M(2, a, (long long int) R(x));
+        M(2, a, R(x));
         break;
 
       case STWI: // s(M_2[A]) <- s($X)
-        M(2, uy+z, (long long int) R(x));
+        M(2, uy+z, R(x));
         break;
       
       case STT: // s(M_4[A] <- s($X)
-        M(4, a, (long long int) R(x));
+        M(4, a, R(x));
         break;
       case STTI: // s(M_4[A] <- s($X)
-        M(4, uy+z, (long long int) R(x));
+        M(4, uy+z, R(x));
         break;
       case STO: // s(M_8[A] <- s($X)
-        M(8, a, (long long int) R(x));
+        M(8, a, R(x));
         break;
       case STOI: // s(M_8[A] <- s($X)
-        M(8, uy+z, (long long int) R(x));
+        M(8, uy+z, R(x));
         break;
 
       case STBU: // u(M_1[A]) <- u($X) mod 2^8
@@ -643,10 +655,10 @@ void mmix::step(int inst)
         M(8, uy+z, R(x));
         break;
       case STHT: // u(M_4[A]) <- floor( u($X) / 2^32 )
-        M(4, a, ((R(x) & 0xFFFFFFFF00000000) >> 16));
+        M(4, a, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
         break;
       case STHTI: // u(M_4[A]) <- floor( u($X) / 2^32 )
-        M(4, uy+z, ((R(x) & 0xFFFFFFFF00000000) >> 16));
+        M(4, uy+z, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
         break;
       case STCO: // u(M_8[A]) <- X
         M(8, a, x);
@@ -655,68 +667,68 @@ void mmix::step(int inst)
         M(8, uy+z, x);
         break;
       case ADD: // s($X) <- s($Y) + s($Z)
-        R(x, ((long long int) R(y)) + ((signed long long) R(z)));
+        R(x, (R(y)) + R(z));
         break;
       case ADDI: // s($X) <- s($Y) + s(Z)
-        R(x, ((long long int) R(y)) + ((signed long long) z));
+        R(x, (R(y)) + (z));
         break;
       case SUB: // s($X) <- s($Y) - s($Z)
-        R(x, ((long long int) R(y)) - ((signed long long) R(z)));
+        R(x, (R(y)) - (R(z)));
         break;
       case SUBI: // s($X) <- s($Y) - s(Z)
-        R(x, ((long long int) R(y)) - ((signed long long) z));
+        R(x, (R(y)) - (z));
         break;
       case MUL: // s($X) <- s($Y) x s($Z)
-        R(x, ((long long int) R(y)) * ((signed long long) R(z)));
+        R(x, (R(y)) * (R(z)));
         break;
 
       case MULI: // s($X) <- s($Y) x s(Z)
-        R(x, ((long long int) R(y)) * ((signed long long) z));
+        R(x, (R(y)) * (z));
         break;
 
       case DIV: // s($X) <- floor(s($Y) / s($Z)) such that ($Z != 0)
                 // and s(rR) <- s($Y) mod s($Z)
-        R(x, (R(z) == 0) ? 0 : 
-              (((long long int) R(y)) / ((signed long long) R(z))));
-        g(rR, (R(z) == 0) ? R(y) :
-              (((long long int) R(y)) % ((signed long long) R(z))));
+        R(x, (R(z) == 0) ? Morsel(0) : 
+              ((R(y)) / (R(z))));
+        g(Address(rR), (R(z) == 0) ? R(y) :
+              ((R(y)) % (R(z))));
         break;
 
       case DIVI: // s($X) <- floor(s($Y) / s(Z) such that (Z != 0)
                 // and s(rR) <- s($Y) mod s(Z)
-        R(x, (z == 0) ? 0 :
-              (((long long int) R(y)) / ((signed long long) z)));
-        g(rR, (z == 0) ? R(y) :
-              (((long long int) R(y)) % ((signed long long) z)));
+        R(x, (z == 0) ? Morsel(0) :
+              ((R(y)) / (z)));
+        g(Address(rR), (z == 0) ? R(y) :
+              ((R(y)) % (z)));
         break;
       case ADDU: // u($X) <- (u($Y) + u($Z)) mod 2^64
         R(x, a);
         break;
       case ADDUI: // u($X) <- (u($Y) + u(Z)) mod 2^64
-        R(x, (ux + z) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (ux + z) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case SUBU: // u($X) <- (u($Y) - u($Z)) mod 2^64
-        R(x, (R(y) - R(z)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y) - R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case SUBUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
-        R(x, (R(y) - z) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y) - z) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case MULU: // u(rH $X) <- u($Y) x u($Z)
         {
-        unsigned long long carry;
-        unsigned long long result;
+        Morsel carry;
+        Morsel result;
         wideMult(R(y), R(z), &carry, &result);
-        g(rH, carry);
+        g(Address(rH), carry);
         R(x, result);
         }
         break;
 
       case MULUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
         {
-        unsigned long long carry;
-        unsigned long long result;
+        Morsel carry;
+        Morsel result;
         wideMult(R(y), z, &carry, &result);
-        g(rH, carry);
+        g(Address(rH), carry);
         R(x, result);
         }
         break;
@@ -725,13 +737,13 @@ void mmix::step(int inst)
                  // u(rR) <- u(rD $Y) mod u($Z), if u($Z) > u(rD);
                  //     otherwise $X <- rD, rR <- $Y
         {
-        unsigned long long numerator_hi;
-        unsigned long long numerator_lo;
-        unsigned long long divisor;
-        unsigned long long quotient;
-        unsigned long long remainder;
+        Morsel numerator_hi;
+        Morsel numerator_lo;
+        Morsel divisor;
+        Morsel quotient;
+        Morsel remainder;
 
-        numerator_hi = g(rD);
+        numerator_hi = g(Address(rD));
         numerator_lo = R(y);
         divisor = R(z);
 
@@ -739,10 +751,10 @@ void mmix::step(int inst)
         {
           wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
           R(x, quotient);
-          g(rR, remainder);
+          g(Address(rR), remainder);
         } else {
           R(x, numerator_hi);
-          g(rR, numerator_lo );
+          g(Address(rR), numerator_lo );
         }
   
         }
@@ -752,13 +764,13 @@ void mmix::step(int inst)
                   // u(rR) <- u(rD $Y) mod u(Z), if u(Z) > u(rD);
                   //    otherwise $X <- rD, rR <- $Y
         {
-        unsigned long long numerator_hi;
-        unsigned long long numerator_lo;
-        unsigned long long divisor;
-        unsigned long long quotient;
-        unsigned long long remainder;
+        Morsel numerator_hi;
+        Morsel numerator_lo;
+        Morsel divisor;
+        Morsel quotient;
+        Morsel remainder;
 
-        numerator_hi = g(rD);
+        numerator_hi = g(Address(rD));
         numerator_lo = R(y);
         divisor = z;
 
@@ -766,44 +778,44 @@ void mmix::step(int inst)
         {
           wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
           R(x, quotient);
-          g(rR, remainder);
+          g(Address(rR), remainder);
         } else {
           R(x, numerator_hi);
-          g(rR, numerator_lo );
+          g(Address(rR), numerator_lo );
         }
   
         }
         break;
 
       case i2ADDU: // u($X) <- (u($Y) x 2 + u($Z)) mod 2^4
-        R(x, (R(y)*2 + R(z)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*2 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i2ADDUI: // u($X) <- (u($Y) x 2 + u(Z)) mod 2^4
-        R(x, (R(y)*2 + z) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*2 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i4ADDU: // u($X) <- (u($Y) x 4 + u($Z)) mod 2^64
-        R(x, (R(y)*4 + R(z)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*4 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i4ADDUI: // u($X) <- (u($Y) x 4 + u(Z)) mod 2^64
-        R(x, (R(y)*4 + z) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*4 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i8ADDU: // u($X) <- (u($Y) x 8 + u($Z)) mod 2^64
-        R(x, (R(y)*8 + R(z)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*8 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i8ADDUI: // u($X) <- (u($Y) x 8 + u(Z)) mod 2^64
-        R(x, (R(y)*8 + z) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*8 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i16ADDU: // u($X) <- (u($Y) x 16 + u($Z)) mod 2^64
-        R(x, (R(y)*16 + R(z)) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*16 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case i16ADDUI: // u($X) <- (u($Y) x 16 + u(Z)) mod 2^64
-        R(x, (R(y)*16 + z) & 0xFFFFFFFFFFFFFFFF);
+        R(x, (R(y)*16 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
         break;
       case NEG: // s($X) <- Y - s($Z)
-        R(x, y - ( (unsigned long long) R(z)) );
+        R(x, y-R(z));
         break;
       case NEGI: // s($X) <- Y - s(Z)
-        R(x, y - ( (unsigned long long) z) );
+        R(x, y-z);
         break;
       case NEGU: // u($X) <- (Y - u($Z)) mod 2^64
         R(x, y - R(z));
@@ -866,10 +878,10 @@ void mmix::step(int inst)
         R(x, ((R(y) > 0) ? z : R(x)) );
         break;
       case CSOD: // if s($Y) mod 2 == 1, set $X <- $Z
-        R(x, ( (R(y) & 0x01) ? R(z) : R(x)) );
+        R(x, ( ((R(y) & 0x01) == 1) ? R(z) : R(x)) );
         break;
       case CSODI: // if s($Y) mod 2 == 1, set $X <- Z
-        R(x, ( (R(y) & 0x01) ? z : R(x)) );
+        R(x, ( ((R(y) & 0x01) == 1) ? z : R(x)) );
         break;
       case CSNN: // if s($Y) >= 0, set $X <- $Z
         R(x, ((R(y) >= 0) ? R(z) : R(x)) );
@@ -890,10 +902,10 @@ void mmix::step(int inst)
         R(x, ((R(y) <= 0) ? z : R(x)) );
         break;
       case CSEV: // if s($Y) mod 2 == 0, set $X <- $Z
-        R(x, ( (!(R(y) & 0x01)) ? R(z) : R(x)) );
+        R(x, ( ((R(y) & 0x01) == 0) ? R(z) : R(x)) );
         break;
       case CSEVI: // if s($Y) mod 2 == 0, set $X <- Z
-        R(x, ( (!(R(y) & 0x01)) ? z : R(x)) );
+        R(x, ( ((R(y) & 0x01) == 0) ? z : R(x)) );
         break;
       case ZSN: // $X <- $Z[s($Y) < 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -914,10 +926,10 @@ void mmix::step(int inst)
         R(x, ((R(y) > 0) ? z : 0) );
         break;
       case ZSOD: // $X <- $Z[s($Y) mod 2 == 1]
-        R(x, ((R(y) & 0x01 ) ? R(z) : 0) );
+        R(x, (((R(y) & 0x01) == 1) ? R(z) : 0) );
         break;
       case ZSODI: // $X <- Z[s($Y) mod 2 == 1]
-        R(x, ((R(y) & 0x01 ) ? z : 0) );
+        R(x, (((R(y) & 0x01) == 1) ? z : 0) );
         break;
       case ZSNN: // $X <- $Z[s($Y) >= 0]
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -992,14 +1004,14 @@ void mmix::step(int inst)
         R(x, ~( R(y) ^ z) );
         break;
       case MUX: // v($X) <- (v($Y) & v(rM)) | (v($Z) & ~v(rM))
-        R(x, (R(y) & g(rM)) | (R(z) & ~g(rM)) );
+        R(x, (R(y) & g(Address(rM))) | (R(z) & ~g(Address(rM))) );
         break;
       case MUXI: // v($X) <- (v($Y) & v(rM)) | (v(Z) & ~v(rM))
-        R(x, (R(y) & g(rM)) | (z & ~g(rM)) );
+        R(x, (R(y) & g(Address(rM))) | (z & ~g(Address(rM))) );
         break;
       case SADD: // s($X) <- s(sum(v($Y) & ~v($Z)))
         {
-        std::bitset<64> temp( R(y) & ~R(z) );
+        Morsel temp( R(y) & ~R(z) );
         R(x, temp.count() );
         //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
         }
@@ -1007,7 +1019,7 @@ void mmix::step(int inst)
 
       case SADDI: // s($X) <- s(sum(v($Y) & ~v(Z)))
         {
-        std::bitset<64> temp( R(y) & ~z );
+        Morsel temp( R(y) & ~z );
         R(x, temp.count() );
         //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
         }
@@ -1015,14 +1027,14 @@ void mmix::step(int inst)
 
       case BDIF: // b($X) <- b($Y) .- b($Z)
         {
-        unsigned long long int b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
-        unsigned long long int b1 = ((R(y)>> 8)&0xFF) - ((R(z)>> 8)&0xFF);
-        unsigned long long int b2 = ((R(y)>>16)&0xFF) - ((R(z)>>16)&0xFF);
-        unsigned long long int b3 = ((R(y)>>24)&0xFF) - ((R(z)>>24)&0xFF);
-        unsigned long long int b4 = ((R(y)>>32)&0xFF) - ((R(z)>>32)&0xFF);
-        unsigned long long int b5 = ((R(y)>>40)&0xFF) - ((R(z)>>40)&0xFF);
-        unsigned long long int b6 = ((R(y)>>48)&0xFF) - ((R(z)>>48)&0xFF);
-        unsigned long long int b7 = ((R(y)>>56)&0xFF) - ((R(z)>>56)&0xFF);
+        Morsel b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
+        Morsel b1 = ((R(y)>> 8)&0xFF) - ((R(z)>> 8)&0xFF);
+        Morsel b2 = ((R(y)>>16)&0xFF) - ((R(z)>>16)&0xFF);
+        Morsel b3 = ((R(y)>>24)&0xFF) - ((R(z)>>24)&0xFF);
+        Morsel b4 = ((R(y)>>32)&0xFF) - ((R(z)>>32)&0xFF);
+        Morsel b5 = ((R(y)>>40)&0xFF) - ((R(z)>>40)&0xFF);
+        Morsel b6 = ((R(y)>>48)&0xFF) - ((R(z)>>48)&0xFF);
+        Morsel b7 = ((R(y)>>56)&0xFF) - ((R(z)>>56)&0xFF);
         b0 = (b0 < 0) ? 0 : b0;
         b1 = (b1 < 0) ? 0 : b1;
         b2 = (b2 < 0) ? 0 : b2;
@@ -1038,14 +1050,14 @@ void mmix::step(int inst)
 
       case BDIFI: // b($X) <- b($Y) .- b(Z)
         {
-        unsigned long long int b0 = ((R(y)>> 0)&0xFF) - ((uzi>> 0)&0xFF);
-        unsigned long long int b1 = ((R(y)>> 8)&0xFF) - ((uzi>> 8)&0xFF);
-        unsigned long long int b2 = ((R(y)>>16)&0xFF) - ((uzi>>16)&0xFF);
-        unsigned long long int b3 = ((R(y)>>24)&0xFF) - ((uzi>>24)&0xFF);
-        unsigned long long int b4 = ((R(y)>>32)&0xFF) - ((uzi>>32)&0xFF);
-        unsigned long long int b5 = ((R(y)>>40)&0xFF) - ((uzi>>40)&0xFF);
-        unsigned long long int b6 = ((R(y)>>48)&0xFF) - ((uzi>>48)&0xFF);
-        unsigned long long int b7 = ((R(y)>>56)&0xFF) - ((uzi>>56)&0xFF);
+        Morsel b0 = ((R(y)>> 0)&0xFF) - ((uzi>> 0)&0xFF);
+        Morsel b1 = ((R(y)>> 8)&0xFF) - ((uzi>> 8)&0xFF);
+        Morsel b2 = ((R(y)>>16)&0xFF) - ((uzi>>16)&0xFF);
+        Morsel b3 = ((R(y)>>24)&0xFF) - ((uzi>>24)&0xFF);
+        Morsel b4 = ((R(y)>>32)&0xFF) - ((uzi>>32)&0xFF);
+        Morsel b5 = ((R(y)>>40)&0xFF) - ((uzi>>40)&0xFF);
+        Morsel b6 = ((R(y)>>48)&0xFF) - ((uzi>>48)&0xFF);
+        Morsel b7 = ((R(y)>>56)&0xFF) - ((uzi>>56)&0xFF);
         b0 = (b0 < 0) ? 0 : b0;
         b1 = (b1 < 0) ? 0 : b1;
         b2 = (b2 < 0) ? 0 : b2;
@@ -1061,10 +1073,10 @@ void mmix::step(int inst)
 
       case WDIF: // w($X) <- w($Y) - w($Z)
         {
-        unsigned long long int w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
-        unsigned long long int w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
-        unsigned long long int w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
-        unsigned long long int w3 = ((R(y)>>48)&0xFFFF) - ((R(z)>>48)&0xFFFF);
+        Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
+        Morsel w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
+        Morsel w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
+        Morsel w3 = ((R(y)>>48)&0xFFFF) - ((R(z)>>48)&0xFFFF);
         w0 = (w0 < 0) ? 0 : w0;
         w1 = (w0 < 0) ? 0 : w1;
         w2 = (w0 < 0) ? 0 : w2;
@@ -1075,10 +1087,10 @@ void mmix::step(int inst)
 
       case WDIFI: // w($X) <- w($Y) - w(Z)
         {
-        unsigned long long int w0 = ((R(y)>> 0)&0xFFFF) - ((uzi>> 0)&0xFFFF);
-        unsigned long long int w1 = ((R(y)>>16)&0xFFFF) - ((uzi>>16)&0xFFFF);
-        unsigned long long int w2 = ((R(y)>>32)&0xFFFF) - ((uzi>>32)&0xFFFF);
-        unsigned long long int w3 = ((R(y)>>48)&0xFFFF) - ((uzi>>48)&0xFFFF);
+        Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((uzi>> 0)&0xFFFF);
+        Morsel w1 = ((R(y)>>16)&0xFFFF) - ((uzi>>16)&0xFFFF);
+        Morsel w2 = ((R(y)>>32)&0xFFFF) - ((uzi>>32)&0xFFFF);
+        Morsel w3 = ((R(y)>>48)&0xFFFF) - ((uzi>>48)&0xFFFF);
         w0 = (w0 < 0) ? 0 : w0;
         w1 = (w0 < 0) ? 0 : w1;
         w2 = (w0 < 0) ? 0 : w2;
@@ -1089,8 +1101,8 @@ void mmix::step(int inst)
 
       case TDIF: // t($X) <- t($Y) - w($Z)
         {
-        unsigned long long int t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
-        unsigned long long int t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
+        Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
+        Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
         t0 = (t0 < 0) ? 0 : t0;
         t1 = (t1 < 0) ? 0 : t1;
         R(x, (t1<<32)&(t0<<0) );
@@ -1099,8 +1111,8 @@ void mmix::step(int inst)
 
       case TDIFI: // t($X) <- t($Y) - w(Z)
         {
-        unsigned long long int t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((uzi>> 0)&0xFFFFFFFF);
-        unsigned long long int t1 = ((R(y)>>32)&0xFFFFFFFF) - ((uzi>>32)&0xFFFFFFFF);
+        Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((uzi>> 0)&0xFFFFFFFF);
+        Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((uzi>>32)&0xFFFFFFFF);
         t0 = (t0 < 0) ? 0 : t0;
         t1 = (t1 < 0) ? 0 : t1;
         R(x, (t1<<32)&(t0<<0) );
@@ -1109,21 +1121,21 @@ void mmix::step(int inst)
 
       case ODIF: // u($X) <- u($Y) - u($Z)
         {
-        uint64_t u0 = (R(y)) - R(z);
+        Morsel u0 = (R(y)) - R(z);
         u0 = (u0 > R(y)) ? 0 : u0;
         }
         break;
 
       case ODIFI: // u($X) <- u($Y) - u(Z)
         {
-        uint64_t u0 = (R(y)) - z;
+        Morsel u0 = (R(y)) - z;
         u0 = (u0 > R(y)) ? 0 : u0;
         }
         break;
 
       case MOR: // m($X) <- m($Z) vx m($Y)
         {
-        unsigned int r;
+        Morsel r;
         for (int i=0; i<64; i++)
           for (int j=0; j<64; j++)
           {
@@ -1138,7 +1150,7 @@ void mmix::step(int inst)
 
       case MORI: // m($X) <- m(Z) vx m($Y)
         {
-        unsigned int r;
+        Morsel r;
         for (int i=0; i<64; i++)
           for (int j=0; j<64; j++)
           {
@@ -1153,7 +1165,7 @@ void mmix::step(int inst)
  
       case MXOR: // m($X) <- m($Z) xor x m($Y)
         {
-        unsigned int r;
+        Morsel r;
         for (int i=0; i<8; i++)
           for (int j=0; j<8; j++)
           {
@@ -1168,7 +1180,7 @@ void mmix::step(int inst)
 
       case MXORI: // m($X) <- m(Z) xor x m($Y)
         {
-        unsigned int r;
+        Morsel r;
         for (int i=0; i<8; i++)
           for (int j=0; j<8; j++)
           {
@@ -1243,17 +1255,17 @@ void mmix::step(int inst)
       case FCMPE: // s($X) <- [f($Y) } f($Z) (f(rE))] - [f($Y) { f($Z) (f(rE))]
         {
         int e;
-        frexp(fy, &e);
-        R(x, (fy > fz && !N(fy, fz, e, frE)) -
-             (fy < fz && !N(fy, fz, e, frE)));
+        frexp(fy.asFloat(), &e);
+        R(x, (fy > fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())) -
+             (fy < fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())));
         }
         break;
 
       case FEQLE: // s($X) <- [f($Y) ~= f($Z) (f(rE))]
         {
         int e;
-        frexp(fy, &e);
-        R(x, N(fy, fz, e, frE));
+        frexp(fy.asFloat(), &e);
+        R(x, N(fy.asFloat(), fz.asFloat(), e, frE.asFloat()));
         }
         break;
 
@@ -1262,39 +1274,39 @@ void mmix::step(int inst)
         break;
 
       case FIX: // s($X) <- int f($Z)
-        R(x, (long long int) fz);
+        R(x, fz);
         break;
 
       case FIXU: // u($X) <- (int f($Z)) mod 2^64
-        R(x, (unsigned long long int) fz);
+        R(x, fz);
         break;
 
       case FLOT: // f($X) <- s($Z)
-        R(x, (double) sz);
+        R(x, sz);
         break;
 
       case FLOTU: // f($x) <- u($Z)
-        R(x, (double) uz);
+        R(x, uz);
         break;
 
       case FLOTUI: // f($X) <- u(Z)
-        R(x, (double) z);
+        R(x, z);
         break;
 
       case SFLOT: // f($X) <- f(T) <- s($Z)
-        R(x, (float) fz);
+        R(x, fz);
         break;
 
       case SFLOTI: // f($X) <- f(T) <- s(Z)
-        R(x, (float) z);
+        R(x, z);
         break;
 
       case SFLOTU: // f($X) <- f(T) <- u($Z)
-        R(x, (float) fz);
+        R(x, fz);
         break;
 
       case SFLOTUI: // f($X) <- f(T) <- u(Z)
-        R(x, (float) z);
+        R(x, z);
         break;
 
       case LDSF: // f($X) <- f(M_4[A])
@@ -1314,7 +1326,7 @@ void mmix::step(int inst)
         break;
 
       case FLOTI: // f($X) <- s(Z)
-        R(x, (double) z);
+        R(x, z);
         break;
 
       case SETH: // u($X) <- YZ x2^48
@@ -1382,7 +1394,7 @@ void mmix::step(int inst)
         break;
       
       case GO: // u($X) <- @+4, then @<-A
-        R(x, target);
+        R(Address(x), target.asMorsel());
         target = a;
         break;
 
@@ -1520,25 +1532,25 @@ void mmix::step(int inst)
 
       case PUSHJ: // push(X) and set rJ<-@+4, then set @<-RA
         push(x);
-        R(rJ, target+4);
+        R(Address(rJ), (target+4).asMorsel());
         target = ra;
         break;
 
       case PUSHJB: // push(X) and set rJ<-@+4, then set @<-RA
         push(x);
-        R(rJ, -1*(target+4));
+        R(Address(rJ), (-1*(target+4)).asMorsel());
         target = ra;
         break;
 
       case PUSHGO: // push(X) and set rJ<-@+4, then set @<-A
         push(x);
-        R(rJ, target+4);
+        R(Address(rJ), (target+4).asMorsel());
         target = a;
         break;
 
       case POP: // pop(X), then @<-rJ+4*YZ
         pop(x);
-        target = R(rJ)+4*((y<<8) & z);
+        target = R(Address(rJ))+4*((y<<8) & z);
         break;
 
       case SAVE: // u($X) <- context
@@ -1552,11 +1564,11 @@ void mmix::step(int inst)
         break;
 
       case LDUNC: // s($X) <- s(M_8[A])
-        R( x, ((long long int) M(8, a)) );
+        R( x, (M(8, a)) );
         break;
 
       case STUNC: // s(M_8[A]) <- s($X)
-        M(8, a, (long long int) R(x));
+        M(8, a, R(x));
         break;
 
       case PRELD: 
@@ -1580,11 +1592,11 @@ void mmix::step(int inst)
       case CSWAP: // if u(M_8[A] == u(rP), set u(M_8[A]) <- u($X) and
                   // u($X) <- 1. Otherwise set u(rP) <- u(M_8[A]) and
                   // u($X) <- 0
-        if (M(8, a) == R(rP)) {
+        if (M(8, a) == R(Address(rP))) {
           M(8,a,R(x));
           R(x,1);
         } else {
-          R(rP, M(8,a));
+          R(Address(rP), M(8,a));
           R(x, 0);
         }
         break;
@@ -1594,7 +1606,7 @@ void mmix::step(int inst)
         break;
 
       case LDUNCI:
-        R( x, ((long long int) M(8, a)) );
+        R( x, (M(8, a)) );
         break;
 
       case LDVTSI:
@@ -1604,7 +1616,7 @@ void mmix::step(int inst)
         break;
 
       case STUNCI: // s(M_8[A] <- s($X)
-        M(8, uy+z, (long long int) R(x));
+        M(8, uy+z, R(x));
         break;
 
       case SYNCDI:
@@ -1619,7 +1631,7 @@ void mmix::step(int inst)
         // the idea is that the NNIX kernel would implement all the trap
         // functions in a proper system.
 
-        switch (y) {
+        switch (y.asChar()) {
         case Halt:
           return;
           break;
@@ -1637,9 +1649,9 @@ void mmix::step(int inst)
           break;
         case Fputs:
           if (z == 1)          
-            for (int i=0; M(1,R(255) + i)  != '\0'; i++)
+            for (int i=0; M(1,R(Address(255)) + i)  != '\0'; i++)
             {
-              printf( "%c", (char)M(1,R(255) + i) );
+              printf( "%c", M(1,R(Address(255)) + i).asChar() );
             }
           break;
         case Fputws:

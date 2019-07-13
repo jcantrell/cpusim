@@ -11,15 +11,19 @@ class Morsel
     dynamic_bitset<> bs;
   public:
   Morsel() : bs(64,0ul) {}
+  size_t count()
+  {
+    return bs.count();
+  }
   Morsel(dynamic_bitset<> in)
   {
     bs = in;
   }
-  Morsel(int in)
+  Morsel(unsigned long long int in)
   {
     *this = in;
   }
-  Morsel operator+(Morsel& other) 
+  Morsel operator+(const Morsel& other) 
   {
     Morsel out;
     bool a, b, carry;
@@ -51,18 +55,43 @@ class Morsel
     rhs_morsel = rhs;
     return *this + rhs_morsel;
   }
+  Morsel operator-(const Morsel& other)
+  {
+    dynamic_bitset<> inverted_bs;
+    inverted_bs = other.bs;
+    inverted_bs.flip();
+    Morsel inverse(inverted_bs);
+    inverse = inverse + 1;
+    return *this + inverse;
+  }
+  friend Morsel operator-(int lhsInt, const Morsel& other)
+  {
+    Morsel lhs;
+    lhs = lhsInt;
+    return lhs - other;
+  }
+  Morsel operator-=(const Morsel& other)
+  {
+    *this = *this - other;
+    return *this;
+  }
   Morsel& operator++(int)
   {
     *this = (*this) + 1;
     return *this;
   }
-  Morsel& operator=(int in)
+  Morsel& operator=(unsigned long long int in)
   {
     //bs = in;
     while (in != 0) {
       bs.push_back( in & 1 );
       in >>= 1;
     }
+    return *this;
+  }
+  Morsel& operator=(const Morsel& other)
+  {
+    bs = other.bs;
     return *this;
   }
   string asString() const 
@@ -101,9 +130,18 @@ class Morsel
     otherMorsel = other;
     return *this < otherMorsel;
   }
+  bool operator<=(const Morsel& other)
+  {
+    return *this < other || *this == other; 
+  }
   bool operator<=(int other)
   {
     return *this < other || *this == other;
+  }
+  friend bool operator<=(int lhs, const Morsel& rhs)
+  {
+    Morsel lhsMorsel(lhs);
+    return lhsMorsel <= rhs;
   }
   bool operator>(int other)
   {
@@ -122,7 +160,11 @@ class Morsel
   {
     return !((*this < other) || (*this == other));
   }
-  Morsel operator/(Morsel& other)
+  bool operator>=(const Morsel& other)
+  {
+    return *this > other || *this == other;
+  }
+  Morsel operator/(const Morsel& other)
   {
     Morsel numerator(*this);
     Morsel quotient;
@@ -134,7 +176,7 @@ class Morsel
     }
     return quotient;
   }
-  Morsel operator%(Morsel& other)
+  Morsel operator%(const Morsel& other)
   {
     Morsel numerator(*this);
     Morsel quotient;
@@ -171,17 +213,30 @@ class Morsel
     }
     return i;
   }
-  Morsel operator&(Morsel& other)
+  Morsel operator&(const Morsel& other)
   {
     Morsel result(*this);
     result.bs = bs & other.bs;
     return result;
   }
-  Morsel operator|(Morsel& other)
+  Morsel operator&(int otherInt)
+  {
+    Morsel other;
+    other = otherInt;
+    Morsel result(*this);
+    result.bs = bs & other.bs;
+    return result;
+  }
+  Morsel operator|(const Morsel& other)
   {
     Morsel result(*this);
     result.bs = bs | other.bs;
     return result;
+  }
+  Morsel operator|=(const Morsel& other)
+  {
+    bs = bs | other.bs;
+    return (*this);
   }
   Morsel operator~()
   {
@@ -189,13 +244,13 @@ class Morsel
     result.bs = ~bs;
     return result;
   }
-  Morsel operator^(Morsel& other)
+  Morsel operator^(const Morsel& other)
   {
     Morsel result(*this);
     result.bs = bs ^ other.bs;
     return result;
   }
-  Morsel operator<<(Morsel& other)
+  Morsel operator<<(const Morsel& other)
   {
     Morsel result(*this);
     result.bs = bs << other.asInt();
@@ -207,7 +262,13 @@ class Morsel
     otherMorsel = other;
     return *this << otherMorsel;
   }
-  Morsel operator>>(Morsel& other)
+  Morsel operator>>(int other)
+  {
+    Morsel otherMorsel;
+    otherMorsel = other;
+    return *this >> otherMorsel;
+  }
+  Morsel operator>>(const Morsel& other)
   {
     Morsel result(*this);
     result.bs = bs >> other.asInt();
@@ -221,10 +282,48 @@ class Morsel
     //return seed;
     return asInt();
   }
-  Morsel operator*(Morsel& other)
+  // TODO: Implement multiplication
+  Morsel operator*(const Morsel& other)
   {
     Morsel result(*this);
     return result;
   }
+  friend Morsel operator*(int lhs, const Morsel& other)
+  {
+    Morsel lhsMorsel(lhs);
+    return lhsMorsel*other;
+  }
+  Morsel& operator<<=(uint64_t in)
+  {
+    bs = bs << in;
+    return *this;
+  }
+  bool operator!=(const Morsel& other)
+  {
+    return !(*this == other);
+  }
+  bool operator!=(unsigned long long int in)
+  {
+    Morsel other(in);
+    return !(*this == other);
+  }
+  // TODO: Implement floats
+  float asFloat()
+  {
+    float result = 3.14;
+    return result;
+  }
+  char asChar()
+  {
+    char result = bs.to_ulong() & 0xFF;
+    return result;
+  }
+/*
+  operator bool()
+  {
+    Morsel zero(0);
+    return !(*this == zero);
+  }
+*/
 };
 #endif
