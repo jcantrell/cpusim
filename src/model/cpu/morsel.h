@@ -2,7 +2,8 @@
 #define MORSEL_H
 #include <boost/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
-#include "Address.h"
+//#include "Address.h"
+class Address;
 using namespace std;
 using namespace boost;
 class Morsel 

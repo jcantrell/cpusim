@@ -10,6 +10,7 @@ OBJ:=controller/main.o \
 			model/cpu/Address.o
 
 cpusim:	$(OBJ)
+	mkdir -p ../bin
 	$(CC) $(CFLAGS) -o ../bin/cpusim $(OBJ)
 
 #$(OBJ):

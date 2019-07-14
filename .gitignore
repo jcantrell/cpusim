@@ -1,3 +1,4 @@
+bin/
 bin/cpusim
 controller/main.o
 cpusim
@@ -19,3 +20,4 @@ src/tests/hello.mmo
 src/ui/TextUI.o
 src/ui/parser/lexer.o
 src/ui/parser/parser.o
+*.swp
