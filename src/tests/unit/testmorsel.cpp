@@ -1,12 +1,8 @@
 #include <iostream>
+#include <string>
 #include "../../model/cpu/morsel.h"
 class TestMorsel : public Morsel
 {
-  private:
-    dynamic_bitset<> getBitset()
-    {
-      return bs;
-    }
 	public:
   TestMorsel() : Morsel() {}
   TestMorsel(dynamic_bitset<> in) : Morsel(in) {}
@@ -15,18 +11,79 @@ class TestMorsel : public Morsel
     dynamic_bitset<> tbs(64,0ul);
     return tbs.count() == count();
   }
-  bool testMorsel_bitset()
+  bool TestMorselAddMorsel()
   {
-    dynamic_bitset<> tbs(64,0ul);
-    TestMorsel tm(tbs);
-    return tbs == tm.getBitset();
+    bool result;
+    Morsel a(7);
+    Morsel b(982);
+    Morsel c(989);
+    Morsel d;
+    d = a + b;
+    result  = (c == d);
+
+    Morsel e(82);
+    Morsel f(83);
+    Morsel g(165);
+    result = result && ( (e+f) == g );
+    return result;
+  }
+  bool testMorselAddInt()
+  {
+    bool result;
+    Morsel a(7);
+    int b = 982;
+    Morsel c(989);
+    Morsel d;
+    d = a+b;
+    result = (c==d);
+    return result;
+  }
+  bool testMorselSubMorsel()
+  {
+    bool result;
+    Morsel a(989);
+    Morsel b(7);
+    Morsel c(982);
+    Morsel d;
+    d = a - b;
+    result = (c==d);
+    return result;
+  }
+  bool testIntSubMorsel()
+  {
+    bool result;
+    int a = 989;
+    Morsel b(7);
+    Morsel c(982);
+    Morsel d;
+    d = a - b;
+    result = (c==d);
+    std::cout << "a: " << a << " b: " << b << " c: " << c << " d: " << d << endl;
+    return result;
   }
 
   void runAllTests()
   {
     TestMorsel tm;
-	  std::cout << "Test " << (tm.testCount() ? "passed" : "failed") << endl;
-	  std::cout << "Test " << (tm.testMorsel_bitset() ? "passed" : "failed") << endl;
+    struct NameResultPair {
+      string funcName;
+      bool (TestMorsel::*funcPtr)();
+      bool result;
+    };
+    NameResultPair tests[] = {
+       {"testCount", TestMorsel::testCount, false}
+      ,{"TestMorselAddMorsel", TestMorsel::TestMorselAddMorsel, false}
+      ,{"testMorselAddInt", TestMorsel::testMorselAddInt, false}
+      ,{"testMorselSubMorsel", TestMorsel::testMorselSubMorsel, false}
+      ,{"testIntSubMorsel", TestMorsel::testIntSubMorsel, false}
+    };
+
+    for (NameResultPair &t : tests)
+    {
+      t.result = (tm.*(t.funcPtr))();
+	    std::cout << "Test " << t.funcName << " " 
+        << (t.result ? "passed" : "failed") << endl;
+    }
   }
 };
 

@@ -26,49 +26,55 @@ class Morsel
   }
   Morsel operator+(const Morsel& other) 
   {
-    Morsel out;
+    dynamic_bitset<> out;
     bool a, b, carry;
     int i;
-    for (i=0, carry=false;i<other.bs.size() && i<bs.size();i++) {
+    for (i=0, carry=false;i<other.size() && i<bs.size();i++) {
       a = bs[i];
       b = other.bs[i];
+      out.push_back( a xor b xor carry );
       carry = ( (b&&carry) || (a&&carry) || (a&&b) );
-      out.bs.push_back( a xor b xor carry );
     }
     for (;i<other.bs.size();i++) {
       a = false;
       b = other.bs[i];
+      out.push_back( a xor b xor carry );
       carry = ( (b&&carry) || (a&&carry) || (a&&b) );
-      out.bs.push_back( a xor b xor carry );
     }
-    for (;i<other.bs.size() && i<bs.size();i++) {
+    for (;i<bs.size();i++) {
       a = bs[i];
       b = false;
+      out.push_back( a xor b xor carry );
       carry = ( (b&&carry) || (a&&carry) || (a&&b) );
-      out.bs.push_back( a xor b xor carry );
     }
+		if (carry)
+			out.push_back(carry);
     
-    return out;
+    return Morsel(out);
   }
-  Morsel operator+( int rhs )
+  Morsel operator+(int rhs)
   {
-    Morsel rhs_morsel;
-    rhs_morsel = rhs;
+    Morsel rhs_morsel(rhs);
     return *this + rhs_morsel;
   }
   Morsel operator-(const Morsel& other)
   {
-    dynamic_bitset<> inverted_bs;
-    inverted_bs = other.bs;
-    inverted_bs.flip();
-    Morsel inverse(inverted_bs);
-    inverse = inverse + 1;
-    return *this + inverse;
+		Morsel lhs(*this);
+		Morsel rhs(other);
+		if (rhs.bs.size() < lhs.bs.size())
+			rhs.bs.resize(lhs.bs.size());
+		if (lhs.bs.size() < rhs.bs.size())
+			lhs.bs.resize(rhs.bs.size());
+		rhs.bs.flip();
+    rhs = rhs + 1;
+		Morsel result;
+		result = lhs + rhs;
+		result.bs.resize(lhs.size());
+		return result;
   }
   friend Morsel operator-(int lhsInt, const Morsel& other)
   {
-    Morsel lhs;
-    lhs = lhsInt;
+    Morsel lhs(lhsInt);
     return lhs - other;
   }
   Morsel operator-=(const Morsel& other)
@@ -97,7 +103,9 @@ class Morsel
   }
   string asString() const 
   {
-    return "";
+		string buffer;
+		to_string(bs, buffer);
+    return buffer;
   }
   friend std::ostream& operator<<( std::ostream& stream, const Morsel& addr ) 
   {
@@ -189,7 +197,7 @@ class Morsel
     }
     return numerator;
   }
-  unsigned int size() 
+  unsigned int size() const
   {
     return bs.size();
   }
