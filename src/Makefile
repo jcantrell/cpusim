@@ -16,10 +16,13 @@ cpusim:	$(OBJ)
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@
 
-test: ../bin/cpusim
+test: ../bin/cpusim tests/unit/testmorsel
+	./tests/unit/testmorsel
 	cd tests && mmixal hello.mms
 	cat script | ../bin/cpusim
 
+tests/unit/testmorsel.o: tests/unit/testmorsel.cpp
+	$(CC) $(CFLAGS) -c -o $@ tests/unit/testmorsel.cpp
 
 controller/main.o: controller/main.cpp ui/TextUI.h
 	$(CC) $(CFLAGS) -c -o $@ controller/main.cpp

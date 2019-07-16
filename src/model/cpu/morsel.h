@@ -89,11 +89,16 @@ class Morsel
   }
   Morsel& operator=(unsigned long long int in)
   {
-    //bs = in;
-    while (in != 0) {
+    unsigned long long int in_copy = in;
+    unsigned size = 0;
+    do
+    {
       bs.push_back( in & 1 );
       in >>= 1;
-    }
+      size++;
+    } while (in != 0);
+    bs = (bs >> (bs.size() - size)) ;
+    bs.resize(size);
     return *this;
   }
   Morsel& operator=(const Morsel& other)
@@ -103,9 +108,36 @@ class Morsel
   }
   string asString() const 
   {
-		string buffer;
-		to_string(bs, buffer);
-    return buffer;
+    Morsel copy(*this);
+    Morsel reversed;
+    reversed = 0;
+    while (copy != 0)
+    {
+      reversed <<= 1;
+      reversed = reversed | (copy & 1);
+      copy = copy >> 1;
+    }
+    while (reversed.bs.size() % 8 != 0)
+    {
+      reversed = reversed * 2;
+    }
+    stringstream out;
+    for (int count=reversed.size();count != 0;count-=8)
+    {
+      Morsel chunk(0);
+
+      for (int i=0;i<8;i++)
+      {
+        chunk = (chunk<<1) | (reversed & 0x1);
+        reversed = (reversed >> 1);
+      }
+      out << hex << (int)chunk.asChar();
+    }
+
+//		string buffer;
+//		to_string(bs, buffer);
+//    return buffer;
+      return out.str();
   }
   friend std::ostream& operator<<( std::ostream& stream, const Morsel& addr ) 
   {
@@ -114,21 +146,32 @@ class Morsel
   }
   bool operator<(Morsel other)
   {
-    int this_index = 0;
-    int other_index = 0;
-    for (;this_index < (bs.size() - other.size());this_index++) {
-      if (bs[this_index] == 1)
-        return true;
-    }
-    for (;other_index < (other.size() - bs.size()); other_index++) {
-      if (other.bs[other_index] == 1)
-        return true;
-    }
-    for (;this_index < size() && other_index < other.size(); 
-          this_index++, other_index++)
+    int this_index = bs.size()-1;
+    int other_index = other.bs.size()-1;
+    for (;this_index > other_index; this_index--)
     {
-      if (bs[this_index] != other.bs[other_index]) {
-        if (bs[this_index] == 1) return false;
+      if (bs[this_index] == 1)
+        {
+          return false;
+        }
+    }
+    for (;other_index > this_index; other_index--)
+    {
+      if (other.bs[other_index] == 1)
+        { 
+          return true;
+        }
+    }
+    for (;this_index >= 0 && other_index >= 0; this_index--, other_index--)
+    {
+      if ((bs[this_index] != other.bs[other_index]))
+      {
+        if (bs[this_index]==0)
+        {
+          return true;
+        } else {
+          return false;
+        }
       } 
     }
     return false;
@@ -156,7 +199,6 @@ class Morsel
   {
     Morsel otherMorsel;
     otherMorsel = other;
-    //return !((*this < otherMorsel) || (*this == otherMorsel));
     return *this > otherMorsel;
   }
   friend bool operator>(int lhs, Morsel rhs)
@@ -188,14 +230,10 @@ class Morsel
   Morsel operator%(const Morsel& other)
   {
     Morsel numerator(*this);
-    Morsel quotient;
-    quotient = 0;
-    while (numerator > other || numerator == other)
-    {
-      numerator = numerator - other;
-      quotient = quotient + 1;
-    }
-    return numerator;
+    Morsel quotient( (*this) / other );
+    Morsel remainder;
+    remainder = (*this) - (quotient * other);
+    return remainder;
   }
   unsigned int size() const
   {
@@ -203,48 +241,58 @@ class Morsel
   }
   bool operator==(Morsel other) const 
   { 
-    return bs==other.bs; 
+    Morsel lhs(*this);
+    Morsel rhs(other);
+    if (rhs.bs.size() < lhs.bs.size()) rhs.bs.resize(lhs.bs.size());
+    if (lhs.bs.size() < rhs.bs.size()) lhs.bs.resize(rhs.bs.size());
+    return lhs.bs==rhs.bs; 
   }
   bool operator==(int other) const {
     Morsel result;
     result = other;
     return *this == result;
   }
-  int asInt() const
+  unsigned int asInt() const
   {
     dynamic_bitset<> copy = bs;
-    int i = 0;
-    i = ~i;
-    while (copy.count() != 0)
+    unsigned int i = 0;
+    while (copy.size() != 0)
     {
-      i = (i << 1) & bs[0];
+      i = (i << 1) | copy[copy.size()-1];
       copy.pop_back();
     }
     return i;
   }
   Morsel operator&(const Morsel& other)
   {
-    Morsel result(*this);
-    result.bs = bs & other.bs;
+    Morsel lhs(*this);
+    Morsel rhs(other);
+    if (lhs.bs.size() < rhs.bs.size()) lhs.bs.resize(rhs.bs.size());
+    if (rhs.bs.size() < lhs.bs.size()) rhs.bs.resize(lhs.bs.size());
+    Morsel result;
+    result.bs = lhs.bs & rhs.bs;
     return result;
   }
   Morsel operator&(int otherInt)
   {
-    Morsel other;
-    other = otherInt;
-    Morsel result(*this);
-    result.bs = bs & other.bs;
-    return result;
+    Morsel other(otherInt);
+    return (*this) & other;
   }
   Morsel operator|(const Morsel& other)
   {
-    Morsel result(*this);
-    result.bs = bs | other.bs;
+    Morsel lhs(*this);
+    Morsel rhs(other);
+    if (lhs.bs.size() < rhs.bs.size()) lhs.bs.resize(rhs.bs.size());
+    if (rhs.bs.size() < lhs.bs.size()) rhs.bs.resize(lhs.bs.size());
+    Morsel result;
+    result.bs = lhs.bs | rhs.bs;
     return result;
   }
   Morsel operator|=(const Morsel& other)
   {
-    bs = bs | other.bs;
+    Morsel result;
+    result = *this | other;
+    *this = result;
     return (*this);
   }
   Morsel operator~()
@@ -253,16 +301,25 @@ class Morsel
     result.bs = ~bs;
     return result;
   }
-  Morsel operator^(const Morsel& other)
+  Morsel operator^(const Morsel& other) const
   {
-    Morsel result(*this);
-    result.bs = bs ^ other.bs;
+    Morsel lhs(*this);
+    Morsel rhs(other);
+    if (lhs.bs.size() < rhs.bs.size()) lhs.bs.resize(rhs.bs.size());
+    if (rhs.bs.size() < lhs.bs.size()) rhs.bs.resize(lhs.bs.size());
+    Morsel result;
+    result.bs = lhs.bs ^ rhs.bs;
     return result;
   }
   Morsel operator<<(const Morsel& other)
   {
     Morsel result(*this);
-    result.bs = bs << other.asInt();
+    Morsel shift(other);
+    while (!(shift == 0))
+    {
+      result.bs = result.bs << 1;
+      shift = shift - 1;
+    }
     return result;
   }
   Morsel operator<<(int other)
@@ -280,7 +337,12 @@ class Morsel
   Morsel operator>>(const Morsel& other)
   {
     Morsel result(*this);
-    result.bs = bs >> other.asInt();
+    Morsel decrementor(other);
+    while (!(decrementor == 0))
+    {
+      result.bs = result.bs >> 1;
+      decrementor = decrementor - 1;
+    }
     return result;
   }
   size_t hashVal()
@@ -291,11 +353,17 @@ class Morsel
     //return seed;
     return asInt();
   }
-  // TODO: Implement multiplication
   Morsel operator*(const Morsel& other)
   {
-    Morsel result(*this);
-    return result;
+    Morsel accumulator(0);
+    Morsel decrementor(other);
+    Morsel zero(0);
+    while (!(zero==decrementor))
+    {
+      accumulator = accumulator + (*this);
+      decrementor = decrementor - 1;
+    }
+    return accumulator;
   }
   friend Morsel operator*(int lhs, const Morsel& other)
   {
@@ -316,23 +384,38 @@ class Morsel
     Morsel other(in);
     return !(*this == other);
   }
-  // TODO: Implement floats
-  float asFloat()
+  float asFloat() const
   {
-    float result = 3.14;
+    Morsel a(*this);
+    union myfloat
+    {
+      float fl;
+      unsigned long long in;
+    };
+
+    unsigned int count = 8;
+    union myfloat temp;
+    union myfloat result = { .in=0 };
+    while (a != 0 && count != 0)
+    {
+      temp.in <<= 8;
+      temp.in = temp.in | ((unsigned char)a.asChar());
+      a = a>>8;
+      count--;
+    }
+    while (count != 8)
+    {
+      result.in <<= 8;
+      result.in = result.in | (temp.in & 0xFF);
+      temp.in >>= 8;
+      count++;
+    } 
+    return result.fl;
+  }
+  unsigned char asChar()
+  {
+    unsigned char result = bs.to_ulong() & 0xFF;
     return result;
   }
-  char asChar()
-  {
-    char result = bs.to_ulong() & 0xFF;
-    return result;
-  }
-/*
-  operator bool()
-  {
-    Morsel zero(0);
-    return !(*this == zero);
-  }
-*/
 };
 #endif
