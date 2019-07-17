@@ -22,7 +22,7 @@ int Address::asInt() const
   }
 string Address::asString() const
   {
-    return "";
+    return m.asString();
   }
 std::ostream& operator<<(std::ostream& stream, const Address& addr) 
 {

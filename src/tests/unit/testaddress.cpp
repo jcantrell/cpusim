@@ -4,53 +4,100 @@
 class TestAddress : public Address
 {
 	public:
-  TestMorsel() : Morsel() {}
-  TestMorsel(dynamic_bitset<> in) : Morsel(in) {}
+  TestAddress() : Address() {}
+  TestAddress(dynamic_bitset<> in) : Address(in) {}
 /*
 * Address();
 * Address(const Address &other);
 * Address(Morsel in);
 */
-  assignInt();
-  asInt();
-  asString();
-  streamAddress();
-  AddressMultiplyAddress();
-  IntMultiplyAddress();
-  AddressMultiplyInt();
-  AddressShiftInt();
-  bool AddressLTAddress();
-  bool AddressLTInt<();
-  bool AddressGTInt();
-  bool AddressGEInt();
-  friend bool operator>(int other, Address rhs);
-  Address operator+(int in);
-  Address operator+(Address other);
-  Address& operator+=(int in);
-  Address operator-(Address other);
-  Address operator-(uint64_t other);
-  Address& operator++(int) ;
-  Address operator%(int in);
-  bool operator==(const Address& other) const;
-  bool operator==(int other);
-  bool operator<=(Morsel in);
-  size_t hashVal();
-  AddressAndAddress operator&(Address& other);
-  AddressAndInt operator&(uint64_t other);
-  AddressOrAddress operator|(Address& other);
-  asMorsel();
-  AddressDivAddress(Address& other);
-  bool AddressDivInt(int rhs);
+  bool assignInt()
+  {
+    return false;
+  }
+  bool asInt(){return false;}
+  bool asString()
+  {
+    Morsel a(95);
+    Address b(a);
+    bool result = (b.asString() == a.asString());
+    return result;
+  }
+  bool streamAddress(){
+    stringstream out;
+    Morsel m(42);
+    Address a(m);
+    out << a;
+    cout << "a: " << a << " m: " << m << " out: " << out.str() << endl;
+    return false;
+  }
+  bool AddressMultiplyAddress(){return false;}
+  bool IntMultiplyAddress(){return false;}
+  bool AddressMultiplyInt(){return false;}
+  bool AddressShiftInt(){return false;}
+  bool AddressLTAddress(){return false;}
+  bool AddressLTInt(){return false;}
+  bool AddressGTInt(){return false;}
+  bool AddressGEInt(){return false;}
+  bool IntGTAddress(){return false;}
+  bool AddressAddInt(){return false;}
+  bool AddressAddAddress(){return false;}
+  bool AddressAddAssignInt(){return false;}
+  bool AddressSubAddress(){return false;}
+  bool AddressSubInt(){return false;}
+  bool AddressInc() {return false;}
+  bool AddressModulusInt(){return false;}
+  bool AddressEQAddress(){return false;}
+  bool AddressEQInt(){return false;}
+  bool AddressLEMorsel(){return false;}
+  bool hashVal(){return false;}
+  bool AddressAndAddress(){return false;}
+  bool AddressAndInt(){return false;}
+  bool AddressOrAddress(){return false;}
+  bool asMorsel(){return false;}
+  bool AddressDivAddress(){return false;}
+  bool AddressDivInt(){return false;}
 
   void runAllTests()
   {
-    TestMorsel tm;
+    TestAddress tm;
     struct NameResultPair {
       string funcName;
-      bool (TestMorsel::*funcPtr)();
+      bool (TestAddress::*funcPtr)();
     };
 
     NameResultPair tests[] = {
+  {"assignInt", TestAddress::assignInt}
+  ,{"asInt", TestAddress::asInt}
+  ,{"asString", TestAddress::asString}
+  ,{"streamAddress", TestAddress::streamAddress}
+  ,{"AddressMultiplyAddress", TestAddress::AddressMultiplyAddress}
+  ,{"IntMultiplyAddress", TestAddress::IntMultiplyAddress}
+  ,{"AddressMultiplyInt", TestAddress::AddressMultiplyInt}
+  ,{"AddressShiftInt", TestAddress::AddressShiftInt}
+  ,{"AddressLTAddress", TestAddress::AddressLTAddress}
+  ,{"AddressLTInt", TestAddress::AddressLTInt}
+  ,{"AddressGTInt", TestAddress::AddressGTInt}
+  ,{"AddressGEInt", TestAddress::AddressGEInt}
+  ,{"IntGTAddress", TestAddress::IntGTAddress}
+  ,{"AddressAddInt", TestAddress::AddressAddInt}
+  ,{"AddressAddAddress", TestAddress::AddressAddAddress}
+  ,{"AddressAddAssignInt", TestAddress::AddressAddAssignInt}
+  ,{"AddressSubAddress", TestAddress::AddressSubAddress}
+  ,{"AddressSubInt", TestAddress::AddressSubInt}
+  ,{"AddressInc", TestAddress::AddressInc}
+  ,{"AddressModulusInt", TestAddress::AddressModulusInt}
+  ,{"AddressEQAddress", TestAddress::AddressEQAddress}
+  ,{"AddressEQInt", TestAddress::AddressEQInt}
+  ,{"AddressLEMorsel", TestAddress::AddressLEMorsel}
+  ,{"hashVal", TestAddress::hashVal}
+  ,{"AddressAndAddress", TestAddress::AddressAndAddress}
+  ,{"AddressAndInt", TestAddress::AddressAndInt}
+  ,{"AddressOrAddress", TestAddress::AddressOrAddress}
+  ,{"asMorsel", TestAddress::asMorsel}
+  ,{"AddressDivAddress", TestAddress::AddressDivAddress}
+  ,{"AddressDivInt", TestAddress::AddressDivInt}
+
     };
     for (NameResultPair &t : tests)
     {
@@ -62,7 +109,7 @@ class TestAddress : public Address
 
 int main()
 {
-	TestMorsel tm;
+	TestAddress tm;
   tm.runAllTests();
 	return 0;
 }

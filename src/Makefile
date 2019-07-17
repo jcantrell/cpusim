@@ -19,7 +19,7 @@ cpusim:	$(OBJ)
 test: ../bin/cpusim tests/unit/testmorsel
 	./tests/unit/testmorsel
 	cd tests && mmixal hello.mms
-	cat script | ../bin/cpusim
+	#cat script | ../bin/cpusim
 
 tests/unit/testmorsel.o: tests/unit/testmorsel.cpp
 	$(CC) $(CFLAGS) -c -o $@ tests/unit/testmorsel.cpp

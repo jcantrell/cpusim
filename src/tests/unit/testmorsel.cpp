@@ -103,6 +103,9 @@ class TestMorsel : public Morsel
     Morsel a(95);
     std::stringstream out;
     out << a;
+    Morsel b(42);
+    cout << " testStreamMorsel: a: " << a << endl;
+    cout << " testStreamMorsel: b: " << b << endl;
     return (out.str() == "5f");
   }
   bool testMorselLessThanMorsel()
@@ -357,6 +360,7 @@ class TestMorsel : public Morsel
       ,{"testMorselInc", TestMorsel::testMorselInc}
       ,{"testMorselAssignInt", TestMorsel::testMorselAssignInt}
       ,{"testMorselAsString", TestMorsel::testMorselAsString}
+      ,{"testStreamMorsel", TestMorsel::testStreamMorsel}
       ,{"testMorselLessThanMorsel", TestMorsel::testMorselLessThanMorsel}
       ,{"testMorselLessThanInt", TestMorsel::testMorselLessThanInt}
       ,{"testMorselLessOrEqualMorsel", TestMorsel::testMorselLessOrEqualMorsel}
