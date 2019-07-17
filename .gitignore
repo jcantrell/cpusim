@@ -21,3 +21,6 @@ src/ui/TextUI.o
 src/ui/parser/lexer.o
 src/ui/parser/parser.o
 *.swp
+src/model/cpu/Address.o
+src/mysess.vim
+.gitignore
