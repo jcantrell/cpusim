@@ -44,37 +44,7 @@ string cpu::toString()
 	s += " |  " + string(flagint.flags.pf ? "1" : "0");
 	s += " |  " + string(flagint.flags.cf ? "1" : "0");
 	s += " |\n";
-	//s += " | " + DF | INF | TF | SF | ZF | AF | PF | CF |\n";
 	s += "-----------------------------------------------\n";
-
-/*
-	s += "CF: ";
-	s += (flagint.flags.cf ? "true" : "false");
-	s += "\n";
-	s += "PF: " + "----------------------------; s += (flagint.flags.pf ? "true" : "false");
-	s += "\n";
-	s += "AF: "; 
-	s += (flagint.flags.af ? "true" : "false");
-	s += "\n";
-	s += "ZF: ";
-	s += (flagint.flags.zf ? "true" : "false");
-	s += "\n";
-	s += "SF: "; 
-	s += (flagint.flags.sf ? "true" : "false");
-	s += "\n";
-	s += "TF: "; 
-	s += (flagint.flags.tf ? "true" : "false");
-	s += "\n";
-	s += "INF: "; 
-	s += (flagint.flags.inf ? "true" : "false");
-	s += "\n";
-	s += "DF: "; 
-	s += (flagint.flags.df ? "true" : "false"); 
-	s += "\n";
-	s += "OF: ";
-	s += (flagint.flags.of ? "true" : "false"); 
-	s += "\n";
-*/
 	return s;
 }
 	
@@ -159,10 +129,8 @@ int cpu::loadimage(string filename)
 
 Morsel cpu::load(Address address, Morsel value)
 	{
-      std::cout << "loading " << value << " to " << address << "\n";
 	    Morsel ret = ram[address];
 	    ram[address] = value;
-      std::cout << "loaded " << ram[address] << " to " << address << "\n";
 	    return ret;
 	}
 
@@ -178,7 +146,6 @@ Morsel& cpu::view(Address address)
 
 	Address cpu::setip(Address in)
 	{
-    printf("setting ip to %s\n",in.asString().c_str());
 	    ip = in;
 			return ip;
 	}

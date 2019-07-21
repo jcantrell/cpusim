@@ -128,11 +128,7 @@ Address Address::operator*(int in)
   {
     return m <= in;
   }
-  size_t Address::hashVal()
-  {
-    return m.hashVal();
-  }
-  Address Address::operator&(Address& other)
+  Address Address::operator&(const Address& other)
   {
     Address result(*this);
     result.m = result.m & other.m;
@@ -146,7 +142,7 @@ Address Address::operator*(int in)
     result = (*this) & otherAddr;
     return result;
   }
-  Address Address::operator|(Address& other)
+  Address Address::operator|(const Address& other)
   {
     Address result(*this);
     result.m = result.m | other.m;
@@ -156,7 +152,7 @@ Address Address::operator*(int in)
   {
     return m;
   }
-  Address Address::operator/(Address& other)
+  Address Address::operator/(const Address& other)
   {
     Address result(*this);
     result.m = result.m / other.m;

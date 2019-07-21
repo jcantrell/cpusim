@@ -111,17 +111,22 @@ class Morsel
     Morsel copy(*this);
     Morsel reversed;
     reversed = 0;
-    while (copy != 0)
+    for (int count=copy.size();count != 0;count--)
     {
       reversed <<= 1;
       reversed = reversed | (copy & 1);
       copy = copy >> 1;
     }
-    while (reversed.bs.size() % 8 != 0)
+    int tCount = 7;
+    while (reversed.bs.size() % 8 != 0 && (tCount >=0))
     {
-      reversed = reversed * 2;
+      reversed.bs.resize(reversed.bs.size()+1);
+      reversed.bs = reversed.bs<<1;
+      tCount--;
     }
     stringstream out;
+    char const hex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c',
+      'd','e','f'};
     for (int count=reversed.size();count != 0;count-=8)
     {
       Morsel chunk(0);
@@ -131,12 +136,9 @@ class Morsel
         chunk = (chunk<<1) | (reversed & 0x1);
         reversed = (reversed >> 1);
       }
-      out << hex << (int)chunk.asChar();
+      out << hex[(chunk.asChar() & 0xF0) >> 4] 
+          << hex[chunk.asChar() & 0xF];
     }
-
-//		string buffer;
-//		to_string(bs, buffer);
-//    return buffer;
       return out.str();
   }
   friend std::ostream& operator<<( std::ostream& stream, const Morsel& addr ) 
@@ -313,6 +315,10 @@ class Morsel
   }
   Morsel operator<<(const Morsel& other)
   {
+    bool debugFlag;
+    if (*this == Morsel(0xa5))
+      debugFlag = true;
+
     Morsel result(*this);
     Morsel shift(other);
     while (!(shift == 0))
@@ -344,14 +350,6 @@ class Morsel
       decrementor = decrementor - 1;
     }
     return result;
-  }
-  size_t hashVal()
-  {
-    //size_t seed = boost::hash_value(bs.size());
-    //std::vector< blocks(bs.num_blocks());
-    //boost::hash_range(seed, blocks.begin(), blocks.end());
-    //return seed;
-    return asInt();
   }
   Morsel operator*(const Morsel& other)
   {

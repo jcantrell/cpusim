@@ -93,20 +93,54 @@ class TestMorsel : public Morsel
   }
   bool testMorselAsString()
   {
-    Morsel a(95);
-    //string str = "1011111";
-    string str = "5f";
-    return (str == a.asString());
+    bool result = true;
+    struct TestCase {
+      Morsel in;
+      string out;
+    };
+
+    TestCase tests[] = {
+       {Morsel(95), "5f"}
+      ,{Morsel(0x2a), "2a"}
+      ,{Morsel(0xf000), "f000"}
+      ,{Morsel(0x28), "28"}
+    };
+
+  //cout << "begin asString testloop" << endl;
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in.asString() == t.out);
+      if (t.in.asString() != t.out)
+      {
+        cout << endl << "Expected: " << t.out 
+                     << " Actual: " << t.in.asString() << endl;
+      }
+    }
+  //cout << "end asString testloop" << endl;
+    return result;
   }
   bool testStreamMorsel()
   {
-    Morsel a(95);
-    std::stringstream out;
-    out << a;
-    Morsel b(42);
-    cout << " testStreamMorsel: a: " << a << endl;
-    cout << " testStreamMorsel: b: " << b << endl;
-    return (out.str() == "5f");
+    bool result = true;
+    struct TestCase {
+      unsigned int in;
+      string str;
+    };
+
+    TestCase tests[] = {
+       {95, "5f"}
+      ,{42, "2a"}
+    };
+
+    for (TestCase &t : tests)
+    {
+      std::stringstream out;
+      Morsel tMorsel(t.in);
+      out << tMorsel;
+      result = result && (out.str() == t.str);
+    }
+
+    return result;
   }
   bool testMorselLessThanMorsel()
   {
@@ -256,12 +290,28 @@ class TestMorsel : public Morsel
   }
   bool testMorselLeftshiftMorsel()
   {
-    Morsel a(0xFF00);
-    Morsel b(4);
-    Morsel c;
-    c = a << b;
-    Morsel d(0xF000);
-    return (c==d);
+    bool result = true;
+    struct TestCase {
+      Morsel in;
+      string out;
+    };
+
+    TestCase tests[] = {
+       {Morsel(0xa5) << 3, "28"}
+      ,{Morsel(0xef) << 4, "f0"}
+      ,{Morsel(0xFF00) << 4, "f000"}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in.asString() == t.out);
+      if (t.in.asString() != t.out)
+      {
+        cout << endl << "Expected: " << t.out 
+                     << " Actual: " << t.in.asString() << endl;
+      }
+    }
+    return result;
   }
   bool testMorselLeftShiftInt()
   {
@@ -336,69 +386,89 @@ class TestMorsel : public Morsel
   }
   bool testMorselAsChar()
   {
-    Morsel a(0xDEAD);
-    unsigned char b;
-    b = a.asChar();
-    unsigned char c = 0xAD;
-    return (b == c);
+    bool result = true;
+    struct TestCase {
+      Morsel in;
+      unsigned char out;
+    };
+
+    TestCase tests[] = {
+       {Morsel(0xDEAD), (unsigned char)0xAD}
+      ,{Morsel(0x2a), (unsigned char)0x2a}
+      ,{Morsel(0xf000), (unsigned char)0xf000}
+      ,{Morsel(0x28), (unsigned char)0x28}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in.asChar() == t.out);
+      if (t.in.asChar() != t.out)
+      {
+        cout << endl << "Expected: " << t.out 
+                     << " Actual: " << t.in.asString() << endl;
+      }
+    }
+    return result;
   }
 
   void runAllTests()
   {
     TestMorsel tm;
     struct NameResultPair {
+      bool runTest;
       string funcName;
       bool (TestMorsel::*funcPtr)();
     };
     NameResultPair tests[] = {
-       {"testCount", TestMorsel::testCount}
-      ,{"TestMorselAddMorsel", TestMorsel::TestMorselAddMorsel}
-      ,{"testMorselAddInt", TestMorsel::testMorselAddInt}
-      ,{"testMorselSubMorsel", TestMorsel::testMorselSubMorsel}
-      ,{"testIntSubMorsel", TestMorsel::testIntSubMorsel}
-      ,{"testMorselDecMorsel", TestMorsel::testMorselDecMorsel}
-      ,{"testMorselInc", TestMorsel::testMorselInc}
-      ,{"testMorselAssignInt", TestMorsel::testMorselAssignInt}
-      ,{"testMorselAsString", TestMorsel::testMorselAsString}
-      ,{"testStreamMorsel", TestMorsel::testStreamMorsel}
-      ,{"testMorselLessThanMorsel", TestMorsel::testMorselLessThanMorsel}
-      ,{"testMorselLessThanInt", TestMorsel::testMorselLessThanInt}
-      ,{"testMorselLessOrEqualMorsel", TestMorsel::testMorselLessOrEqualMorsel}
-      ,{"testMorselLessOrEqualInt", TestMorsel::testMorselLessOrEqualInt}
-      ,{"testIntLessOrEqualMorsel", TestMorsel::testIntLessOrEqualMorsel}
-      ,{"testMorselGreaterThanInt", TestMorsel::testMorselGreaterThanInt}
-      ,{"testIntGreaterThanMorsel", TestMorsel::testIntGreaterThanMorsel}
-      ,{"testMorselGreaterThanMorsel", TestMorsel::testMorselGreaterThanMorsel}
-      ,{"testMorselGreaterOrEqualMorsel", TestMorsel::testMorselGreaterOrEqualMorsel}
-      ,{"testMorselDivMorsel", TestMorsel::testMorselDivMorsel}
-      ,{"testMorselModMorsel", TestMorsel::testMorselModMorsel}
-      ,{"testMorselSize", TestMorsel::testMorselSize}
-      ,{"testMorselEqualMorsel", TestMorsel::testMorselEqualMorsel}
-      ,{"testMorselEqualInt", TestMorsel::testMorselEqualInt}
-      ,{"testMorselAsInt", TestMorsel::testMorselAsInt}
-      ,{"testMorselBitwiseAndMorsel", TestMorsel::testMorselBitwiseAndMorsel}
-      ,{"testMorselBitwiseAndInt", TestMorsel::testMorselBitwiseAndInt}
-      ,{"testMorselBitwiseOrMorsel", TestMorsel::testMorselBitwiseOrMorsel}
-      ,{"testMorselBitwiseOrMorselAssign", TestMorsel::testMorselBitwiseOrMorselAssign}
-      ,{"testMorselBitwiseInverse", TestMorsel::testMorselBitwiseInverse}
-      ,{"testMorselBitwiseXorMorsel", TestMorsel::testMorselBitwiseXorMorsel}
-      ,{"testMorselLeftshiftMorsel", TestMorsel::testMorselLeftshiftMorsel}
-      ,{"testMorselLeftShiftInt", TestMorsel::testMorselLeftShiftInt}
-      ,{"testMorselRightShiftInt", TestMorsel::testMorselRightShiftInt}
-      ,{"testMorselRightShiftMorsel", TestMorsel::testMorselRightShiftMorsel}
-      ,{"testMorselMultiplyMorsel", TestMorsel::testMorselMultiplyMorsel}
-      ,{"testMorselIntMultiplyMorsel", TestMorsel::testMorselIntMultiplyMorsel}
-      ,{"testMorselLeftShiftAssignInt", TestMorsel::testMorselLeftShiftAssignInt}
-      ,{"testMorselNEMorsel", TestMorsel::testMorselNEMorsel}
-      ,{"testMorselNEInt", TestMorsel::testMorselNEInt}
-      ,{"testMorselAsFloat", TestMorsel::testMorselAsFloat}
-      ,{"testMorselAsChar", testMorselAsChar}
-  };
+       {true, "testCount", &TestMorsel::testCount}
+      ,{true, "TestMorselAddMorsel", &TestMorsel::TestMorselAddMorsel}
+      ,{true, "testMorselAddInt", &TestMorsel::testMorselAddInt}
+      ,{true, "testMorselSubMorsel", &TestMorsel::testMorselSubMorsel}
+      ,{true, "testIntSubMorsel", &TestMorsel::testIntSubMorsel}
+      ,{true, "testMorselDecMorsel", &TestMorsel::testMorselDecMorsel}
+      ,{true, "testMorselInc", &TestMorsel::testMorselInc}
+      ,{true, "testMorselAssignInt", &TestMorsel::testMorselAssignInt}
+      ,{true, "testMorselAsString", &TestMorsel::testMorselAsString}
+      ,{true, "testStreamMorsel", &TestMorsel::testStreamMorsel}
+      ,{true, "testMorselLessThanMorsel", &TestMorsel::testMorselLessThanMorsel}
+      ,{true, "testMorselLessThanInt", &TestMorsel::testMorselLessThanInt}
+      ,{true, "testMorselLessOrEqualMorsel", &TestMorsel::testMorselLessOrEqualMorsel}
+      ,{true, "testMorselLessOrEqualInt", &TestMorsel::testMorselLessOrEqualInt}
+      ,{true, "testIntLessOrEqualMorsel", &TestMorsel::testIntLessOrEqualMorsel}
+      ,{true, "testMorselGreaterThanInt", &TestMorsel::testMorselGreaterThanInt}
+      ,{true, "testIntGreaterThanMorsel", &TestMorsel::testIntGreaterThanMorsel}
+      ,{true, "testMorselGreaterThanMorsel", &TestMorsel::testMorselGreaterThanMorsel}
+      ,{true, "testMorselGreaterOrEqualMorsel", &TestMorsel::testMorselGreaterOrEqualMorsel}
+      ,{true, "testMorselDivMorsel", &TestMorsel::testMorselDivMorsel}
+      ,{true, "testMorselModMorsel", &TestMorsel::testMorselModMorsel}
+      ,{true, "testMorselSize", &TestMorsel::testMorselSize}
+      ,{true, "testMorselEqualMorsel", &TestMorsel::testMorselEqualMorsel}
+      ,{true, "testMorselEqualInt", &TestMorsel::testMorselEqualInt}
+      ,{true, "testMorselAsInt", &TestMorsel::testMorselAsInt}
+      ,{true, "testMorselBitwiseAndMorsel", &TestMorsel::testMorselBitwiseAndMorsel}
+      ,{true, "testMorselBitwiseAndInt", &TestMorsel::testMorselBitwiseAndInt}
+      ,{true, "testMorselBitwiseOrMorsel", &TestMorsel::testMorselBitwiseOrMorsel}
+      ,{true, "testMorselBitwiseOrMorselAssign", &TestMorsel::testMorselBitwiseOrMorselAssign}
+      ,{true, "testMorselBitwiseInverse", &TestMorsel::testMorselBitwiseInverse}
+      ,{true, "testMorselBitwiseXorMorsel", &TestMorsel::testMorselBitwiseXorMorsel}
+      ,{true, "testMorselLeftshiftMorsel", &TestMorsel::testMorselLeftshiftMorsel}
+      ,{true, "testMorselLeftShiftInt", &TestMorsel::testMorselLeftShiftInt}
+      ,{true, "testMorselRightShiftInt", &TestMorsel::testMorselRightShiftInt}
+      ,{true, "testMorselRightShiftMorsel", &TestMorsel::testMorselRightShiftMorsel}
+      ,{true, "testMorselMultiplyMorsel", &TestMorsel::testMorselMultiplyMorsel}
+      ,{true, "testMorselIntMultiplyMorsel", &TestMorsel::testMorselIntMultiplyMorsel}
+      ,{true, "testMorselLeftShiftAssignInt", &TestMorsel::testMorselLeftShiftAssignInt}
+      ,{true, "testMorselNEMorsel", &TestMorsel::testMorselNEMorsel}
+      ,{true, "testMorselNEInt", &TestMorsel::testMorselNEInt}
+      ,{true, "testMorselAsFloat", &TestMorsel::testMorselAsFloat}
+      ,{true, "testMorselAsChar", &TestMorsel::testMorselAsChar}
+    };
 
     for (NameResultPair &t : tests)
     {
-	    std::cout << "Test " << t.funcName << " " 
-        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
+      if (t.runTest)
+	      std::cout << "Test " << t.funcName << " " 
+          << ( (tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
     }
   }
 };

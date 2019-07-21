@@ -34,12 +34,11 @@ class Address {
   bool operator==(const Address& other) const;
   bool operator==(int other);
   bool operator<=(Morsel in);
-  size_t hashVal();
-  Address operator&(Address& other);
+  Address operator&(const Address& other);
   Address operator&(uint64_t other);
-  Address operator|(Address& other);
+  Address operator|(const Address& other);
   Morsel asMorsel();
-  Address operator/(Address& other);
+  Address operator/(const Address& other);
   Address operator/(int rhs);
 };
 
