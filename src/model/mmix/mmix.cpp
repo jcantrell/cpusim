@@ -119,7 +119,7 @@ mmix::loadobject(string filename)
     char ar[4];
   };
   union tetra_union tetra;
-  char op,x,y,z;
+  unsigned char op,x,y,z;
 
   //uint64_t lambda = 0;
   Address lambda;
@@ -161,8 +161,13 @@ mmix::loadobject(string filename)
 
         case lop_loc:
           {
-          cout << "lop_loc called\n";
-          address = ((uint64_t)y<<56);
+          //TODO: load tetra.ar[2] (y) into appropriate byte of address
+          //cout << "lop_loc called\n";
+          //address = ((uint64_t)y<<56);
+          address = (Address(y).resize(64) << 56);
+          Address yaddr(0xff);
+          Address post;
+          post = yaddr<<4;
           Address offset; offset = 0;
           union tetra_union addr1;
           union tetra_union addr2;
@@ -174,6 +179,7 @@ mmix::loadobject(string filename)
             | (addr1.ar[2]<<8)
             | (addr1.ar[3])
           );
+/*
           cout << "loaded first tetra of address: "
                << std::hex << setfill('0') << std::setw(8)
                << offset << '\n' 
@@ -188,6 +194,7 @@ mmix::loadobject(string filename)
               << (int) (unsigned char)(addr1.ar[3]) 
           << endl;
           cout << "end first tetra" << endl;
+*/
           if (z==2)
           {
             offset = offset<<32;
@@ -199,11 +206,9 @@ mmix::loadobject(string filename)
             | (addr2.ar[2]<<8)
             | (addr2.ar[3])
             );
-            cout << "loaded second tetra of address: "
-                 << std::hex << setfill('0') << std::setw(8)
-                 << offset << endl;
           }
           lambda = address | offset;
+/*
           cout << "address: " 
                 << std::hex << setfill('0') << std::setw(8)
                 << address << endl
@@ -213,6 +218,7 @@ mmix::loadobject(string filename)
                 << "lambda: " 
                 << std::hex << setfill('0') << std::setw(8)
                 << lambda << endl;
+*/
           }
           break;
 
@@ -241,7 +247,7 @@ mmix::loadobject(string filename)
           delta = (delta<<32)&z;
           //uint64_t delta = ((uint64_t)y<<32)&z;
           address = lambda - 4*delta;
-          cout << "case lop_fixr\n";
+          //cout << "case lop_fixr\n";
           load(address+2,y);
           load(address+3,z);
         }
@@ -291,7 +297,7 @@ mmix::loadobject(string filename)
           //load rG with value of Z (must be >= 32)
           //$G,$G+1,...,$255 set to values of next (256-G)*2 tetras
           {
-          cout << "lop_post called\n";
+          //cout << "lop_post called\n";
           special_registers[rG] = z;
           for (int i=0;i<=(256-G)*2;i+=2)
           {
@@ -324,9 +330,6 @@ mmix::loadobject(string filename)
       }
     } else {
       quoted_flag = false;
-      cout    << "saving "
-              << std::hex << setfill('0') << std::setw(4)
-              << tetra.num
 /*
               << std::hex << setfill('0') << std::setw(2)
               << (int) (unsigned char)tetra.ar[0] 
@@ -338,15 +341,16 @@ mmix::loadobject(string filename)
               << std::hex << setfill('0') << std::setw(2)
               << (int) (unsigned char)tetra.ar[3] 
 */
-              << " to " << lambda << "\n";
       M(4, lambda, tetra.num);
-      Morsel v = M(4, lambda);
-      cout << "value at " 
-              << std::hex << setfill('0') << std::setw(2)
-              << lambda
-              << " is "
-              << std::hex << setfill('0') << std::setw(2)
-              << v << "\n";
+      //Morsel v = M(4, lambda);
+      //cout << "value at " 
+       //       << lambda
+       //       << " is "
+              //<< view(lambda) 
+              //<< view(lambda+1) 
+              //<< view(lambda+2) 
+              //<< view(lambda+3) 
+              //<< "\n";
       lambda = (lambda/4)*4+4;
 	  }
   
@@ -386,69 +390,67 @@ mmix::M(unsigned int size,
 }
 
 Morsel
-mmix::M( unsigned int size,
-//         unsigned long long address,
-         Address address,
-         //unsigned long long int value)
-         Morsel value
-)
+mmix::M(unsigned int size, Address address, Morsel value)
 {
   const unsigned int octasize = 8;
   Morsel octabyte[octasize];
   Address base;
   base = address - (address % size);
-/*
-  cout << "base is "
-            << std::hex << setfill('0') << std::setw(2)
-            << (int) (unsigned char)(base)
-        << " size is "
-            << std::hex << setfill('0') << std::setw(2)
-            << (unsigned int)(size)
-        << " address is "
-            << std::hex << setfill('0') << std::setw(16)
-            << (unsigned long long)(address)
-        << " value is "
-            << std::hex << setfill('0') << std::setw(8)
-            << (int) (unsigned char)(value);
-*/
+  Morsel value2(value);
 
-  // Load data into byte array
+  // Load data from ram into byte array
   for (int i=0;i<size;i++)
     octabyte[i] = view(base + i);
 
-  // Copy data in byte array to 64-bit int
-  //unsigned long long int retvalue = 0;
-  Morsel retvalue;
-  retvalue = 0;
+  // Copy data in byte array to Morsel for returning
+  Morsel retvalue(0);
   for (int i=0;i<size;i++)
   {
     retvalue & octabyte[octasize-(i+1)];
     retvalue <<= 8;
   }
-  Morsel temp;
-  
-  temp = (Morsel(0xFF) << Morsel(size - 1) );
-  retvalue = retvalue & temp;
-  //printf("M2: Value is: %llu\n", retvalue);
+  //cout << "retval: " << retvalue << endl;
 
-  // Load new value into byte array
-  char *value_array = static_cast<char*>(static_cast<void*>(&value));
   for (int i=0;i<size;i++)
-    octabyte[i] = value_array[i];
+  {
+    octabyte[i] = (value2 & Morsel(0xFF)).resize(byte_size);
+ //   cout << "chunk of value: " << octabyte[i] << endl;
+    value2 = value2 >> 8;
+  }
+  //Morsel temp;
+  //temp = (Morsel(0xFF) << Morsel(size - 1) );
+  //retvalue = retvalue & temp;
 
   // Copy data in byte array to memory
   for (int i=0;i<size;i++)
   {
+/*
     cout << "M: calling load with "
-              << std::hex << setfill('0') << std::setw(2)
               << (base+i)
         << " and "
-              << std::hex << setfill('0') << std::setw(2)
-              << octabyte[i] ;
+              << octabyte[i].asString().substr(0,2) 
+              << " full octabyte[i]: " << octabyte[i].asString()
+              << endl;
+*/
     load(base+i,octabyte[i]);
+/*
+    cout << "M: calling view with "
+              << (base+i)
+        << " gives " <<
+              view(base+i) << endl;
+*/
   }
+/*
+  for (int i=0;i<size;i++)
+  {
+    cout << " Address: " << (base+i) << " Value: "
+              //<< std::hex << setfill('0') << std::setw(2)
+              //<< octabyte[i].asString().substr(0,2) << endl;
+              << view(base+i) << endl;
+  }
+*/
 
-  return 0;
+  return retvalue;
 }
 
 Morsel mmix::R(Address reg)

@@ -195,12 +195,28 @@ class TestMorsel : public Morsel
   }
   bool testMorselDivMorsel()
   {
-    Morsel a(21);
-    Morsel b(7);
-    Morsel c;
-    c = a / b;
-    Morsel d(3);
-    return (c==d);
+    bool result = true;
+    struct TestCase {
+      Morsel in;
+      Morsel out;
+    };
+
+    TestCase tests[] = {
+       {Morsel(23)/Morsel(7),Morsel(3)}
+      //,{Morsel(27)/Morsel(4),Morsel(6)}
+      //{Morsel(21)/Morsel(7),Morsel(3)}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in == t.out);
+      if (!(t.in == t.out))
+      {
+        cout << endl << "Expected: " << t.out 
+                     << " Actual: " << t.in << endl;
+      }
+    }
+    return result;
   }
   bool testMorselModMorsel()
   {

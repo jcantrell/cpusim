@@ -37,7 +37,6 @@ union flagsint {
 
 class cpu {
 	private:
-		int byte_size;  
 		Address address_size;
 		boost::unordered_map<Address, Morsel> ram;
 		boost::unordered_map<Address, Morsel> registers;
@@ -46,11 +45,12 @@ class cpu {
 		union flagsint flagint;
 
 	public:
+		const int byte_size;  
 		cpu(int byte_in, Address address_in, unsigned int reg_count);
 		~cpu();
 
 // Control methods
-		void memdump();
+		void memdump(std::ostream& os = std::cout);
 		Morsel load(Address address, Morsel value);
 		Morsel& view(Address address);
 		Address getip();

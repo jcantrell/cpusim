@@ -73,6 +73,8 @@ class mmix : public cpu {
 
     // load a .mmo file
     void loadobject(string filename);
+
+
 };
 
 #endif

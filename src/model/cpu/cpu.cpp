@@ -1,10 +1,10 @@
 #include "model/cpu/cpu.h"
 #include <fstream>
 
-cpu::cpu(int byte_in, Address address_in, unsigned int reg_count)
+cpu::cpu(int byte_in, Address address_in, unsigned int reg_count) : byte_size(byte_in)
 	{
     flagint.i = 42; //magic number 101010
-    byte_size = byte_in;
+    //byte_size = byte_in;
     address_size = address_in;
     ip = 0;
     status = {0};
@@ -47,53 +47,47 @@ string cpu::toString()
 	s += "-----------------------------------------------\n";
 	return s;
 }
-	
+
 // Print hex dump of memory contents to screen
-// TODO: Properly format cells with leading 0xF
-// TODO: Summarize long areas of zeroes
-void cpu::memdump()
-	{
-    char string_out[1000];
-    char buffer[1000];
-    int zero_count = 0;
-    bool print_line = true;
-    cout << "address size is " << address_size;
-    //for (int i=0; i<address_size;i++)
-	    //printf("%02x", (unsigned char)ram[i]);
-      Address i;
-	    for (i=0; i<address_size;i+=16)
-	    {
-        //cout << "i is " << i;
-          std::string line_out;
-          print_line=true;
-          for (int j=0;j<1000;j++)
-            string_out[j] = 0;
-	        sprintf(buffer, "%s: ", i.asString().c_str());
-          strcat(string_out,buffer);
-          bool line_is_zero = true;
-          Address j;
-          for (j=0;j<16 && i+j < address_size;j++)
-          {
-            line_is_zero = line_is_zero && (ram[i+j] == 0);
-            if (j % 2 == 0)
-            {
-              sprintf(buffer,"%s"," ");
-              strcat(string_out,buffer);
-            }
-	          //sprintf(buffer,"%02x", (unsigned char)ram[i+j]);
-	          sprintf(buffer,"%s", ram[i+j].asString().c_str());
-            strcat(string_out,buffer);
-          }
-	        sprintf(buffer,"%s","\n");
-          strcat(string_out,buffer);
+void cpu::memdump(std::ostream& os)
+{
+  unsigned lineWidth = (128 + byte_size - 1) / byte_size;
 
-          zero_count = ( line_is_zero ? zero_count+1 : 0);
-          print_line = ( (zero_count > 1) ? false : true );
+  map<Address, Morsel> mymap;
+  for (std::pair<Address, Morsel> element : ram)
+    mymap[element.first] = element.second;
 
-          if (print_line)
-            printf("%s",string_out);
-	    }
-	}
+  std::vector<Morsel> line (lineWidth);
+  for (Morsel& element : line)
+    element.resize(byte_size);
+
+  Address previous;
+  previous = mymap.begin()->first;
+  for (std::pair<Address, Morsel> element : mymap)
+  {
+    if ( !(previous / 128 == element.first / 128) )
+    {
+      os << (previous - previous % (128/byte_size)) << ": ";
+      for (int lineIndex=0;lineIndex<lineWidth;lineIndex++)
+      {
+        os << line[lineIndex].asString();
+        if (lineIndex%2==1 && lineIndex!=(lineWidth-1)){os << " ";}
+        line[lineIndex] = Morsel(0);
+      }
+      os << endl;
+    }
+    line[(element.first % lineWidth).asInt()] = element.second;
+    previous = element.first;
+  }
+      os << (previous - previous % (128/byte_size)) << ": ";
+      for (int lineIndex=0;lineIndex<lineWidth;lineIndex++)
+      {
+        os << line[lineIndex].asString();
+        if (lineIndex%2==1 && lineIndex!=(lineWidth-1)) os << " " ;
+        line[lineIndex] = Morsel(0);
+      }
+  os << endl;
+}
 
 int cpu::loadimage(string filename)
 {
@@ -129,6 +123,7 @@ int cpu::loadimage(string filename)
 
 Morsel cpu::load(Address address, Morsel value)
 	{
+      value.resize(byte_size);
 	    Morsel ret = ram[address];
 	    ram[address] = value;
 	    return ret;

@@ -7,12 +7,16 @@ class TestCPU : public cpu
   TestCPU() : cpu(8, Address(65536), 32) {}
 	bool testmemdump()
   {
-    Morsel a(95);
-    Address b(102);
+    Morsel a(0x5f);
+    Address b(0x66);
     cpu mycpu(8, Address(65536), 32);
     mycpu.load(b, a);
-    mycpu.memdump();
-    return false;
+    std::ostringstream oss;
+    std::ostringstream exp;
+    mycpu.memdump(oss);
+    exp << "60: 0000 0000 0000 5f00 0000 0000 0000 0000" << endl;
+    bool result = (oss.str() == exp.str());
+    return result;
   }
 	bool testload()
   {

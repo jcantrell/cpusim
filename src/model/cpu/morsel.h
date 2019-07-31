@@ -2,6 +2,7 @@
 #define MORSEL_H
 #include <boost/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
+#include <iostream>
 //#include "Address.h"
 class Address;
 using namespace std;
@@ -146,7 +147,7 @@ class Morsel
     stream << addr.asString();
     return stream;
   }
-  bool operator<(Morsel other)
+  bool operator<(const Morsel other) const
   {
     int this_index = bs.size()-1;
     int other_index = other.bs.size()-1;
@@ -219,6 +220,36 @@ class Morsel
   }
   Morsel operator/(const Morsel& other)
   {
+    Morsel dividend(*this);
+    Morsel divisor(other);
+    Morsel quotient(0);
+    Morsel remainder(0);
+    Morsel radix(2);
+
+    if (divisor > dividend) return Morsel(0);
+    if (divisor == dividend) return Morsel(1);
+    if (dividend <= divisor * radix)
+    {
+      while (dividend > divisor || dividend == divisor)
+      {
+        dividend = dividend - divisor;
+        quotient = quotient + 1;
+      }
+      return quotient;
+    }
+
+    for (int i=dividend.bs.size()-1;i>=0;i--)
+    {
+      remainder = remainder * radix + Morsel(dividend.bs[i]);
+
+      //push(remainder/divisor);
+      quotient.resize(quotient.size()+1);
+      quotient = (quotient << 1) | (remainder/divisor);
+      
+      remainder = remainder%divisor;
+    }
+    return quotient;
+/*
     Morsel numerator(*this);
     Morsel quotient;
     quotient = 0;
@@ -228,6 +259,7 @@ class Morsel
       quotient = quotient + 1;
     }
     return quotient;
+*/
   }
   Morsel operator%(const Morsel& other)
   {
@@ -414,6 +446,11 @@ class Morsel
   {
     unsigned char result = bs.to_ulong() & 0xFF;
     return result;
+  }
+  Morsel& resize(unsigned int newsize)
+  {
+    bs.resize(newsize);
+    return *this;
   }
 };
 #endif

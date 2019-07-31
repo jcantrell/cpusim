@@ -23,7 +23,7 @@ test: ../bin/cpusim tests/unit/testmorsel tests/unit/testaddress tests/unit/test
 	./tests/unit/testaddress
 	./tests/unit/testcpu
 	cd tests && mmixal hello.mms
-	#cat script | ../bin/cpusim
+	cat script | ../bin/cpusim
 
 tests/unit/testcpu: tests/unit/testcpu.cpp
 	@echo "BEGIN testcpu"

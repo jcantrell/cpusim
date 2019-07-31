@@ -19,7 +19,7 @@ class Address {
   friend Address operator*(int lhs, const Address& rhs);
   Address operator*(int in);
   Address operator<<(int other);
-  bool operator<(Address other);
+  bool operator<(const Address other) const;
   bool operator<(int other);
   bool operator>(int other);
   bool operator<=(int other);
@@ -40,6 +40,8 @@ class Address {
   Morsel asMorsel();
   Address operator/(const Address& other);
   Address operator/(int rhs);
+  Address& resize(unsigned int newsize);
+  unsigned int size();
 };
 
   size_t hash_value(Address const& in);
