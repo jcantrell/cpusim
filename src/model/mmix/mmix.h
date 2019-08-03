@@ -75,6 +75,8 @@ class mmix : public cpu {
     void loadobject(string filename);
 
 
+    //Instruction set
+    void jmp();
 };
 
 #endif

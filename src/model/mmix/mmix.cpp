@@ -527,47 +527,47 @@ void mmix::step(int inst)
   switch (inst)
   {
       case JMP: // JMP
-        target = Address( (x<<16) & (y<<8) & (z<<0) );
+        jmp();
         break;
 
       case LDB: // LDB: s($X) <- s(M_1[A])
-        R(x, M(1, a));
+        ldb();
         break;
 
       case LDBI: // s($X) <- s(M_1[A])
-        R(x, M(1, (uy + z)));
+        ldbi();
         break;
 
       case LDBU: // LDBU: u($X) <- u(M_1[A])
-        R(x, M(1, a));
+        ldbu();
         break;
 
       case LDBUI: // u($X) <- u(M_1[A])
-        R(x, M(1, (uy+z)));
+        ldbui();
         break;
 
       case LDW: // s($X) <- s(M_2[A])
-        R(x, M(2, a));
+        ldw();
         break;
 
       case LDWI: // s($X) <- s(M_2[A])
-        R(x, M(2, uy+z));
+        ldwi();
         break;
 
       case LDWU: // LDWU: u($X) <- u(M_2[A])
-        R(x, M(2, a) );
+        ldwu();
         break;
   
       case LDWUI: // u($X) <- u(M_2[A])
-        R(x, M(2, uy+z) );
+        ldwui();
         break;
 
       case LDT: // LDT: s($X) <- s(M_4[A])
-        R(x, (M(4, a)) );
+        ldt();
         break;
 
       case LDTI: // s($X) <- s(M_4[A])
-        R(x, (M(4, uy+z)) );
+        ldti();
         break;
 
       case LDTU: // u($X) <- u(M_4[A])
@@ -1417,183 +1417,474 @@ void mmix::step(int inst)
         break;
 
       case BNN: // if s($X) >= 0, set @ <- RA
-        target = ( ( sz >= 0 ) ? ra : target );
+        bnn();
         break;
 
       case BNZ: // if s($X) != 0, set @ <- RA
-        target = ( ( sz != 0 ) ? ra : target );
+        bnz();
         break;
 
       case BNP: // if s($X) <= 0, set @ <- RA
-        target = ( ( sz <= 0 ) ? ra : target );
+        bnp();
         break;
 
       case BEV: // if s($X) mod 2 == 0, set @ <- RA
-        target = ( ( (uz & 1) == 0 ) ? ra : target );
+        bev();
         break;
 
       case PBN: // if s($X) < 0, set @ <- RA
-        target = ( ( sx < 0 ) ? ra : target );
+        pbn();
         break;
 
       case PBZ: // if $X = 0, set @ <- RA
-        target = ( ( uz == 0 ) ? ra : target );
+        pbz();
         break;
 
       case PBP: // if s($X) = 0, set @ <- RA
-        target = ( ( sz > 0 ) ? ra : target );
+        pbp();
         break;
 
       case PBOD: // if s($X) mod 2 == 1, set @ <- RA
-        target = ( ( (uz & 1) == 1 ) ? ra : target );
+        pbod();
         break;
 
       case PBNN: // if s($X) >= 0, set @ <- RA
-        target = ( ( sz >= 0 ) ? ra : target );
+        pbnn();
         break;
 
       case PBNZ: // if s($X) != 0, set @ <- RA
-        target = ( ( sz != 0 ) ? ra : target );
+        pbnz();
         break;
 
       case PBNP: // if s($X) <= 0, set @ <- RA
-        target = ( ( sz <= 0 ) ? ra : target );
+        pbnp();
         break;
 
       case PBEV: // if s($X) mod 2 == 0, set @ <- RA
-        target = ( ( (uz & 1) == 0 ) ? ra : target );
+        pbev();
         break;
 
       case JMPB: 
-        target = -1*ra;
+        jmpb();
         break;
 
       case BNB: // if s($X) < 0, set @ <- -RA
-        target = ( ( sx < 0 ) ? -1*ra : target );
+        bnb();
         break;
 
       case BZB: // if $X = 0, set @ <- -RA
-        target = ( ( uz == 0 ) ? -1*ra : target );
+        bzb();
         break;
 
       case BPB: // if s($X) = 0, set @ <- -RA
-        target = ( ( sz > 0 ) ? -1*ra : target );
+        bpb();
         break;
 
       case BODB: // if s($X) mod 2 == 1, set @ <- -RA
-        target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
+        bodb();
         break;
 
       case BNNB: // if s($X) >= 0, set @ <- -RA
-        target = ( ( sz >= 0 ) ? -1*ra : target );
+        bnnb();
         break;
 
       case BNZB: // if s($X) != 0, set @ <- -RA
-        target = ( ( sz != 0 ) ? -1*ra : target );
+        bnzb();
         break;
 
       case BNPB: // if s($X) <= 0, set @ <- -RA
-        target = ( ( sz <= 0 ) ? -1*ra : target );
+        bnpb();
         break;
 
       case BEVB: // if s($X) mod 2 == 0, set @ <- -RA
-        target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
+        bevb();
         break;
 
       case PBNB: // if s($X) < 0, set @ <- -RA
-        target = ( ( sx < 0 ) ? -1*ra : target );
+        pbnb();
         break;
 
       case PBZB: // if $X = 0, set @ <- -RA
-        target = ( ( uz == 0 ) ? -1*ra : target );
+        pbzb();
         break;
 
       case PBPB: // if s($X) = 0, set @ <- -RA
-        target = ( ( sz > 0 ) ? -1*ra : target );
+        pbpb();
         break;
 
       case PBODB: // if s($X) mod 2 == 1, set @ <- -RA
-        target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
+        pbodb();
         break;
 
       case PBNNB: // if s($X) >= 0, set @ <- -RA
-        target = ( ( sz >= 0 ) ? -1*ra : target );
+        pbnnb();
         break;
 
       case PBNZB: // if s($X) != 0, set @ <- -RA
-        target = ( ( sz != 0 ) ? -1*ra : target );
+        pbnzb();
         break;
 
       case PBNPB: // if s($X) <= 0, set @ <- -RA
-        target = ( ( sz <= 0 ) ? -1*ra : target );
+        pbnpb();
         break;
 
       case PBEVB: // if s($X) mod 2 == 0, set @ <- -RA
-        target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
+        pbevb();
         break;
 
       case PUSHJ: // push(X) and set rJ<-@+4, then set @<-RA
-        push(x);
-        R(Address(rJ), (target+4).asMorsel());
-        target = ra;
+        pushj();
         break;
 
       case PUSHJB: // push(X) and set rJ<-@+4, then set @<-RA
-        push(x);
-        R(Address(rJ), (-1*(target+4)).asMorsel());
-        target = ra;
+        pushjb();
         break;
 
       case PUSHGO: // push(X) and set rJ<-@+4, then set @<-A
-        push(x);
-        R(Address(rJ), (target+4).asMorsel());
-        target = a;
+        pushgo();
         break;
 
       case POP: // pop(X), then @<-rJ+4*YZ
-        pop(x);
-        target = R(Address(rJ))+4*((y<<8) & z);
+        pop();
         break;
 
       case SAVE: // u($X) <- context
-        push(255);
-        R(x, register_stack_top);
+        save();
         break;
 
       case UNSAVE: // context<- u($Z)
-        pop(255);
-        R(x, register_stack_top);
+        unsave();
         break;
 
       case LDUNC: // s($X) <- s(M_8[A])
-        R( x, (M(8, a)) );
+        ldunc();
         break;
 
       case STUNC: // s(M_8[A]) <- s($X)
-        M(8, a, R(x));
+        stunc();
         break;
 
       case PRELD: 
+        preld();
         break;
 
       case PREST:
+        prest();
         break;
 
       case PREGO:
+        prego();
         break;
 
       case SYNCID:
+        syncid();
         break;
 
       case SYNCD:
+        syncd();
         break;
 
       case SYNC:
+        sync();
         break;
 
       case CSWAP: // if u(M_8[A] == u(rP), set u(M_8[A]) <- u($X) and
                   // u($X) <- 1. Otherwise set u(rP) <- u(M_8[A]) and
                   // u($X) <- 0
+       cswap();
+       break;
+
+      case LDVTS: 
+        ldvts();
+        break;
+
+      case CSWAPI: 
+        cswapi();
+        break;
+
+      case LDUNCI:
+        ldunci();
+        break;
+
+      case LDVTSI:
+        ldvtsi();
+        break;
+
+      case PRELDI:
+        preldi();
+        break;
+
+      case PREGOI:
+        pregoi();
+        break;
+
+      case GOI:
+        goi();
+        break;
+
+      case STUNCI: // s(M_8[A] <- s($X)
+        stunci();
+        break;
+
+      case SYNCDI:
+        syncdi();
+        break;
+
+      case PRESTI:
+        presti();
+        break;
+
+      case SYNCIDI:
+        syncidi();
+        break;
+      case PUSHGOI:
+        pushgoi();
+        break;
+
+      case TRIP:
+        trip();
+        break;
+      case TRAP:
+        // MMIX simulators seem to implement 10 traps for basic i/o
+        // the idea is that the NNIX kernel would implement all the trap
+        // functions in a proper system.
+        trap();
+        break;
+
+      case RESUME:
+        resume();
+        break;
+
+      case GET: // u($X) <- u(g[Z]), where 0 <= Z < 32
+        get();
+        break;
+
+      case PUT: // u(g[X]) <- u($Z), where 0 <= X < 32
+        put();
+        break;
+
+      case PUTI: // u(g[X]) <- u(Z), where 0 <= X < 32
+        puti();
+        break;
+
+      case GETA: // u($X) <- RA
+        //R(x, ra);
+        geta();
+        break;
+
+      case GETAB: // u($X) <- RA
+        getab();
+        break;
+
+      case SWYM:
+        swym();
+        break;
+
+      default:
+          break;
+  }
+
+  setip( target );
+}
+
+void bnn()
+{
+  target = ( ( sz >= 0 ) ? ra : target );
+}
+
+void bnz()
+{
+  target = ( ( sz != 0 ) ? ra : target );
+}
+
+void bnp()
+{
+  target = ( ( sz <= 0 ) ? ra : target );
+}
+
+void bev()
+{
+  target = ( ( (uz & 1) == 0 ) ? ra : target );
+}
+
+void pbn()
+{
+  target = ( ( sx < 0 ) ? ra : target );
+}
+
+void pbz()
+{
+  target = ( ( uz == 0 ) ? ra : target );
+}
+
+void pbp()
+{
+  target = ( ( sz > 0 ) ? ra : target );
+}
+
+void pbod()
+{
+  target = ( ( (uz & 1) == 1 ) ? ra : target );
+}
+
+void pbnn()
+{
+  target = ( ( sz >= 0 ) ? ra : target );
+}
+
+void pbnz()
+{
+  target = ( ( sz != 0 ) ? ra : target );
+}
+
+void pbnp()
+{
+  target = ( ( sz <= 0 ) ? ra : target );
+}
+
+void pbev()
+{
+  target = ( ( (uz & 1) == 0 ) ? ra : target );
+}
+
+void jmpb()
+{
+  target = -1*ra;
+}
+
+void bnb()
+{
+  target = ( ( sx < 0 ) ? -1*ra : target );
+}
+
+void bzb()
+{
+  target = ( ( uz == 0 ) ? -1*ra : target );
+}
+
+void bpb()
+{
+  target = ( ( sz > 0 ) ? -1*ra : target );
+}
+
+void bodb()
+{
+  target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
+}
+
+void bnnb()
+{
+  target = ( ( sz >= 0 ) ? -1*ra : target );
+}
+
+void bnzb()
+{
+  target = ( ( sz != 0 ) ? -1*ra : target );
+}
+
+void bnpb()
+{
+  target = ( ( sz <= 0 ) ? -1*ra : target );
+}
+
+void bevb()
+{
+  target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
+}
+
+void pbnb()
+{
+  target = ( ( sx < 0 ) ? -1*ra : target );
+}
+
+void pbzb()
+{
+  target = ( ( uz == 0 ) ? -1*ra : target );
+}
+
+void pbpb()
+{
+  target = ( ( sz > 0 ) ? -1*ra : target );
+}
+
+void pbodb()
+{
+  target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
+}
+
+void pbnnb()
+{
+  target = ( ( sz >= 0 ) ? -1*ra : target );
+}
+
+void pbnzb()
+{
+  target = ( ( sz != 0 ) ? -1*ra : target );
+}
+
+void pbnpb()
+{
+  target = ( ( sz <= 0 ) ? -1*ra : target );
+}
+
+void pbevb()
+{
+  target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
+}
+
+void pushj()
+{
+  push(x);
+  R(Address(rJ), (target+4).asMorsel());
+  target = ra;
+}
+
+void pushjb()
+{
+  push(x);
+  R(Address(rJ), (-1*(target+4)).asMorsel());
+  target = ra;
+}
+
+void pushgo()
+{
+  push(x);
+  R(Address(rJ), (target+4).asMorsel());
+  target = a;
+}
+
+void pop()
+{
+  pop(x);
+  target = R(Address(rJ))+4*((y<<8) & z);
+}
+
+void save()
+{
+  push(255);
+  R(x, register_stack_top);
+}
+void unsave()
+{
+  pop(255);
+  R(x, register_stack_top);
+}
+
+void ldunc()
+{
+  R( x, (M(8, a)) );
+}
+void stunc()
+{
+  M(8, a, R(x));
+}
+void ldunci()
+{
+  R( x, (M(8, a)) );
+}
+
+void cswap()
+{
         if (M(8, a) == R(Address(rP))) {
           M(8,a,R(x));
           R(x,1);
@@ -1601,38 +1892,46 @@ void mmix::step(int inst)
           R(Address(rP), M(8,a));
           R(x, 0);
         }
-        break;
-
-      case LDVTS: 
-      case CSWAPI: 
-        break;
-
-      case LDUNCI:
-        R( x, (M(8, a)) );
-        break;
-
-      case LDVTSI:
-      case PRELDI:
-      case PREGOI:
-      case GOI:
-        break;
-
-      case STUNCI: // s(M_8[A] <- s($X)
-        M(8, uy+z, R(x));
-        break;
-
-      case SYNCDI:
-      case PRESTI:
-      case SYNCIDI:
-      case PUSHGOI:
-        break;
-
-      case TRIP:
-      case TRAP:
-        // MMIX simulators seem to implement 10 traps for basic i/o
-        // the idea is that the NNIX kernel would implement all the trap
-        // functions in a proper system.
-
+ 
+}
+void preldi()
+{
+  return;
+}
+void pregoi()
+{
+  return;
+}
+void goi()
+{
+  return;
+}
+void stunci()
+{
+  M(8, uy+z, R(x));
+}
+void syncdi()
+{
+  return;
+}
+void presti()
+{
+  return;
+}
+void syncidi()
+{
+  return;
+}
+void pushgoi()
+{
+  return;
+}
+void trip()
+{
+  trap();
+}
+void trap()
+{
         switch (y.asChar()) {
         case Halt:
           return;
@@ -1665,37 +1964,119 @@ void mmix::step(int inst)
         default:
           break;
         }
-        break;
+}
+void resume()
+{
+}
 
-      case RESUME:
-        break;
+void get()
+{
+  R(x, g(z));
+}
 
-      case GET: // u($X) <- u(g[Z]), where 0 <= Z < 32
-        R(x, g(z));
-        break;
+void put()
+{
+  g(x, R(z));
+}
 
-      case PUT: // u(g[X]) <- u($Z), where 0 <= X < 32
-        g(x, R(z));
-        break;
+void puti()
+{
+  g(x, z);
+}
 
-      case PUTI: // u(g[X]) <- u(Z), where 0 <= X < 32
-        g(x, z);
-        break;
+void geta()
+{
+  R(x, ra);
+}
 
-      case GETA: // u($X) <- RA
-        R(x, ra);
-        break;
+void getab()
+{
+  R(x, -1*ra);
+}
 
-      case GETAB: // u($X) <- RA
-        R(x, -1*ra);
-        break;
-
-      case SWYM:
-        break;
-
-      default:
-          break;
-  }
-
+void jmp()
+{
+  Address target = getip()+stepsize;
+  target = Address( (x<<16) & (y<<8) & (z<<0) );
   setip( target );
+}
+
+void ldb()
+{ 
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+  R(x, M(1, a));
+}
+
+void ldbi()
+{
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+
+
+  R(x, M(1, (uy + z)));
+}
+
+void ldbu()
+{
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+  R(x, M(1, a));
+}
+
+void ldbui()
+{
+  R(x, M(1, (uy+z)));
+}
+
+void ldw()
+{
+  R(x, M(2, a));
+}
+
+void ldwi()
+{
+  R(x, M(2, uy+z));
+}
+
+void ldwu()
+{
+  R(x, M(2, a) );
+}
+
+void ldwui()
+{
+  R(x, M(2, uy+z) );
+}
+
+void ldt()
+{
+  R(x, (M(4, a)) );
+}
+
+void ldti()
+{
+  R(x, (M(4, uy+z)) );
+}
+
+void swym()
+{
+  return;
 }
