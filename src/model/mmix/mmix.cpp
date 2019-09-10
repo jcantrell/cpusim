@@ -524,6 +524,7 @@ void mmix::step(int inst)
   Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
   Morsel ra = 4*( (uy<<8) & uz);
 
+// instruction_map[inst]();
   switch (inst)
   {
       case JMP: // JMP
@@ -571,849 +572,631 @@ void mmix::step(int inst)
         break;
 
       case LDTU: // u($X) <- u(M_4[A])
-        R(x, M(4, a) );
+        ldtu();
         break;
 
       case LDTUI: // u($X) <- u(M_4[A])
-        R(x, M(4, uy+z) );
+        ldtui();
         break;
 
       case LDO: // s($X) <- s(M_8[A])
-        R(x, (M(8, a)) );
+        ldo();
         break;
 
       case LDOI: // s($X) <- s(M_8[A])
-        R(x, (M(8, uy+z)) );
+        ldoi();
         break;
 
       case LDOU: // u($X) <- u(M_8[A])
-        R(x, M(8, a) );
+        ldou();
         break;
 
       case LDOUI: // u($X) <- u(M_8[A])
-        R(x, M(8, uy+z) );
+        ldoui();
         break;
 
       case LDHT: // u($X) <- u(M_4[A]) x 2^32
-        R(x, (M(4, a) << 32));
+        ldht();
         break;
 
       case LDHTI: // u($X) <- u(M_4[A]) x 2^32
-        R(x, (M(4, uy+z) << 32));
+        ldhti();
         break;
 
       case STB: // s(M_1[A]) <- s($X)
-        M(1, a, R(x));
+        stb();
         break;
 
       case STBI: // s(M_1[A]) <- s($X)
-        M(1, uy+z, R(x));
+        stbi();
         break;
 
       case STW: // s(M_2[A]) <- s($X)
-        M(2, a, R(x));
+        stw();
         break;
 
       case STWI: // s(M_2[A]) <- s($X)
-        M(2, uy+z, R(x));
+        stwi();
         break;
       
       case STT: // s(M_4[A] <- s($X)
-        M(4, a, R(x));
+        stt();
         break;
       case STTI: // s(M_4[A] <- s($X)
-        M(4, uy+z, R(x));
+        stti();
         break;
       case STO: // s(M_8[A] <- s($X)
-        M(8, a, R(x));
+        sto();
         break;
       case STOI: // s(M_8[A] <- s($X)
-        M(8, uy+z, R(x));
+        stoi();
         break;
 
       case STBU: // u(M_1[A]) <- u($X) mod 2^8
-        M(1, a, R(x));
+        stbu();
         break;
 
       case STBUI: // u(M_1[A]) <- u($X) mod 2^8
-        M(1, uy+z, R(x));
+        stbui();
         break;
       case STWU: // u(M_2[A]) <- u($X) mod 2^16
-        M(2, a, R(x));
+        stwu();
         break;
       case STWUI: // u(M_2[A]) <- u($X) mod 2^16
-        M(2, uy+z, R(x));
+        stwui();
         break;
       case STTU: // u(M_4[A]) <- u($X) mod 2^32
-        M(4, a, R(x));
+        sttu();
         break;
       case STTUI: // u(M_4[A]) <- u($X) mod 2^32
-        M(4, uy+z, R(x));
+        sttui();
         break;
       case STOU: // u(M_8[A]) <- u($X)
-        M(8, a, R(x));
+        stou();
         break;
       case STOUI: // u(M_8[A]) <- u($X)
-        M(8, uy+z, R(x));
+        stoui();
         break;
       case STHT: // u(M_4[A]) <- floor( u($X) / 2^32 )
-        M(4, a, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
+        stht();
         break;
       case STHTI: // u(M_4[A]) <- floor( u($X) / 2^32 )
-        M(4, uy+z, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
+        sthti();
         break;
       case STCO: // u(M_8[A]) <- X
-        M(8, a, x);
+        stco();
         break;
       case STCOI: // u(M_8[A]) <- X
-        M(8, uy+z, x);
+        stcoi();
         break;
       case ADD: // s($X) <- s($Y) + s($Z)
-        R(x, (R(y)) + R(z));
+        add();
         break;
       case ADDI: // s($X) <- s($Y) + s(Z)
-        R(x, (R(y)) + (z));
+        addi();
         break;
       case SUB: // s($X) <- s($Y) - s($Z)
-        R(x, (R(y)) - (R(z)));
+        sub();
         break;
       case SUBI: // s($X) <- s($Y) - s(Z)
-        R(x, (R(y)) - (z));
+        subi();
         break;
       case MUL: // s($X) <- s($Y) x s($Z)
-        R(x, (R(y)) * (R(z)));
+        mul();
         break;
 
       case MULI: // s($X) <- s($Y) x s(Z)
-        R(x, (R(y)) * (z));
+        muli();
         break;
 
       case DIV: // s($X) <- floor(s($Y) / s($Z)) such that ($Z != 0)
                 // and s(rR) <- s($Y) mod s($Z)
-        R(x, (R(z) == 0) ? Morsel(0) : 
-              ((R(y)) / (R(z))));
-        g(Address(rR), (R(z) == 0) ? R(y) :
-              ((R(y)) % (R(z))));
-        break;
+        div();
+       break;
 
       case DIVI: // s($X) <- floor(s($Y) / s(Z) such that (Z != 0)
                 // and s(rR) <- s($Y) mod s(Z)
-        R(x, (z == 0) ? Morsel(0) :
-              ((R(y)) / (z)));
-        g(Address(rR), (z == 0) ? R(y) :
-              ((R(y)) % (z)));
-        break;
+        divi();
+       break;
       case ADDU: // u($X) <- (u($Y) + u($Z)) mod 2^64
-        R(x, a);
+        addu();
         break;
       case ADDUI: // u($X) <- (u($Y) + u(Z)) mod 2^64
-        R(x, (ux + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+        addui();
         break;
       case SUBU: // u($X) <- (u($Y) - u($Z)) mod 2^64
-        R(x, (R(y) - R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+        subu();
         break;
       case SUBUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
-        R(x, (R(y) - z) & Morsel(0xFFFFFFFFFFFFFFFF));
+        subui();
         break;
       case MULU: // u(rH $X) <- u($Y) x u($Z)
-        {
-        Morsel carry;
-        Morsel result;
-        wideMult(R(y), R(z), &carry, &result);
-        g(Address(rH), carry);
-        R(x, result);
-        }
-        break;
+        mulu();
+       break;
 
       case MULUI: // u($X) <- (u($Y) - u(Z)) mod 2^64
-        {
-        Morsel carry;
-        Morsel result;
-        wideMult(R(y), z, &carry, &result);
-        g(Address(rH), carry);
-        R(x, result);
-        }
-        break;
+        mului();
+       break;
 
       case DIVU: // u($X) <- floor(u(rD $Y) / u($Z))
                  // u(rR) <- u(rD $Y) mod u($Z), if u($Z) > u(rD);
                  //     otherwise $X <- rD, rR <- $Y
-        {
-        Morsel numerator_hi;
-        Morsel numerator_lo;
-        Morsel divisor;
-        Morsel quotient;
-        Morsel remainder;
 
-        numerator_hi = g(Address(rD));
-        numerator_lo = R(y);
-        divisor = R(z);
-
-        if (divisor > numerator_hi)
-        {
-          wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
-          R(x, quotient);
-          g(Address(rR), remainder);
-        } else {
-          R(x, numerator_hi);
-          g(Address(rR), numerator_lo );
-        }
-  
-        }
         break;
 
       case DIVUI: // u($X) <- floor(u(rD $Y) / u(Z))
                   // u(rR) <- u(rD $Y) mod u(Z), if u(Z) > u(rD);
                   //    otherwise $X <- rD, rR <- $Y
-        {
-        Morsel numerator_hi;
-        Morsel numerator_lo;
-        Morsel divisor;
-        Morsel quotient;
-        Morsel remainder;
-
-        numerator_hi = g(Address(rD));
-        numerator_lo = R(y);
-        divisor = z;
-
-        if (divisor > numerator_hi)
-        {
-          wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
-          R(x, quotient);
-          g(Address(rR), remainder);
-        } else {
-          R(x, numerator_hi);
-          g(Address(rR), numerator_lo );
-        }
-  
-        }
-        break;
+       break;
 
       case i2ADDU: // u($X) <- (u($Y) x 2 + u($Z)) mod 2^4
-        R(x, (R(y)*2 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i2addu();
         break;
       case i2ADDUI: // u($X) <- (u($Y) x 2 + u(Z)) mod 2^4
-        R(x, (R(y)*2 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i2addui();
         break;
       case i4ADDU: // u($X) <- (u($Y) x 4 + u($Z)) mod 2^64
-        R(x, (R(y)*4 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i4addu();
         break;
       case i4ADDUI: // u($X) <- (u($Y) x 4 + u(Z)) mod 2^64
-        R(x, (R(y)*4 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i4addui();
         break;
       case i8ADDU: // u($X) <- (u($Y) x 8 + u($Z)) mod 2^64
-        R(x, (R(y)*8 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i8addu();
         break;
       case i8ADDUI: // u($X) <- (u($Y) x 8 + u(Z)) mod 2^64
-        R(x, (R(y)*8 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i8addui();
         break;
       case i16ADDU: // u($X) <- (u($Y) x 16 + u($Z)) mod 2^64
-        R(x, (R(y)*16 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i16addu();
         break;
       case i16ADDUI: // u($X) <- (u($Y) x 16 + u(Z)) mod 2^64
-        R(x, (R(y)*16 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+        i16addui();
         break;
       case NEG: // s($X) <- Y - s($Z)
-        R(x, y-R(z));
+        neg();
         break;
       case NEGI: // s($X) <- Y - s(Z)
-        R(x, y-z);
+        negi();
         break;
       case NEGU: // u($X) <- (Y - u($Z)) mod 2^64
-        R(x, y - R(z));
+        negu();
         break;
       case NEGUI: // u($X) <- (Y - u(Z)) mod 2^64
-        R(x, y - z);
+        negui();
         break;
       case SL: // s($X) <- s($Y) x 2^u($Z)
-        R(x, R(y) << R(z));
+        sl();
         break;
       case SLI: // s($X) <- s($Y) x 2^u(Z)
-        R(x, R(y) << z);
+        sli();
         break;
       case SLU: // u($X) <- (u($Y) x 2^u($Z)) mod 2^64
-        R(x, R(y) << R(z));
+        slu();
         break;
       case SLUI: // u($X) <- (u($Y) x 2^u(Z)) mod 2^64
-        R(x, R(y) << z);
+        slui();
         break;
       case SR: // s($X) <- floor( s($Y) / 2^u($Z) )
-        R(x, R(y) >> R(z) );
+        sr();
         break;
       case SRI: // s($X) <- floor( s($Y) / 2^u(Z) )
-        R(x, R(y) >> z );
+        sri();
         break;
       case SRU: // u($X) <- floor( u($Y) / 2^u($Z) )
-        R(x, R(y) >> R(z) );
+        sru();
         break;
       case SRUI: // u($X) <- floor( u($Y) / 2^u(Z) )
-        R(x, R(y) >> z );
+        srui();
         break;
       case CMP: // s($X) <- [s($Y) > s($Z)] - [s($Y) < s($Z)]
-        R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+        cmp();
         break;
       case CMPI: // s($X) <- [s($Y) > s(Z)] - [s($Y) < s(Z)]
-        R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
+        cmpi();
         break;
       case CMPU: // s($X) <- [u($Y) > u($Z)] - [u($Y) < u($Z)]
-        R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+        cmpu();
         break;
       case CMPUI: // s($X) <- [u($Y) > u(Z)] - [u($Y) < u(Z)]
-        R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
+        cmpui();
         break;
       case CSN: // if s($Y) < 0, set $X <- $Z
-        R(x, ((R(y) < 0) ? R(z) : R(x)) );
+        csn();
         break;
       case CSNI: // if s($Y) < 0, set $X <- Z
-        R(x, ((R(y) < 0) ? z : R(x)) );
+        csni();
         break;
       case CSZ: // if $Y = 0, set $X <- $Z
-        R(x, ((R(y) == 0) ? R(z) : R(x)) );
+        csz();
         break;
       case CSZI: // if $Y = 0, set $X <- Z
-        R(x, ((R(y) == 0) ? z : R(x)) );
+        cszi();
         break;
       case CSP: // if s($Y) > 0, set $X <- $Z
-        R(x, ((R(y) > 0) ? R(z) : R(x)) );
+        csp();
         break;
       case CSPI: // if s($Y) > 0, set $X <- Z
-        R(x, ((R(y) > 0) ? z : R(x)) );
+        cspi();
         break;
       case CSOD: // if s($Y) mod 2 == 1, set $X <- $Z
-        R(x, ( ((R(y) & 0x01) == 1) ? R(z) : R(x)) );
+        csod();
         break;
       case CSODI: // if s($Y) mod 2 == 1, set $X <- Z
-        R(x, ( ((R(y) & 0x01) == 1) ? z : R(x)) );
+        csodi();
         break;
       case CSNN: // if s($Y) >= 0, set $X <- $Z
-        R(x, ((R(y) >= 0) ? R(z) : R(x)) );
+        csnn();
         break;
       case CSNNI: // if s($Y) >= 0, set $X <- Z
-        R(x, ((R(y) >= 0) ? z : R(x)) );
+        csnni();
         break;
       case CSNZ: // if $Y != 0, set $X <- $Z
-        R(x, ((R(y) != 0) ? R(z) : R(x)) );
+        csnz();
         break;
       case CSNZI: // if $Y != 0, set $X <- Z
-        R(x, ((R(y) != 0) ? z : R(x)) );
+        csnzi();
         break;
       case CSNP: // if s($Y) <= 0, set $X <- $Z
-        R(x, ((R(y) <= 0) ? R(z) : R(x)) );
+        csnp();
         break;
       case CSNPI: // if s($Y) <= 0, set $X <- Z
-        R(x, ((R(y) <= 0) ? z : R(x)) );
+        csnpi();
         break;
       case CSEV: // if s($Y) mod 2 == 0, set $X <- $Z
-        R(x, ( ((R(y) & 0x01) == 0) ? R(z) : R(x)) );
+        csev();
         break;
       case CSEVI: // if s($Y) mod 2 == 0, set $X <- Z
-        R(x, ( ((R(y) & 0x01) == 0) ? z : R(x)) );
+        csevi();
         break;
       case ZSN: // $X <- $Z[s($Y) < 0]
-        R(x, ((R(y) < 0) ? R(z) : 0) );
+        zsn();
         break;
       case ZSNI: // $X <- Z[s($Y) < 0]
-        R(x, ((R(y) < 0) ? z : 0) );
+        zsni();
         break;
       case ZSZ: // $X <- $Z[$Y = 0]
-        R(x, ((R(y) == 0) ? R(z) : 0) );
+        zsz();
         break;
       case ZSZI: // $X <- Z[$Y = 0]
-        R(x, ((R(y) == 0) ? z : 0) );
+        zszi();
         break;
       case ZSP: // $X <- $Z[s($Y) > 0]
-        R(x, ((R(y) > 0) ? R(z) : 0) );
+        zsp();
         break;
       case ZSPI: // $X <- Z[s($Y) > 0]
-        R(x, ((R(y) > 0) ? z : 0) );
+        zspi();
         break;
       case ZSOD: // $X <- $Z[s($Y) mod 2 == 1]
-        R(x, (((R(y) & 0x01) == 1) ? R(z) : 0) );
+        zsod();
         break;
       case ZSODI: // $X <- Z[s($Y) mod 2 == 1]
-        R(x, (((R(y) & 0x01) == 1) ? z : 0) );
+        zsodi();
         break;
       case ZSNN: // $X <- $Z[s($Y) >= 0]
-        R(x, ((R(y) < 0) ? R(z) : 0) );
+        zsnn();
         break;
       case ZSNNI: // $X <- Z[s($Y) >= 0]
-        R(x, ((R(y) < 0) ? z : 0) );
+        zsnni();
         break;
       case ZSNZ: // $X <- $Z[s($Y) != 0]
-        R(x, ((R(y) < 0) ? R(z) : 0) );
+        zsnz();
         break;
       case ZSNZI: // $X <- Z[s($Y) != 0]
-        R(x, ((R(y) < 0) ? z : 0) );
+        zsnzi();
         break;
       case ZSNP: // $X <- $Z[s($Y) <= 0]
-        R(x, ((R(y) < 0) ? R(z) : 0) );
+        zsnp();
         break;
       case ZSNPI: // $X <- Z[s($Y) <= 0]
-        R(x, ((R(y) < 0) ? z : 0) );
+        zsnpi();
         break;
       case ZSEV: // $X <- $Zs($Y) mod 2 == 0]
-        R(x, ((R(y) < 0) ? R(z) : 0) );
+        zsev();
         break;
       case ZSEVI: // $X <- Zs($Y) mod 2 == 0]
-        R(x, ((R(y) < 0) ? z : 0) );
+        zsevi();
         break;
       case AND: // v($X) <- v($Y) & v($Z)
-        R(x, R(y) & R(z));
+        AND();
         break;
       case ANDI: // v($X) <- v($Y) & v(Z)
-        R(x, R(y) & z);
+        andi();
         break;
       case OR: // v($X) <- v($Y) v v($Z)
-        R(x, R(y) | R(z));
+        OR();
         break;
       case ORI: // v($X) <- v($Y) v v(Z)
-        R(x, R(y) | z);
+        ori();
         break;
       case XOR: // v($X) <-  v($Y) xor v($Z)
-        R(x, R(y) ^ R(z));
+        XOR();
         break;
       case XORI: // v($X) <-  v($Y) xor v(Z)
-        R(x, R(y) ^ z);
+        xori();
         break;
       case ANDN: // v($X) <- v($Y) v ~v($Z)
-        R(x, R(y) & ~R(z));
+        andn();
         break;
       case ANDNI: // v($X) <- v($Y) v ~v(Z)
-        R(x, R(y) & ~z);
+        andni();
         break;
       case ORN: // v($X) <- v($Y) v ~v($Z)
-        R(x, R(y) | ~R(z));
+        orn();
         break;
       case ORNI: // v($X) <- v($Y) v ~v(Z)
-        R(x, R(y) | ~z);
+        orni();
         break;
       case NAND: // ~v($X) <- v($Y) & v($Z)
-        R(x, ~( R(y) & R(z)) );
+        nand();
         break;
       case NANDI: // ~v($X) <- v($Y) & v(Z)
-        R(x, ~( R(y) & z) );
+        nandi();
         break;
       case NOR: // ~v($X) <- v($Y) v v($Z)
-        R(x, ~( R(y) | R(z)) );
+        nor();
         break;
       case NORI: // ~v($X) <- v($Y) v v(Z)
-        R(x, ~( R(y) | z) );
+        nori();
         break;
       case NXOR: // ~v($X) <- v($Y) xor v($Z)
-        R(x, ~( R(y) ^ R(z)) );
+        nxor();
         break;
       case NXORI: // ~v($X) <- v($Y) xor v(Z)
-        R(x, ~( R(y) ^ z) );
+        nxori();
         break;
       case MUX: // v($X) <- (v($Y) & v(rM)) | (v($Z) & ~v(rM))
-        R(x, (R(y) & g(Address(rM))) | (R(z) & ~g(Address(rM))) );
+        mux();
         break;
       case MUXI: // v($X) <- (v($Y) & v(rM)) | (v(Z) & ~v(rM))
-        R(x, (R(y) & g(Address(rM))) | (z & ~g(Address(rM))) );
+        muxi();
         break;
       case SADD: // s($X) <- s(sum(v($Y) & ~v($Z)))
-        {
-        Morsel temp( R(y) & ~R(z) );
-        R(x, temp.count() );
-        //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
-        }
-        break;
+        sadd();
+       break;
 
       case SADDI: // s($X) <- s(sum(v($Y) & ~v(Z)))
-        {
-        Morsel temp( R(y) & ~z );
-        R(x, temp.count() );
-        //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
-        }
-        break;
+        saddi();
+       break;
 
       case BDIF: // b($X) <- b($Y) .- b($Z)
-        {
-        Morsel b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
-        Morsel b1 = ((R(y)>> 8)&0xFF) - ((R(z)>> 8)&0xFF);
-        Morsel b2 = ((R(y)>>16)&0xFF) - ((R(z)>>16)&0xFF);
-        Morsel b3 = ((R(y)>>24)&0xFF) - ((R(z)>>24)&0xFF);
-        Morsel b4 = ((R(y)>>32)&0xFF) - ((R(z)>>32)&0xFF);
-        Morsel b5 = ((R(y)>>40)&0xFF) - ((R(z)>>40)&0xFF);
-        Morsel b6 = ((R(y)>>48)&0xFF) - ((R(z)>>48)&0xFF);
-        Morsel b7 = ((R(y)>>56)&0xFF) - ((R(z)>>56)&0xFF);
-        b0 = (b0 < 0) ? 0 : b0;
-        b1 = (b1 < 0) ? 0 : b1;
-        b2 = (b2 < 0) ? 0 : b2;
-        b3 = (b3 < 0) ? 0 : b3;
-        b4 = (b4 < 0) ? 0 : b4;
-        b5 = (b5 < 0) ? 0 : b5;
-        b6 = (b6 < 0) ? 0 : b6;
-        b7 = (b7 < 0) ? 0 : b7;
-        R(x, (b7<<56) & (b6<<48) & (b5<<40) & (b4<<32) & (b3<<24) & (b2<<16)
-              & (b1<<8) & (b0<<0) );
-        }
-        break;
+        bdif();
+       break;
 
       case BDIFI: // b($X) <- b($Y) .- b(Z)
-        {
-        Morsel b0 = ((R(y)>> 0)&0xFF) - ((uzi>> 0)&0xFF);
-        Morsel b1 = ((R(y)>> 8)&0xFF) - ((uzi>> 8)&0xFF);
-        Morsel b2 = ((R(y)>>16)&0xFF) - ((uzi>>16)&0xFF);
-        Morsel b3 = ((R(y)>>24)&0xFF) - ((uzi>>24)&0xFF);
-        Morsel b4 = ((R(y)>>32)&0xFF) - ((uzi>>32)&0xFF);
-        Morsel b5 = ((R(y)>>40)&0xFF) - ((uzi>>40)&0xFF);
-        Morsel b6 = ((R(y)>>48)&0xFF) - ((uzi>>48)&0xFF);
-        Morsel b7 = ((R(y)>>56)&0xFF) - ((uzi>>56)&0xFF);
-        b0 = (b0 < 0) ? 0 : b0;
-        b1 = (b1 < 0) ? 0 : b1;
-        b2 = (b2 < 0) ? 0 : b2;
-        b3 = (b3 < 0) ? 0 : b3;
-        b4 = (b4 < 0) ? 0 : b4;
-        b5 = (b5 < 0) ? 0 : b5;
-        b6 = (b6 < 0) ? 0 : b6;
-        b7 = (b7 < 0) ? 0 : b7;
-        R(x, (b7<<56) & (b6<<48) & (b5<<40) & (b4<<32) & (b3<<24) & (b2<<16)
-              & (b1<<8) & (b0<<0) );
-        }
-        break;
+        bdifi();
+       break;
 
       case WDIF: // w($X) <- w($Y) - w($Z)
-        {
-        Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
-        Morsel w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
-        Morsel w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
-        Morsel w3 = ((R(y)>>48)&0xFFFF) - ((R(z)>>48)&0xFFFF);
-        w0 = (w0 < 0) ? 0 : w0;
-        w1 = (w0 < 0) ? 0 : w1;
-        w2 = (w0 < 0) ? 0 : w2;
-        w3 = (w0 < 0) ? 0 : w3;
-        R(x, (w3<<48)&(w2<<32)&(w1<<16)&(w0<<0) );
-        }
-        break;
+        wdif();
+       break;
 
       case WDIFI: // w($X) <- w($Y) - w(Z)
-        {
-        Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((uzi>> 0)&0xFFFF);
-        Morsel w1 = ((R(y)>>16)&0xFFFF) - ((uzi>>16)&0xFFFF);
-        Morsel w2 = ((R(y)>>32)&0xFFFF) - ((uzi>>32)&0xFFFF);
-        Morsel w3 = ((R(y)>>48)&0xFFFF) - ((uzi>>48)&0xFFFF);
-        w0 = (w0 < 0) ? 0 : w0;
-        w1 = (w0 < 0) ? 0 : w1;
-        w2 = (w0 < 0) ? 0 : w2;
-        w3 = (w0 < 0) ? 0 : w3;
-        R(x, (w3<<48)&(w2<<32)&(w1<<16)&(w0<<0) );
-        }
-        break;
+        wdifi();
+       break;
 
       case TDIF: // t($X) <- t($Y) - w($Z)
-        {
-        Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
-        Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
-        t0 = (t0 < 0) ? 0 : t0;
-        t1 = (t1 < 0) ? 0 : t1;
-        R(x, (t1<<32)&(t0<<0) );
-        }
-        break;
+        tdif();
+       break;
 
       case TDIFI: // t($X) <- t($Y) - w(Z)
-        {
-        Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((uzi>> 0)&0xFFFFFFFF);
-        Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((uzi>>32)&0xFFFFFFFF);
-        t0 = (t0 < 0) ? 0 : t0;
-        t1 = (t1 < 0) ? 0 : t1;
-        R(x, (t1<<32)&(t0<<0) );
-        }
-        break;
+        tdifi();
+       break;
 
       case ODIF: // u($X) <- u($Y) - u($Z)
-        {
-        Morsel u0 = (R(y)) - R(z);
-        u0 = (u0 > R(y)) ? 0 : u0;
-        }
-        break;
+        odif();
+       break;
 
       case ODIFI: // u($X) <- u($Y) - u(Z)
-        {
-        Morsel u0 = (R(y)) - z;
-        u0 = (u0 > R(y)) ? 0 : u0;
-        }
-        break;
+        odifi();
+       break;
 
       case MOR: // m($X) <- m($Z) vx m($Y)
-        {
-        Morsel r;
-        for (int i=0; i<64; i++)
-          for (int j=0; j<64; j++)
-          {
-            r = (R(z)>>i)&(R(y)>>i);
-            for (int k=2; k<=64;k++)
-              r = r | ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
-            r=r&1;
-            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
-          }
-        }
+        mor();
         break;
 
       case MORI: // m($X) <- m(Z) vx m($Y)
-        {
-        Morsel r;
-        for (int i=0; i<64; i++)
-          for (int j=0; j<64; j++)
-          {
-            r = (z>>i)&(R(y)>>i);
-            for (int k=2; k<=64;k++)
-              r = r | ( (z>>(i+8*k)) & (R(y)>>(k+8*j)) );
-            r=r&1;
-            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
-          }
-        }
+        mori();
         break;
  
       case MXOR: // m($X) <- m($Z) xor x m($Y)
-        {
-        Morsel r;
-        for (int i=0; i<8; i++)
-          for (int j=0; j<8; j++)
-          {
-            r = (R(z)>>i)&(R(y)>>i);
-            for (int k=1; k<8;k++)
-              r = r ^ ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
-            r=r&1;
-            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
-          }
-        }
-        break;
+        mxor();
+       break;
 
       case MXORI: // m($X) <- m(Z) xor x m($Y)
-        {
-        Morsel r;
-        for (int i=0; i<8; i++)
-          for (int j=0; j<8; j++)
-          {
-            r = (z>>i)&(R(y)>>i);
-            for (int k=1; k<8;k++)
-              r = r ^ ( (z>>(i+8*k)) & (R(y)>>(k+8*j)) );
-            r=r&1;
-            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
-          }
-        }
-        break;
+        mxori();
+       break;
 
       case FADD: // f($X) <- f($Y) + f($Z)
-        {
-        double t = ( *(double*)&uy + *(double*)&uz );
-        R(x, *(unsigned long long int *)&t );
-        }
+        fadd();
         break;
 
       case FSUB: // f($X) <- f($Y) - f($Z)
-        {
-        double t = ( *(double*)&uy - *(double*)&uz );
-        R(x, *(unsigned long long int *)&t );
-        }
-        break;
+        fsub();
+       break;
 
       case FMUL: // f($X) <- f($Y) * f($Z)
-        {
-        double t = ( *(double*)&uy * *(double*)&uz );
-        R(x, *(unsigned long long int *)&t );
-        }
+        fmul();
         break;
 
       case FDIV: // f($X) <- f($Y) / f($Z)
-        {
-        double t = ( *(double*)&uy / *(double*)&uz );
-        R(x, *(unsigned long long int *)&t );
-        }
+        fdiv();
         break;
 
       case FREM: // f($X) <- f($Y) rem f($Z)
-        {
-        double t = fmod( *(double*)&uy , *(double*)&uz );
-        R(x, *(unsigned long long int *)&t );
-        }
-        break;
+        frem();
+       break;
 
       case FSQRT: // f($X) <-  f($Z)^(1/2)
-        {
-        double t = sqrt( *(double*)&uz );
-        R(x, *(unsigned long long int *)&t );
-        }
-        break;
+        fsqrt();
+       break;
 
       case FINT: // f($X) <- int f($Z)
-        R(x, (unsigned long long int)( *(double*)&uz ));
+        fint();
         break;
 
       case FCMP: // s($X) <- [f($Y) > f($Z)] - [f($Y) < f($Z)]
-        R(x, ((*(double*)&uy > *(double*)&uz) ? 1 : 0) 
-           - ((*(double*)&uy < *(double*)&uz) ? 1 : 0) );
+        fcmp();
         break;
 
       case FEQL: // s($X) <- [f($Y) == f($Z)]
-        R(x, *(double*)&uy == *(double*)&uz );
+        feql();
         break;
 
       case FUN: // s($X) <- [f($Y) || f($Z)]
-        R(x, fy != fy || fz != fz );
+        fun();
         break;
 
       case FCMPE: // s($X) <- [f($Y) } f($Z) (f(rE))] - [f($Y) { f($Z) (f(rE))]
-        {
-        int e;
-        frexp(fy.asFloat(), &e);
-        R(x, (fy > fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())) -
-             (fy < fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())));
-        }
+        fcmpe();
         break;
 
       case FEQLE: // s($X) <- [f($Y) ~= f($Z) (f(rE))]
-        {
-        int e;
-        frexp(fy.asFloat(), &e);
-        R(x, N(fy.asFloat(), fz.asFloat(), e, frE.asFloat()));
-        }
+        feqle();
         break;
 
       case FUNE: // s($X) <- [f($Y) || f($Z) (f(rE))]
-        R(x, fy != fy || fz != fz || frE != frE);
+        fune();
         break;
 
       case FIX: // s($X) <- int f($Z)
-        R(x, fz);
+        fix();
         break;
 
       case FIXU: // u($X) <- (int f($Z)) mod 2^64
-        R(x, fz);
+        fixu();
         break;
 
       case FLOT: // f($X) <- s($Z)
-        R(x, sz);
+        flot();
         break;
 
       case FLOTU: // f($x) <- u($Z)
-        R(x, uz);
+        flotu();
         break;
 
       case FLOTUI: // f($X) <- u(Z)
-        R(x, z);
+        flotui();
         break;
 
       case SFLOT: // f($X) <- f(T) <- s($Z)
-        R(x, fz);
+        sflot();
         break;
 
       case SFLOTI: // f($X) <- f(T) <- s(Z)
-        R(x, z);
+        sfloti();
         break;
 
       case SFLOTU: // f($X) <- f(T) <- u($Z)
-        R(x, fz);
+        sflotu();
         break;
 
       case SFLOTUI: // f($X) <- f(T) <- u(Z)
-        R(x, z);
+        sflotui();
         break;
 
       case LDSF: // f($X) <- f(M_4[A])
-        R(x, M(4, a));
+        ldsf();
         break;
 
       case LDSFI: // f($X) <- f(M_4[A])
-        R(x, M(4, uy+z));
+        ldsfi();
         break;
  
       case STSF: // f(M_4[A]) <- f($X)
-        M(4, a, fx);
+        stsf();
         break;
 
       case STSFI: // f(M_4[A]) <- f($X)
-        M(4, uy+z, fx);
+        stsfi();
         break;
 
       case FLOTI: // f($X) <- s(Z)
-        R(x, z);
+        floti();
         break;
 
       case SETH: // u($X) <- YZ x2^48
-        R(x, ((uyi<<8) & uzi) << 48);
+        seth();
         break;
 
       case SETMH: // u($X) <- YZ x2^32
-        R(x, ((uyi<<8) & uzi) << 32);
+        setmh();
         break;
 
       case SETML: // u($Z) <- YZ
-        R(x, ((uyi<<8) & uzi));
+        setml();
         break;
 
       case SETL: // u($X) <- YZ x2^16
-        R(x, ((uyi<<8) & uzi) << 16);
+        setl();
         break;
 
       case INCH:  // u($X) <- ( u($X) + YZ x2^48) mod 2^64
-        R(x, R(x) + (((uyi<<8) & uzi) << 48) );
+        inch();
         break;
 
       case INCMH: // u($X) <- ( u($X) + YZ x2^32) mod 2^64
-        R(x, R(x) + (((uyi<<8) & uzi) << 32) );
+        incmh();
         break;
 
       case INCML: // u($X) <- ( u($X) + YZ x2^16) mod 2^64
-        R(x, R(x) + (((uyi<<8) & uzi) << 16) );
+        incml();
         break;
         
       case INCL: // u($X) <- ( u($X) + YZ) mod 2^64
-        R(x, ux + ((uyi<<8) & uzi) );
+        incl();
         break;
 
       case ORH: // v($X) <- v($X) v v(YZ << 48)
-        R(x, ux | (((uyi<<8) & uzi)<<48) );
+        orh();
         break;
 
       case ORMH: // v($X) <- v($X) v v(YZ << 32)
-        R(x, ux | (((uyi<<8) & uzi)<<32) );
+        ormh();
         break;
 
       case ORML: // v($X) <- v($X) v v(YZ << 16)
-        R(x, ux | (((uyi<<8) & uzi)<<16) );
+        orml();
         break;
 
       case ORL: // v($X) <- v($X) v v(YZ)
-        R(x, ux | ((uyi<<8) & uzi) );
+        orl();
         break;
 
       case ANDNH: // v($X) <- v($X) ^ ~v(YZ << 48)
-        R(x, ux & ~(((uyi<<8) & uzi)<<48) );
+        andnh();
         break;
 
       case ANDNMH: // v($X) <- v($X) ^ ~v(YZ<<32)
-        R(x, ux & ~(((uyi<<8) & uzi)<<32) );
+        andnmh();
         break;
 
       case ANDNML: // v($X) <- v($X) ^ ~v(YZ<<16)
-        R(x, ux & ~(((uyi<<8) & uzi)<<16) );
+        andnml();
         break;
 
       case ANDNL: // v($X) <- v($X) ^ ~v(YZ)
-        R(x, ux & ~((uyi<<8) & uzi) );
+        andnl();
         break;
       
       case GO: // u($X) <- @+4, then @<-A
-        R(Address(x), target.asMorsel());
-        target = a;
+        go();
         break;
 
       case BN: // if s($X) < 0, set @ <- RA
-        target = ( ( sx < 0 ) ? ra : target );
+        bn();
         break;
 
       case BZ: // if $X = 0, set @ <- RA
-        target = ( ( uz == 0 ) ? ra : target );
+        bz();
         break;
 
       case BP: // if s($X) = 0, set @ <- RA
-        target = ( ( sz > 0 ) ? ra : target );
+        bp();
         break;
 
       case BOD: // if s($X) mod 2 == 1, set @ <- RA
-        target = ( ( (uz & 1) == 1 ) ? ra : target );
+        bod();
         break;
 
       case BNN: // if s($X) >= 0, set @ <- RA
@@ -1687,203 +1470,1300 @@ void mmix::step(int inst)
   setip( target );
 }
 
-void bnn()
+void mmix::ldtu()
 {
-  target = ( ( sz >= 0 ) ? ra : target );
+        R(x, M(4, a) );
 }
 
-void bnz()
+void mmix::ldtui()
 {
-  target = ( ( sz != 0 ) ? ra : target );
+        R(x, M(4, uy+z) );
 }
 
-void bnp()
+void mmix::ldo()
 {
-  target = ( ( sz <= 0 ) ? ra : target );
+        R(x, (M(8, a)) );
 }
 
-void bev()
+void mmix::ldoi()
 {
-  target = ( ( (uz & 1) == 0 ) ? ra : target );
+        R(x, (M(8, uy+z)) );
 }
 
-void pbn()
+void mmix::ldou()
+{
+        R(x, M(8, a) );
+}
+
+void mmix::ldoui()
+{
+        R(x, M(8, uy+z) );
+}
+
+void mmix::ldht()
+{
+        R(x, (M(4, a) << 32));
+}
+
+void mmix::ldhti()
+{
+        R(x, (M(4, uy+z) << 32));
+}
+
+void mmix::stb()
+{
+        M(1, a, R(x));
+}
+
+void mmix::stbi()
+{
+        M(1, uy+z, R(x));
+}
+
+void mmix::stw()
+{
+        M(2, a, R(x));
+}
+
+void mmix::stwi()
+{
+        M(2, uy+z, R(x));
+}
+
+void mmix::stt()
+{
+        M(4, a, R(x));
+}
+
+void mmix::stti()
+{
+        M(4, uy+z, R(x));
+}
+
+void mmix::sto()
+{
+        M(8, a, R(x));
+}
+
+void mmix::stoi()
+{
+        M(8, uy+z, R(x));
+}
+
+void mmix::stbu()
+{
+        M(1, a, R(x));
+}
+
+void mmix::stbui()
+{
+        M(1, uy+z, R(x));
+}
+
+void mmix::stwu()
+{
+        M(2, a, R(x));
+}
+
+void mmix::stwui()
+{
+        M(2, uy+z, R(x));
+}
+
+void mmix::sttu()
+{
+        M(4, a, R(x));
+}
+
+void mmix::sttui()
+{
+        M(4, uy+z, R(x));
+}
+
+void mmix::stou()
+{
+        M(8, a, R(x));
+}
+
+void mmix::stoui()
+{
+        M(8, uy+z, R(x));
+}
+
+void mmix::stht()
+{
+        M(4, a, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
+}
+
+void mmix::sthti()
+{
+        M(4, uy+z, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
+}
+
+void mmix::stco()
+{
+        M(8, a, x);
+}
+
+void mmix::stcoi()
+{
+        M(8, uy+z, x);
+}
+
+void mmix::add()
+{
+        R(x, (R(y)) + R(z));
+}
+
+void mmix::addi()
+{
+        R(x, (R(y)) + (z));
+}
+
+void mmix::sub()
+{
+        R(x, (R(y)) - (R(z)));
+}
+
+void mmix::subi()
+{
+        R(x, (R(y)) - (z));
+}
+
+void mmix::mul()
+{
+        R(x, (R(y)) * (R(z)));
+}
+
+void mmix::muli()
+{
+        R(x, (R(y)) * (z));
+}
+
+void mmix::div()
+{        R(x, (R(z) == 0) ? Morsel(0) : 
+              ((R(y)) / (R(z))));
+        g(Address(rR), (R(z) == 0) ? R(y) :
+              ((R(y)) % (R(z))));
+}
+
+void mmix::divi()
+{        R(x, (z == 0) ? Morsel(0) :
+              ((R(y)) / (z)));
+        g(Address(rR), (z == 0) ? R(y) :
+              ((R(y)) % (z)));
+}
+
+void mmix::addu()
+{
+        R(x, a);
+}
+
+void mmix::addui()
+{
+        R(x, (ux + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::subu()
+{
+        R(x, (R(y) - R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::subui()
+{
+        R(x, (R(y) - z) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::mulu()
+{        {
+        Morsel carry;
+        Morsel result;
+        wideMult(R(y), R(z), &carry, &result);
+        g(Address(rH), carry);
+        R(x, result);
+        }
+ 
+}
+
+void mmix::mului()
+{        {
+        Morsel carry;
+        Morsel result;
+        wideMult(R(y), z, &carry, &result);
+        g(Address(rH), carry);
+        R(x, result);
+        }
+ 
+}
+
+void mmix::divu()
+{        {
+        Morsel numerator_hi;
+        Morsel numerator_lo;
+        Morsel divisor;
+        Morsel quotient;
+        Morsel remainder;
+
+        numerator_hi = g(Address(rD));
+        numerator_lo = R(y);
+        divisor = R(z);
+
+        if (divisor > numerator_hi)
+        {
+          wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
+          R(x, quotient);
+          g(Address(rR), remainder);
+        } else {
+          R(x, numerator_hi);
+          g(Address(rR), numerator_lo );
+        }
+  
+        }
+}
+
+void mmix::divui()
+{        {
+        Morsel numerator_hi;
+        Morsel numerator_lo;
+        Morsel divisor;
+        Morsel quotient;
+        Morsel remainder;
+
+        numerator_hi = g(Address(rD));
+        numerator_lo = R(y);
+        divisor = z;
+
+        if (divisor > numerator_hi)
+        {
+          wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
+          R(x, quotient);
+          g(Address(rR), remainder);
+        } else {
+          R(x, numerator_hi);
+          g(Address(rR), numerator_lo );
+        }
+  
+        }
+}
+ 
+void mmix::i2addu()
+{
+        R(x, (R(y)*2 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i2addui()
+{
+        R(x, (R(y)*2 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i4addu()
+{
+        R(x, (R(y)*4 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i4addui()
+{
+        R(x, (R(y)*4 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i8addu()
+{
+        R(x, (R(y)*8 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i8addui()
+{
+        R(x, (R(y)*8 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i16addu()
+{
+        R(x, (R(y)*16 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::i16addui()
+{
+        R(x, (R(y)*16 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
+}
+
+void mmix::neg()
+{
+        R(x, y-R(z));
+}
+
+void mmix::negi()
+{
+        R(x, y-z);
+}
+
+void mmix::negu()
+{
+        R(x, y - R(z));
+}
+
+void mmix::negui()
+{
+        R(x, y - z);
+}
+
+void mmix::sl()
+{
+        R(x, R(y) << R(z));
+}
+
+void mmix::sli()
+{
+        R(x, R(y) << z);
+}
+
+void mmix::slu()
+{
+        R(x, R(y) << R(z));
+}
+
+void mmix::slui()
+{
+        R(x, R(y) << z);
+}
+
+void mmix::sr()
+{
+        R(x, R(y) >> R(z) );
+}
+
+void mmix::sri()
+{
+        R(x, R(y) >> z );
+}
+
+void mmix::sru()
+{
+        R(x, R(y) >> R(z) );
+}
+
+void mmix::srui()
+{
+        R(x, R(y) >> z );
+}
+
+void mmix::cmp()
+{
+        R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+}
+
+void mmix::cmpi()
+{
+        R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
+}
+
+void mmix::cmpu()
+{
+        R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
+}
+
+void mmix::cmpui()
+{
+        R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
+}
+
+void mmix::csn()
+{
+        R(x, ((R(y) < 0) ? R(z) : R(x)) );
+}
+
+void mmix::csni()
+{
+        R(x, ((R(y) < 0) ? z : R(x)) );
+}
+
+void mmix::csz()
+{
+        R(x, ((R(y) == 0) ? R(z) : R(x)) );
+}
+
+void mmix::cszi()
+{
+        R(x, ((R(y) == 0) ? z : R(x)) );
+}
+
+void mmix::csp()
+{
+        R(x, ((R(y) > 0) ? R(z) : R(x)) );
+}
+
+void mmix::cspi()
+{
+        R(x, ((R(y) > 0) ? z : R(x)) );
+}
+
+void mmix::csod()
+{
+        R(x, ( ((R(y) & 0x01) == 1) ? R(z) : R(x)) );
+}
+
+void mmix::csodi()
+{
+        R(x, ( ((R(y) & 0x01) == 1) ? z : R(x)) );
+}
+
+void mmix::csnn()
+{
+        R(x, ((R(y) >= 0) ? R(z) : R(x)) );
+}
+
+void mmix::csnni()
+{
+        R(x, ((R(y) >= 0) ? z : R(x)) );
+}
+
+void mmix::csnz()
+{
+        R(x, ((R(y) != 0) ? R(z) : R(x)) );
+}
+
+void mmix::csnzi()
+{
+        R(x, ((R(y) != 0) ? z : R(x)) );
+}
+
+void mmix::csnp()
+{
+        R(x, ((R(y) <= 0) ? R(z) : R(x)) );
+}
+
+void mmix::csnpi()
+{
+        R(x, ((R(y) <= 0) ? z : R(x)) );
+}
+
+void mmix::csev()
+{
+        R(x, ( ((R(y) & 0x01) == 0) ? R(z) : R(x)) );
+}
+
+void mmix::csevi()
+{
+        R(x, ( ((R(y) & 0x01) == 0) ? z : R(x)) );
+}
+
+void mmix::zsn()
+{
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+}
+
+void mmix::zsni()
+{
+        R(x, ((R(y) < 0) ? z : 0) );
+}
+
+void mmix::zsz()
+{
+        R(x, ((R(y) == 0) ? R(z) : 0) );
+}
+
+void mmix::zszi()
+{
+        R(x, ((R(y) == 0) ? z : 0) );
+}
+
+void mmix::zsp()
+{
+        R(x, ((R(y) > 0) ? R(z) : 0) );
+}
+
+void mmix::zspi()
+{
+        R(x, ((R(y) > 0) ? z : 0) );
+}
+
+void mmix::zsod()
+{
+        R(x, (((R(y) & 0x01) == 1) ? R(z) : 0) );
+}
+
+void mmix::zsodi()
+{
+        R(x, (((R(y) & 0x01) == 1) ? z : 0) );
+}
+
+void mmix::zsnn()
+{
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+}
+
+void mmix::zsnni()
+{
+        R(x, ((R(y) < 0) ? z : 0) );
+}
+
+void mmix::zsnz()
+{
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+}
+void mmix::zsnzi()
+{
+        R(x, ((R(y) < 0) ? z : 0) );
+}
+
+void mmix::zsnp()
+{
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+}
+
+void mmix::zsnpi()
+{
+        R(x, ((R(y) < 0) ? z : 0) );
+}
+
+void mmix::zsev()
+{
+        R(x, ((R(y) < 0) ? R(z) : 0) );
+}
+
+void mmix::zsevi()
+{
+        R(x, ((R(y) < 0) ? z : 0) );
+}
+
+void mmix::AND()
+{
+        R(x, R(y) & R(z));
+}
+
+void mmix::andi()
+{
+        R(x, R(y) & z);
+}
+
+void mmix::OR()
+{
+        R(x, R(y) | R(z));
+}
+
+void mmix::ori()
+{
+        R(x, R(y) | z);
+}
+
+void mmix::xor()
+{
+        R(x, R(y) ^ R(z));
+}
+
+void mmix::xori()
+{
+        R(x, R(y) ^ z);
+}
+
+void mmix::andn()
+{
+        R(x, R(y) & ~R(z));
+}
+
+void mmix::andni()
+{
+        R(x, R(y) & ~z);
+}
+
+void mmix::orn()
+{
+        R(x, R(y) | ~R(z));
+}
+
+void mmix::orni()
+{
+        R(x, R(y) | ~z);
+}
+
+void mmix::nand()
+{
+        R(x, ~( R(y) & R(z)) );
+}
+
+void mmix::nandi()
+{
+        R(x, ~( R(y) & z) );
+}
+
+void mmix::nor()
+{
+        R(x, ~( R(y) | R(z)) );
+}
+
+void mmix::nori()
+{
+        R(x, ~( R(y) | z) );
+}
+
+void mmix::nxor()
+{
+        R(x, ~( R(y) ^ R(z)) );
+}
+
+void mmix::nxori()
+{
+        R(x, ~( R(y) ^ z) );
+}
+
+void mmix::mux()
+{
+        R(x, (R(y) & g(Address(rM))) | (R(z) & ~g(Address(rM))) );
+}
+
+void mmix::muxi()
+{
+        R(x, (R(y) & g(Address(rM))) | (z & ~g(Address(rM))) );
+}
+
+void mmix::sadd()
+        {
+        Morsel temp( R(y) & ~R(z) );
+        R(x, temp.count() );
+        //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
+        }
+ 
+void mmix::saddi()
+        {
+        Morsel temp( R(y) & ~z );
+        R(x, temp.count() );
+        //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
+        }
+ 
+void mmix::bdif()
+        {
+        Morsel b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
+        Morsel b1 = ((R(y)>> 8)&0xFF) - ((R(z)>> 8)&0xFF);
+        Morsel b2 = ((R(y)>>16)&0xFF) - ((R(z)>>16)&0xFF);
+        Morsel b3 = ((R(y)>>24)&0xFF) - ((R(z)>>24)&0xFF);
+        Morsel b4 = ((R(y)>>32)&0xFF) - ((R(z)>>32)&0xFF);
+        Morsel b5 = ((R(y)>>40)&0xFF) - ((R(z)>>40)&0xFF);
+        Morsel b6 = ((R(y)>>48)&0xFF) - ((R(z)>>48)&0xFF);
+        Morsel b7 = ((R(y)>>56)&0xFF) - ((R(z)>>56)&0xFF);
+        b0 = (b0 < 0) ? 0 : b0;
+        b1 = (b1 < 0) ? 0 : b1;
+        b2 = (b2 < 0) ? 0 : b2;
+        b3 = (b3 < 0) ? 0 : b3;
+        b4 = (b4 < 0) ? 0 : b4;
+        b5 = (b5 < 0) ? 0 : b5;
+        b6 = (b6 < 0) ? 0 : b6;
+        b7 = (b7 < 0) ? 0 : b7;
+        R(x, (b7<<56) & (b6<<48) & (b5<<40) & (b4<<32) & (b3<<24) & (b2<<16)
+              & (b1<<8) & (b0<<0) );
+        }
+ 
+void mmix::bdifi()
+{        {
+        Morsel b0 = ((R(y)>> 0)&0xFF) - ((uzi>> 0)&0xFF);
+        Morsel b1 = ((R(y)>> 8)&0xFF) - ((uzi>> 8)&0xFF);
+        Morsel b2 = ((R(y)>>16)&0xFF) - ((uzi>>16)&0xFF);
+        Morsel b3 = ((R(y)>>24)&0xFF) - ((uzi>>24)&0xFF);
+        Morsel b4 = ((R(y)>>32)&0xFF) - ((uzi>>32)&0xFF);
+        Morsel b5 = ((R(y)>>40)&0xFF) - ((uzi>>40)&0xFF);
+        Morsel b6 = ((R(y)>>48)&0xFF) - ((uzi>>48)&0xFF);
+        Morsel b7 = ((R(y)>>56)&0xFF) - ((uzi>>56)&0xFF);
+        b0 = (b0 < 0) ? 0 : b0;
+        b1 = (b1 < 0) ? 0 : b1;
+        b2 = (b2 < 0) ? 0 : b2;
+        b3 = (b3 < 0) ? 0 : b3;
+        b4 = (b4 < 0) ? 0 : b4;
+        b5 = (b5 < 0) ? 0 : b5;
+        b6 = (b6 < 0) ? 0 : b6;
+        b7 = (b7 < 0) ? 0 : b7;
+        R(x, (b7<<56) & (b6<<48) & (b5<<40) & (b4<<32) & (b3<<24) & (b2<<16)
+              & (b1<<8) & (b0<<0) );
+        }
+ 
+}
+
+void mmix::wdif()
+{        {
+        Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
+        Morsel w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
+        Morsel w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
+        Morsel w3 = ((R(y)>>48)&0xFFFF) - ((R(z)>>48)&0xFFFF);
+        w0 = (w0 < 0) ? 0 : w0;
+        w1 = (w0 < 0) ? 0 : w1;
+        w2 = (w0 < 0) ? 0 : w2;
+        w3 = (w0 < 0) ? 0 : w3;
+        R(x, (w3<<48)&(w2<<32)&(w1<<16)&(w0<<0) );
+        }
+ 
+}
+
+void mmix::wdifi()
+        {
+        Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((uzi>> 0)&0xFFFF);
+        Morsel w1 = ((R(y)>>16)&0xFFFF) - ((uzi>>16)&0xFFFF);
+        Morsel w2 = ((R(y)>>32)&0xFFFF) - ((uzi>>32)&0xFFFF);
+        Morsel w3 = ((R(y)>>48)&0xFFFF) - ((uzi>>48)&0xFFFF);
+        w0 = (w0 < 0) ? 0 : w0;
+        w1 = (w0 < 0) ? 0 : w1;
+        w2 = (w0 < 0) ? 0 : w2;
+        w3 = (w0 < 0) ? 0 : w3;
+        R(x, (w3<<48)&(w2<<32)&(w1<<16)&(w0<<0) );
+        }
+ 
+void mmix::tdif()
+        {
+        Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
+        Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
+        t0 = (t0 < 0) ? 0 : t0;
+        t1 = (t1 < 0) ? 0 : t1;
+        R(x, (t1<<32)&(t0<<0) );
+        }
+ 
+void mmix::tdifi()
+        {
+        Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((uzi>> 0)&0xFFFFFFFF);
+        Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((uzi>>32)&0xFFFFFFFF);
+        t0 = (t0 < 0) ? 0 : t0;
+        t1 = (t1 < 0) ? 0 : t1;
+        R(x, (t1<<32)&(t0<<0) );
+        }
+ 
+void mmix::ofif()
+{        {
+        Morsel u0 = (R(y)) - R(z);
+        u0 = (u0 > R(y)) ? 0 : u0;
+        }
+ 
+}
+
+void mmix::odifi()
+{        {
+        Morsel u0 = (R(y)) - z;
+        u0 = (u0 > R(y)) ? 0 : u0;
+        }
+ 
+}
+
+void mmix::mor()
+{        {
+        Morsel r;
+        for (int i=0; i<64; i++)
+          for (int j=0; j<64; j++)
+          {
+            r = (R(z)>>i)&(R(y)>>i);
+            for (int k=2; k<=64;k++)
+              r = r | ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+}
+
+void mmix::mori()
+{
+        {
+        Morsel r;
+        for (int i=0; i<64; i++)
+          for (int j=0; j<64; j++)
+          {
+            r = (z>>i)&(R(y)>>i);
+            for (int k=2; k<=64;k++)
+              r = r | ( (z>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+}
+
+void mmix::mxor()
+{        {
+        Morsel r;
+        for (int i=0; i<8; i++)
+          for (int j=0; j<8; j++)
+          {
+            r = (R(z)>>i)&(R(y)>>i);
+            for (int k=1; k<8;k++)
+              r = r ^ ( (R(z)>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+ 
+}
+
+void mmix::mxori()
+{        {
+        Morsel r;
+        for (int i=0; i<8; i++)
+          for (int j=0; j<8; j++)
+          {
+            r = (z>>i)&(R(y)>>i);
+            for (int k=1; k<8;k++)
+              r = r ^ ( (z>>(i+8*k)) & (R(y)>>(k+8*j)) );
+            r=r&1;
+            R(x, (R(x) & (~(1<<(i+8*j)))) | (r<<(i+8*j)) );
+          }
+        }
+ 
+}
+
+void mmix::fadd()
+{
+{
+        double t = ( *(double*)&uy + *(double*)&uz );
+        R(x, *(unsigned long long int *)&t );
+        }
+
+}
+
+void mmix::fsub()
+{        {
+        double t = ( *(double*)&uy - *(double*)&uz );
+        R(x, *(unsigned long long int *)&t );
+        }
+ 
+}
+
+void mmix::fmul()
+{        {
+        double t = ( *(double*)&uy * *(double*)&uz );
+        R(x, *(unsigned long long int *)&t );
+        }
+ 
+}
+
+void mmix::fdiv()
+{        {
+        double t = ( *(double*)&uy / *(double*)&uz );
+        R(x, *(unsigned long long int *)&t );
+        }
+ 
+}
+
+void mmix::frem()
+{
+        {
+        double t = fmod( *(double*)&uy , *(double*)&uz );
+        R(x, *(unsigned long long int *)&t );
+        }
+ 
+}
+
+void mmix::fsqrt()
+{        {
+        double t = sqrt( *(double*)&uz );
+        R(x, *(unsigned long long int *)&t );
+        }
+ 
+}
+
+void mmix::fint()
+{
+  R(x, (unsigned long long int)( *(double*)&uz ));
+}
+
+void mmix::fcmp()
+{        R(x, ((*(double*)&uy > *(double*)&uz) ? 1 : 0) 
+           - ((*(double*)&uy < *(double*)&uz) ? 1 : 0) );
+ 
+}
+
+void mmix::feql()
+{
+        R(x, *(double*)&uy == *(double*)&uz );
+}
+
+void mmix::fun()
+{
+        R(x, fy != fy || fz != fz );
+}
+
+void mmix::fcmpe()
+        {
+        int e;
+        frexp(fy.asFloat(), &e);
+        R(x, (fy > fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())) -
+             (fy < fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())));
+        }
+ 
+void mmix::feqle()
+{
+        int e;
+        frexp(fy.asFloat(), &e);
+        R(x, N(fy.asFloat(), fz.asFloat(), e, frE.asFloat()));
+}
+
+void mmix::fune()
+{
+  R(x, fy != fy || fz != fz || frE != frE);
+}
+
+void mmix::fix()
+{
+  R(x, fz);
+}
+
+void mmix::fixu()
+{
+  R(x, fz);
+}
+
+void mmix::flot()
+{
+        R(x, sz);
+}
+
+void mmix::flotu()
+{
+  R(x, uz);
+}
+
+void mmix::flotui()
+{
+  R(x, z);
+}
+
+void mmix::sflot()
+{
+  R(x, fz);
+}
+
+void mmix::sfloti()
+{
+  R(x, z);
+}
+
+void mmix::sflotu()
+{
+  R(x, fz);
+}
+
+void mmix::sflotui()
+{
+  R(x, z);
+}
+
+void mmix::ldsf()
+{
+  R(x, M(4, a));
+}
+
+void mmix::ldsfi()
+{
+  R(x, M(4, uy+z));
+}
+
+void mmix::stsf()
+{
+  M(4, a, fx);
+}
+
+void mmix::stsfi()
+{
+  M(4, uy+z, fx);
+}
+
+void mmix::floti()
+{
+  R(x, z);
+}
+
+void mmix::seth()
+{
+  R(x, ((uyi<<8) & uzi) << 48);
+}
+
+void mmix::setmh()
+{
+  R(x, ((uyi<<8) & uzi) << 32);
+}
+
+void mmix::setml()
+{
+  R(x, ((uyi<<8) & uzi));
+}
+
+void mmix::setl()
+{
+  R(x, ((uyi<<8) & uzi) << 16);
+}
+
+void mmix::inch()
+{
+  R(x, R(x) + (((uyi<<8) & uzi) << 48) );
+}
+
+void mmix::incmh()
+{
+  R(x, R(x) + (((uyi<<8) & uzi) << 32) );
+}
+
+void mmix::incml()
+{
+  R(x, R(x) + (((uyi<<8) & uzi) << 16) );
+}
+
+void mmix::incl()
+{
+  R(x, ux + ((uyi<<8) & uzi) );
+}
+
+void mmix::orh()
+{
+  R(x, ux | (((uyi<<8) & uzi)<<48) );
+}
+
+void mmix::ormh()
+{
+  R(x, ux | (((uyi<<8) & uzi)<<32) );
+}
+
+void mmix::orml()
+{
+  R(x, ux | (((uyi<<8) & uzi)<<16) );
+}
+
+void mmix::orl()
+{
+        R(x, ux | ((uyi<<8) & uzi) );
+}
+
+void mmix::andnh()
+{
+        R(x, ux & ~(((uyi<<8) & uzi)<<48) );
+}
+
+void mmix::andnmh()
+{
+  R(x, ux & ~(((uyi<<8) & uzi)<<32) );
+}
+
+void mmix::andnml()
+{
+  R(x, ux & ~(((uyi<<8) & uzi)<<16) );
+}
+
+void mmix::andnl()
+{
+  R(x, ux & ~((uyi<<8) & uzi) );
+}
+
+void mmix::go()
+{
+        R(Address(x), target.asMorsel());
+        target = a;
+}
+
+void mmix::bn()
 {
   target = ( ( sx < 0 ) ? ra : target );
 }
 
-void pbz()
+void mmix::bz()
 {
   target = ( ( uz == 0 ) ? ra : target );
 }
 
-void pbp()
+void mmix::bp()
 {
   target = ( ( sz > 0 ) ? ra : target );
 }
 
-void pbod()
+void mmix::bod()
 {
   target = ( ( (uz & 1) == 1 ) ? ra : target );
 }
 
-void pbnn()
+void mmix::bnn()
 {
   target = ( ( sz >= 0 ) ? ra : target );
 }
 
-void pbnz()
+void mmix::bnz()
 {
   target = ( ( sz != 0 ) ? ra : target );
 }
 
-void pbnp()
+void mmix::bnp()
 {
   target = ( ( sz <= 0 ) ? ra : target );
 }
 
-void pbev()
+void mmix::bev()
 {
   target = ( ( (uz & 1) == 0 ) ? ra : target );
 }
 
-void jmpb()
+void mmix::pbn()
+{
+  target = ( ( sx < 0 ) ? ra : target );
+}
+
+void mmix::pbz()
+{
+  target = ( ( uz == 0 ) ? ra : target );
+}
+
+void mmix::pbp()
+{
+  target = ( ( sz > 0 ) ? ra : target );
+}
+
+void mmix::pbod()
+{
+  target = ( ( (uz & 1) == 1 ) ? ra : target );
+}
+
+void mmix::pbnn()
+{
+  target = ( ( sz >= 0 ) ? ra : target );
+}
+
+void mmix::pbnz()
+{
+  target = ( ( sz != 0 ) ? ra : target );
+}
+
+void mmix::pbnp()
+{
+  target = ( ( sz <= 0 ) ? ra : target );
+}
+
+void mmix::pbev()
+{
+  target = ( ( (uz & 1) == 0 ) ? ra : target );
+}
+
+void mmix::jmpb()
 {
   target = -1*ra;
 }
 
-void bnb()
+void mmix::bnb()
 {
   target = ( ( sx < 0 ) ? -1*ra : target );
 }
 
-void bzb()
+void mmix::bzb()
 {
   target = ( ( uz == 0 ) ? -1*ra : target );
 }
 
-void bpb()
+void mmix::bpb()
 {
   target = ( ( sz > 0 ) ? -1*ra : target );
 }
 
-void bodb()
+void mmix::bodb()
 {
   target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
 }
 
-void bnnb()
+void mmix::bnnb()
 {
   target = ( ( sz >= 0 ) ? -1*ra : target );
 }
 
-void bnzb()
+void mmix::bnzb()
 {
   target = ( ( sz != 0 ) ? -1*ra : target );
 }
 
-void bnpb()
+void mmix::bnpb()
 {
   target = ( ( sz <= 0 ) ? -1*ra : target );
 }
 
-void bevb()
+void mmix::bevb()
 {
   target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
 }
 
-void pbnb()
+void mmix::pbnb()
 {
   target = ( ( sx < 0 ) ? -1*ra : target );
 }
 
-void pbzb()
+void mmix::pbzb()
 {
   target = ( ( uz == 0 ) ? -1*ra : target );
 }
 
-void pbpb()
+void mmix::pbpb()
 {
   target = ( ( sz > 0 ) ? -1*ra : target );
 }
 
-void pbodb()
+void mmix::pbodb()
 {
   target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
 }
 
-void pbnnb()
+void mmix::pbnnb()
 {
   target = ( ( sz >= 0 ) ? -1*ra : target );
 }
 
-void pbnzb()
+void mmix::pbnzb()
 {
   target = ( ( sz != 0 ) ? -1*ra : target );
 }
 
-void pbnpb()
+void mmix::pbnpb()
 {
   target = ( ( sz <= 0 ) ? -1*ra : target );
 }
 
-void pbevb()
+void mmix::pbevb()
 {
   target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
 }
 
-void pushj()
+void mmix::pushj()
 {
   push(x);
   R(Address(rJ), (target+4).asMorsel());
   target = ra;
 }
 
-void pushjb()
+void mmix::pushjb()
 {
   push(x);
   R(Address(rJ), (-1*(target+4)).asMorsel());
   target = ra;
 }
 
-void pushgo()
+void mmix::pushgo()
 {
   push(x);
   R(Address(rJ), (target+4).asMorsel());
   target = a;
 }
 
-void pop()
+void mmix::pop()
 {
   pop(x);
   target = R(Address(rJ))+4*((y<<8) & z);
 }
 
-void save()
+void mmix::save()
 {
   push(255);
   R(x, register_stack_top);
 }
-void unsave()
+void mmix::unsave()
 {
   pop(255);
   R(x, register_stack_top);
 }
 
-void ldunc()
+void mmix::ldunc()
 {
   R( x, (M(8, a)) );
 }
-void stunc()
+void mmix::stunc()
 {
   M(8, a, R(x));
 }
-void ldunci()
+void mmix::ldunci()
 {
   R( x, (M(8, a)) );
 }
 
-void cswap()
+void mmix::cswap()
 {
         if (M(8, a) == R(Address(rP))) {
           M(8,a,R(x));
@@ -1894,43 +2774,43 @@ void cswap()
         }
  
 }
-void preldi()
+void mmix::preldi()
 {
   return;
 }
-void pregoi()
+void mmix::pregoi()
 {
   return;
 }
-void goi()
+void mmix::goi()
 {
   return;
 }
-void stunci()
+void mmix::stunci()
 {
   M(8, uy+z, R(x));
 }
-void syncdi()
+void mmix::syncdi()
 {
   return;
 }
-void presti()
+void mmix::presti()
 {
   return;
 }
-void syncidi()
+void mmix::syncidi()
 {
   return;
 }
-void pushgoi()
+void mmix::pushgoi()
 {
   return;
 }
-void trip()
+void mmix::trip()
 {
   trap();
 }
-void trap()
+void mmix::trap()
 {
         switch (y.asChar()) {
         case Halt:
@@ -1965,43 +2845,43 @@ void trap()
           break;
         }
 }
-void resume()
+void mmix::resume()
 {
 }
 
-void get()
+void mmix::get()
 {
   R(x, g(z));
 }
 
-void put()
+void mmix::put()
 {
   g(x, R(z));
 }
 
-void puti()
+void mmix::puti()
 {
   g(x, z);
 }
 
-void geta()
+void mmix::geta()
 {
   R(x, ra);
 }
 
-void getab()
+void mmix::getab()
 {
   R(x, -1*ra);
 }
 
-void jmp()
+void mmix::jmp()
 {
   Address target = getip()+stepsize;
   target = Address( (x<<16) & (y<<8) & (z<<0) );
   setip( target );
 }
 
-void ldb()
+void mmix::ldb()
 { 
   Morsel x = M(1, getip()+1); 
   Morsel y = M(1, getip()+2); 
@@ -2014,7 +2894,7 @@ void ldb()
   R(x, M(1, a));
 }
 
-void ldbi()
+void mmix::ldbi()
 {
   Morsel x = M(1, getip()+1); 
   Morsel y = M(1, getip()+2); 
@@ -2027,7 +2907,7 @@ void ldbi()
   R(x, M(1, (uy + z)));
 }
 
-void ldbu()
+void mmix::ldbu()
 {
   Morsel x = M(1, getip()+1); 
   Morsel y = M(1, getip()+2); 
@@ -2041,42 +2921,42 @@ void ldbu()
   R(x, M(1, a));
 }
 
-void ldbui()
+void mmix::ldbui()
 {
   R(x, M(1, (uy+z)));
 }
 
-void ldw()
+void mmix::ldw()
 {
   R(x, M(2, a));
 }
 
-void ldwi()
+void mmix::ldwi()
 {
   R(x, M(2, uy+z));
 }
 
-void ldwu()
+void mmix::ldwu()
 {
   R(x, M(2, a) );
 }
 
-void ldwui()
+void mmix::ldwui()
 {
   R(x, M(2, uy+z) );
 }
 
-void ldt()
+void mmix::ldt()
 {
   R(x, (M(4, a)) );
 }
 
-void ldti()
+void mmix::ldti()
 {
   R(x, (M(4, uy+z)) );
 }
 
-void swym()
+void mmix::swym()
 {
   return;
 }
