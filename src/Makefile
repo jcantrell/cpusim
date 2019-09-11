@@ -8,6 +8,11 @@ OBJ:=controller/main.o \
 			model/subleq/subleq.o \
 			model/mmix/mmix.o \
 			model/cpu/Address.o
+TESTS:=tests/unit/testmorsel \
+				tests/unit/testaddress \
+				tests/unit/testUnsignedMorsel \
+				tests/unit/testSignedMorsel \
+				tests/unit/testcpu
 
 ../bin/cpusim: cpusim
 
@@ -18,10 +23,12 @@ cpusim:	$(OBJ)
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@
 
-test: ../bin/cpusim tests/unit/testmorsel tests/unit/testaddress tests/unit/testcpu
+test: ../bin/cpusim $(TESTS)
 	./tests/unit/testmorsel
 	./tests/unit/testaddress
 	./tests/unit/testcpu
+	./tests/unit/testUnsignedMorsel
+	./tests/unit/testSignedMorsel
 	cd tests && mmixal hello.mms
 	cat script | ../bin/cpusim
 
@@ -29,6 +36,12 @@ tests/unit/testcpu: tests/unit/testcpu.cpp
 	@echo "BEGIN testcpu"
 	$(CC) $(CFLAGS) -o $@ tests/unit/testcpu.cpp -I. model/cpu/Address.cpp model/cpu/cpu.cpp
 	@echo "END testcpu"
+
+tests/unit/testSignedMorsel.o: tests/unit/testSignedMorsel.cpp
+	$(CC) $(CFLAGS) -c -o $@ tests/unit/testSignedMorsel.cpp
+
+tests/unit/testUnsignedMorsel.o: tests/unit/testUnsignedMorsel.cpp
+	$(CC) $(CFLAGS) -c -o $@ tests/unit/testUnsignedMorsel.cpp
 
 tests/unit/testmorsel.o: tests/unit/testmorsel.cpp
 	$(CC) $(CFLAGS) -c -o $@ tests/unit/testmorsel.cpp
