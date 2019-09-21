@@ -8,8 +8,10 @@
 
 class mmix : public cpu {
   private:
+    unsigned int stepsize = 4;
     unsigned char L;
     unsigned char G;
+    Address target;
     unsigned long long int register_stack_top;
     boost::unordered_map<int, int> special_registers;
     boost::unordered_map<Address, Morsel> globals;
@@ -176,11 +178,11 @@ void zsnp();
 void zsnpi();
 void zsev();
 void zsevi();
-void AND();
+void opcode_AND();
 void andi();
-void OR();
+void opcode_OR();
 void ori();
-void xor();
+void opcode_xor();
 void xori();
 void andn();
 void andni();
@@ -202,7 +204,7 @@ void wdif();
 void wdifi();
 void tdif();
 void tdifi();
-void ofif();
+void odif();
 void odifi();
 void mor();
 void mori();
@@ -295,12 +297,18 @@ void ldunc();
 void stunc();
 void ldunci();
 void cswap();
+void cswapi();
+void preld();
 void preldi();
+void prego();
 void pregoi();
 void goi();
 void stunci();
+void syncd();
 void syncdi();
+void prest();
 void presti();
+void syncid();
 void syncidi();
 void pushgoi();
 void trip();
@@ -323,7 +331,9 @@ void ldwui();
 void ldt();
 void ldti();
 void swym();
-void jmp();;
+void ldvts();
+void ldvtsi();
+void ofif();
 };
 
 #endif

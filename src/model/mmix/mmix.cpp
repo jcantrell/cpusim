@@ -3,7 +3,7 @@
 #include <math.h>
 #include <iomanip>
 
-mmix::mmix(int byte_size, Address address_size) : cpu(byte_size, address_size,32)
+mmix::mmix(int byte_size, Address address_size) : cpu(byte_size, address_size,32)  , target(getip()+stepsize)
 {
   register_stack_top = 0;
 }
@@ -499,7 +499,7 @@ void mmix::pop(Morsel reg)
 
 void mmix::step(int inst)
 {
-  unsigned int stepsize = 4;
+/*
   // Pre-fetch register numbers, and their values, for convenience
   Morsel x = M(1, getip()+1); 
   Morsel y = M(1, getip()+2); 
@@ -507,7 +507,6 @@ void mmix::step(int inst)
   Morsel uxi = x;
   Morsel uyi = y;
   Morsel uzi = z;
-  Address target = getip()+stepsize;
 
   Morsel ux = R(x); // unsigned values at the given addresses
   Morsel uy = R(y);
@@ -523,7 +522,10 @@ void mmix::step(int inst)
   // A <- (u($Y) + u($Z)) mod 2^64
   Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
   Morsel ra = 4*( (uy<<8) & uz);
+*/
 
+  static void (*syscalls[])(void) = {
+  };
 // instruction_map[inst]();
   switch (inst)
   {
@@ -898,19 +900,19 @@ void mmix::step(int inst)
         zsevi();
         break;
       case AND: // v($X) <- v($Y) & v($Z)
-        AND();
+        opcode_AND();
         break;
       case ANDI: // v($X) <- v($Y) & v(Z)
         andi();
         break;
       case OR: // v($X) <- v($Y) v v($Z)
-        OR();
+        opcode_OR();
         break;
       case ORI: // v($X) <- v($Y) v v(Z)
         ori();
         break;
       case XOR: // v($X) <-  v($Y) xor v($Z)
-        XOR();
+        opcode_xor();
         break;
       case XORI: // v($X) <-  v($Y) xor v(Z)
         xori();
@@ -1472,210 +1474,787 @@ void mmix::step(int inst)
 
 void mmix::ldtu()
 {
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
         R(x, M(4, a) );
 }
 
 void mmix::ldtui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, M(4, uy+z) );
 }
 
 void mmix::ldo()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (M(8, a)) );
 }
 
 void mmix::ldoi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (M(8, uy+z)) );
 }
 
 void mmix::ldou()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, M(8, a) );
 }
 
 void mmix::ldoui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, M(8, uy+z) );
 }
 
 void mmix::ldht()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (M(4, a) << 32));
 }
 
 void mmix::ldhti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (M(4, uy+z) << 32));
 }
 
 void mmix::stb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(1, a, R(x));
 }
 
 void mmix::stbi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(1, uy+z, R(x));
 }
 
 void mmix::stw()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(2, a, R(x));
 }
 
 void mmix::stwi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(2, uy+z, R(x));
 }
 
 void mmix::stt()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(4, a, R(x));
 }
 
 void mmix::stti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(4, uy+z, R(x));
 }
 
 void mmix::sto()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(8, a, R(x));
 }
 
 void mmix::stoi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(8, uy+z, R(x));
 }
 
 void mmix::stbu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(1, a, R(x));
 }
 
 void mmix::stbui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(1, uy+z, R(x));
 }
 
 void mmix::stwu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(2, a, R(x));
 }
 
 void mmix::stwui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(2, uy+z, R(x));
 }
 
 void mmix::sttu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(4, a, R(x));
 }
 
 void mmix::sttui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(4, uy+z, R(x));
 }
 
 void mmix::stou()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(8, a, R(x));
 }
 
 void mmix::stoui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(8, uy+z, R(x));
 }
 
 void mmix::stht()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(4, a, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
 }
 
 void mmix::sthti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(4, uy+z, ((R(x) & Morsel(0xFFFFFFFF00000000)) >> 16));
 }
 
 void mmix::stco()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(8, a, x);
 }
 
 void mmix::stcoi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         M(8, uy+z, x);
 }
 
 void mmix::add()
 {
-        R(x, (R(y)) + R(z));
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+       R(x, (R(y)) + R(z));
 }
 
 void mmix::addi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)) + (z));
 }
 
 void mmix::sub()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)) - (R(z)));
 }
 
 void mmix::subi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)) - (z));
 }
 
 void mmix::mul()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)) * (R(z)));
 }
 
 void mmix::muli()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)) * (z));
 }
 
 void mmix::div()
-{        R(x, (R(z) == 0) ? Morsel(0) : 
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+        R(x, (R(z) == 0) ? Morsel(0) : 
               ((R(y)) / (R(z))));
         g(Address(rR), (R(z) == 0) ? R(y) :
               ((R(y)) % (R(z))));
 }
 
 void mmix::divi()
-{        R(x, (z == 0) ? Morsel(0) :
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+        R(x, (z == 0) ? Morsel(0) :
               ((R(y)) / (z)));
         g(Address(rR), (z == 0) ? R(y) :
               ((R(y)) % (z)));
 }
 
 void mmix::addu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, a);
 }
 
 void mmix::addui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (ux + z) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::subu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y) - R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::subui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y) - z) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::mulu()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+        {
         Morsel carry;
         Morsel result;
         wideMult(R(y), R(z), &carry, &result);
@@ -1686,7 +2265,22 @@ void mmix::mulu()
 }
 
 void mmix::mului()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+        {
         Morsel carry;
         Morsel result;
         wideMult(R(y), z, &carry, &result);
@@ -1697,7 +2291,22 @@ void mmix::mului()
 }
 
 void mmix::divu()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+        {
         Morsel numerator_hi;
         Morsel numerator_lo;
         Morsel divisor;
@@ -1722,7 +2331,22 @@ void mmix::divu()
 }
 
 void mmix::divui()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
+        {
         Morsel numerator_hi;
         Morsel numerator_lo;
         Morsel divisor;
@@ -1747,390 +2371,1468 @@ void mmix::divui()
 }
  
 void mmix::i2addu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*2 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i2addui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*2 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i4addu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*4 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i4addui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*4 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i8addu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*8 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i8addui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*8 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i16addu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*16 + R(z)) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::i16addui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y)*16 + z) & Morsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::neg()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, y-R(z));
 }
 
 void mmix::negi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, y-z);
 }
 
 void mmix::negu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, y - R(z));
 }
 
 void mmix::negui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, y - z);
 }
 
 void mmix::sl()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) << R(z));
 }
 
 void mmix::sli()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) << z);
 }
 
 void mmix::slu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) << R(z));
 }
 
 void mmix::slui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) << z);
 }
 
 void mmix::sr()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) >> R(z) );
 }
 
 void mmix::sri()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) >> z );
 }
 
 void mmix::sru()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) >> R(z) );
 }
 
 void mmix::srui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) >> z );
 }
 
 void mmix::cmp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
 }
 
 void mmix::cmpi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
 }
 
 void mmix::cmpu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? -1 : 0)) );
 }
 
 void mmix::cmpui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
 }
 
 void mmix::csn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? R(z) : R(x)) );
 }
 
 void mmix::csni()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? z : R(x)) );
 }
 
 void mmix::csz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) == 0) ? R(z) : R(x)) );
 }
 
 void mmix::cszi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) == 0) ? z : R(x)) );
 }
 
 void mmix::csp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > 0) ? R(z) : R(x)) );
 }
 
 void mmix::cspi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > 0) ? z : R(x)) );
 }
 
 void mmix::csod()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ( ((R(y) & 0x01) == 1) ? R(z) : R(x)) );
 }
 
 void mmix::csodi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ( ((R(y) & 0x01) == 1) ? z : R(x)) );
 }
 
 void mmix::csnn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) >= 0) ? R(z) : R(x)) );
 }
 
 void mmix::csnni()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) >= 0) ? z : R(x)) );
 }
 
 void mmix::csnz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) != 0) ? R(z) : R(x)) );
 }
 
 void mmix::csnzi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) != 0) ? z : R(x)) );
 }
 
 void mmix::csnp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) <= 0) ? R(z) : R(x)) );
 }
 
 void mmix::csnpi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) <= 0) ? z : R(x)) );
 }
 
 void mmix::csev()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ( ((R(y) & 0x01) == 0) ? R(z) : R(x)) );
 }
 
 void mmix::csevi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ( ((R(y) & 0x01) == 0) ? z : R(x)) );
 }
 
 void mmix::zsn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? R(z) : 0) );
 }
 
 void mmix::zsni()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? z : 0) );
 }
 
 void mmix::zsz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) == 0) ? R(z) : 0) );
 }
 
 void mmix::zszi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) == 0) ? z : 0) );
 }
 
 void mmix::zsp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > 0) ? R(z) : 0) );
 }
 
 void mmix::zspi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) > 0) ? z : 0) );
 }
 
 void mmix::zsod()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (((R(y) & 0x01) == 1) ? R(z) : 0) );
 }
 
 void mmix::zsodi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (((R(y) & 0x01) == 1) ? z : 0) );
 }
 
 void mmix::zsnn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? R(z) : 0) );
 }
 
 void mmix::zsnni()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? z : 0) );
 }
 
 void mmix::zsnz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? R(z) : 0) );
 }
 void mmix::zsnzi()
 {
-        R(x, ((R(y) < 0) ? z : 0) );
+  Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+       R(x, ((R(y) < 0) ? z : 0) );
 }
 
 void mmix::zsnp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? R(z) : 0) );
 }
 
 void mmix::zsnpi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? z : 0) );
 }
 
 void mmix::zsev()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? R(z) : 0) );
 }
 
 void mmix::zsevi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ((R(y) < 0) ? z : 0) );
 }
 
-void mmix::AND()
-{
+void mmix::opcode_AND()
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) & R(z));
 }
 
 void mmix::andi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) & z);
 }
 
-void mmix::OR()
-{
+void mmix::opcode_OR()
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) | R(z));
 }
 
 void mmix::ori()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) | z);
 }
 
-void mmix::xor()
-{
+void mmix::opcode_xor()
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) ^ R(z));
 }
 
 void mmix::xori()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) ^ z);
 }
 
 void mmix::andn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) & ~R(z));
 }
 
 void mmix::andni()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) & ~z);
 }
 
 void mmix::orn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) | ~R(z));
 }
 
 void mmix::orni()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, R(y) | ~z);
 }
 
 void mmix::nand()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ~( R(y) & R(z)) );
 }
 
 void mmix::nandi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ~( R(y) & z) );
 }
 
 void mmix::nor()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ~( R(y) | R(z)) );
 }
 
 void mmix::nori()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ~( R(y) | z) );
 }
 
 void mmix::nxor()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ~( R(y) ^ R(z)) );
 }
 
 void mmix::nxori()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, ~( R(y) ^ z) );
 }
 
 void mmix::mux()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y) & g(Address(rM))) | (R(z) & ~g(Address(rM))) );
 }
 
 void mmix::muxi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(x, (R(y) & g(Address(rM))) | (z & ~g(Address(rM))) );
 }
 
 void mmix::sadd()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         Morsel temp( R(y) & ~R(z) );
         R(x, temp.count() );
         //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
         }
  
 void mmix::saddi()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         Morsel temp( R(y) & ~z );
         R(x, temp.count() );
         //R(x, (new std::bitset<64>( R(y) & ~R(z) ))->count() );
         }
  
 void mmix::bdif()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         Morsel b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
         Morsel b1 = ((R(y)>> 8)&0xFF) - ((R(z)>> 8)&0xFF);
         Morsel b2 = ((R(y)>>16)&0xFF) - ((R(z)>>16)&0xFF);
@@ -2152,7 +3854,24 @@ void mmix::bdif()
         }
  
 void mmix::bdifi()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+         {
         Morsel b0 = ((R(y)>> 0)&0xFF) - ((uzi>> 0)&0xFF);
         Morsel b1 = ((R(y)>> 8)&0xFF) - ((uzi>> 8)&0xFF);
         Morsel b2 = ((R(y)>>16)&0xFF) - ((uzi>>16)&0xFF);
@@ -2176,7 +3895,20 @@ void mmix::bdifi()
 }
 
 void mmix::wdif()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+          {
         Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
         Morsel w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
         Morsel w2 = ((R(y)>>32)&0xFFFF) - ((R(z)>>32)&0xFFFF);
@@ -2191,7 +3923,23 @@ void mmix::wdif()
 }
 
 void mmix::wdifi()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+  
         Morsel w0 = ((R(y)>> 0)&0xFFFF) - ((uzi>> 0)&0xFFFF);
         Morsel w1 = ((R(y)>>16)&0xFFFF) - ((uzi>>16)&0xFFFF);
         Morsel w2 = ((R(y)>>32)&0xFFFF) - ((uzi>>32)&0xFFFF);
@@ -2204,7 +3952,20 @@ void mmix::wdifi()
         }
  
 void mmix::tdif()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  
         Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
         Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
         t0 = (t0 < 0) ? 0 : t0;
@@ -2213,7 +3974,23 @@ void mmix::tdif()
         }
  
 void mmix::tdifi()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ 
         Morsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((uzi>> 0)&0xFFFFFFFF);
         Morsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((uzi>>32)&0xFFFFFFFF);
         t0 = (t0 < 0) ? 0 : t0;
@@ -2222,7 +3999,20 @@ void mmix::tdifi()
         }
  
 void mmix::ofif()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         Morsel u0 = (R(y)) - R(z);
         u0 = (u0 > R(y)) ? 0 : u0;
         }
@@ -2230,15 +4020,46 @@ void mmix::ofif()
 }
 
 void mmix::odifi()
-{        {
+{ Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+        {
         Morsel u0 = (R(y)) - z;
         u0 = (u0 > R(y)) ? 0 : u0;
         }
  
 }
 
+void mmix::odif()
+{
+  return;
+}
 void mmix::mor()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         Morsel r;
         for (int i=0; i<64; i++)
           for (int j=0; j<64; j++)
@@ -2253,7 +4074,20 @@ void mmix::mor()
 }
 
 void mmix::mori()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         {
         Morsel r;
         for (int i=0; i<64; i++)
@@ -2269,7 +4103,20 @@ void mmix::mori()
 }
 
 void mmix::mxor()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         Morsel r;
         for (int i=0; i<8; i++)
           for (int j=0; j<8; j++)
@@ -2285,7 +4132,20 @@ void mmix::mxor()
 }
 
 void mmix::mxori()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         Morsel r;
         for (int i=0; i<8; i++)
           for (int j=0; j<8; j++)
@@ -2301,7 +4161,20 @@ void mmix::mxori()
 }
 
 void mmix::fadd()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
 {
         double t = ( *(double*)&uy + *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
@@ -2310,7 +4183,20 @@ void mmix::fadd()
 }
 
 void mmix::fsub()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         double t = ( *(double*)&uy - *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
@@ -2318,7 +4204,20 @@ void mmix::fsub()
 }
 
 void mmix::fmul()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         double t = ( *(double*)&uy * *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
@@ -2326,7 +4225,20 @@ void mmix::fmul()
 }
 
 void mmix::fdiv()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         double t = ( *(double*)&uy / *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
@@ -2334,7 +4246,20 @@ void mmix::fdiv()
 }
 
 void mmix::frem()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         {
         double t = fmod( *(double*)&uy , *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
@@ -2343,7 +4268,20 @@ void mmix::frem()
 }
 
 void mmix::fsqrt()
-{        {
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         {
         double t = sqrt( *(double*)&uz );
         R(x, *(unsigned long long int *)&t );
         }
@@ -2351,28 +4289,93 @@ void mmix::fsqrt()
 }
 
 void mmix::fint()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, (unsigned long long int)( *(double*)&uz ));
 }
 
 void mmix::fcmp()
-{        R(x, ((*(double*)&uy > *(double*)&uz) ? 1 : 0) 
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+         R(x, ((*(double*)&uy > *(double*)&uz) ? 1 : 0) 
            - ((*(double*)&uy < *(double*)&uz) ? 1 : 0) );
  
 }
 
 void mmix::feql()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         R(x, *(double*)&uy == *(double*)&uz );
 }
 
 void mmix::fun()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         R(x, fy != fy || fz != fz );
 }
 
 void mmix::fcmpe()
-        {
+        {Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         int e;
         frexp(fy.asFloat(), &e);
         R(x, (fy > fz && !N(fy.asFloat(), fz.asFloat(), e, frE.asFloat())) -
@@ -2380,391 +4383,1464 @@ void mmix::fcmpe()
         }
  
 void mmix::feqle()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         int e;
         frexp(fy.asFloat(), &e);
         R(x, N(fy.asFloat(), fz.asFloat(), e, frE.asFloat()));
 }
 
 void mmix::fune()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, fy != fy || fz != fz || frE != frE);
 }
 
 void mmix::fix()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, fz);
 }
 
 void mmix::fixu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, fz);
 }
 
 void mmix::flot()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
         R(x, sz);
 }
 
 void mmix::flotu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, uz);
 }
 
 void mmix::flotui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, z);
 }
 
 void mmix::sflot()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, fz);
 }
 
 void mmix::sfloti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, z);
 }
 
 void mmix::sflotu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, fz);
 }
 
 void mmix::sflotui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, z);
 }
 
 void mmix::ldsf()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   R(x, M(4, a));
 }
 
 void mmix::ldsfi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, M(4, uy+z));
 }
 
 void mmix::stsf()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   M(4, a, fx);
 }
 
 void mmix::stsfi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   M(4, uy+z, fx);
 }
 
 void mmix::floti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   R(x, z);
 }
 
 void mmix::seth()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   R(x, ((uyi<<8) & uzi) << 48);
 }
 
 void mmix::setmh()
-{
-  R(x, ((uyi<<8) & uzi) << 32);
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+   R(x, ((uyi<<8) & uzi) << 32);
 }
 
 void mmix::setml()
-{
-  R(x, ((uyi<<8) & uzi));
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ((uyi<<8) & uzi));
 }
 
 void mmix::setl()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ 
   R(x, ((uyi<<8) & uzi) << 16);
 }
 
 void mmix::inch()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ 
   R(x, R(x) + (((uyi<<8) & uzi) << 48) );
 }
 
 void mmix::incmh()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ 
   R(x, R(x) + (((uyi<<8) & uzi) << 32) );
 }
 
 void mmix::incml()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+ 
   R(x, R(x) + (((uyi<<8) & uzi) << 16) );
 }
 
 void mmix::incl()
-{
-  R(x, ux + ((uyi<<8) & uzi) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux + ((uyi<<8) & uzi) );
 }
 
 void mmix::orh()
-{
-  R(x, ux | (((uyi<<8) & uzi)<<48) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux | (((uyi<<8) & uzi)<<48) );
 }
 
 void mmix::ormh()
-{
-  R(x, ux | (((uyi<<8) & uzi)<<32) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux | (((uyi<<8) & uzi)<<32) );
 }
 
 void mmix::orml()
-{
-  R(x, ux | (((uyi<<8) & uzi)<<16) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux | (((uyi<<8) & uzi)<<16) );
 }
 
 void mmix::orl()
-{
-        R(x, ux | ((uyi<<8) & uzi) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+         R(x, ux | ((uyi<<8) & uzi) );
 }
 
 void mmix::andnh()
-{
-        R(x, ux & ~(((uyi<<8) & uzi)<<48) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+         R(x, ux & ~(((uyi<<8) & uzi)<<48) );
 }
 
 void mmix::andnmh()
-{
-  R(x, ux & ~(((uyi<<8) & uzi)<<32) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux & ~(((uyi<<8) & uzi)<<32) );
 }
 
 void mmix::andnml()
-{
-  R(x, ux & ~(((uyi<<8) & uzi)<<16) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux & ~(((uyi<<8) & uzi)<<16) );
 }
 
 void mmix::andnl()
-{
-  R(x, ux & ~((uyi<<8) & uzi) );
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel uxi = x;
+  Morsel uyi = y;
+  Morsel uzi = z;
+   R(x, ux & ~((uyi<<8) & uzi) );
 }
 
 void mmix::go()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
         R(Address(x), target.asMorsel());
         target = a;
 }
 
 void mmix::bn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sx < 0 ) ? ra : target );
 }
 
 void mmix::bz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( uz == 0 ) ? ra : target );
 }
 
 void mmix::bp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz > 0 ) ? ra : target );
 }
 
 void mmix::bod()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 1 ) ? ra : target );
 }
 
 void mmix::bnn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz >= 0 ) ? ra : target );
 }
 
 void mmix::bnz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz != 0 ) ? ra : target );
 }
 
 void mmix::bnp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz <= 0 ) ? ra : target );
 }
 
 void mmix::bev()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 0 ) ? ra : target );
 }
 
 void mmix::pbn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sx < 0 ) ? ra : target );
 }
 
 void mmix::pbz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( uz == 0 ) ? ra : target );
 }
 
 void mmix::pbp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz > 0 ) ? ra : target );
 }
 
 void mmix::pbod()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 1 ) ? ra : target );
 }
 
 void mmix::pbnn()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz >= 0 ) ? ra : target );
 }
 
 void mmix::pbnz()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz != 0 ) ? ra : target );
 }
 
 void mmix::pbnp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz <= 0 ) ? ra : target );
 }
 
 void mmix::pbev()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 0 ) ? ra : target );
 }
 
 void mmix::jmpb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = -1*ra;
 }
 
 void mmix::bnb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sx < 0 ) ? -1*ra : target );
 }
 
 void mmix::bzb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( uz == 0 ) ? -1*ra : target );
 }
 
 void mmix::bpb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz > 0 ) ? -1*ra : target );
 }
 
 void mmix::bodb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
 }
 
 void mmix::bnnb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz >= 0 ) ? -1*ra : target );
 }
 
 void mmix::bnzb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz != 0 ) ? -1*ra : target );
 }
 
 void mmix::bnpb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz <= 0 ) ? -1*ra : target );
 }
 
 void mmix::bevb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
 }
 
 void mmix::pbnb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sx < 0 ) ? -1*ra : target );
 }
 
 void mmix::pbzb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( uz == 0 ) ? -1*ra : target );
 }
 
 void mmix::pbpb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz > 0 ) ? -1*ra : target );
 }
 
 void mmix::pbodb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
 }
 
 void mmix::pbnnb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz >= 0 ) ? -1*ra : target );
 }
 
 void mmix::pbnzb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz != 0 ) ? -1*ra : target );
 }
 
 void mmix::pbnpb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( sz <= 0 ) ? -1*ra : target );
 }
 
 void mmix::pbevb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
 }
 
 void mmix::pushj()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   push(x);
   R(Address(rJ), (target+4).asMorsel());
   target = ra;
 }
 
 void mmix::pushjb()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel ra = 4*( (uy<<8) & uz);
+ 
   push(x);
   R(Address(rJ), (-1*(target+4)).asMorsel());
   target = ra;
 }
 
 void mmix::pushgo()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   push(x);
   R(Address(rJ), (target+4).asMorsel());
   target = a;
 }
 
 void mmix::pop()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   pop(x);
   target = R(Address(rJ))+4*((y<<8) & z);
 }
 
 void mmix::save()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   push(255);
   R(x, register_stack_top);
 }
 void mmix::unsave()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+ 
   pop(255);
   R(x, register_stack_top);
 }
 
 void mmix::ldunc()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   R( x, (M(8, a)) );
 }
 void mmix::stunc()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   M(8, a, R(x));
 }
 void mmix::ldunci()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+ 
   R( x, (M(8, a)) );
 }
 
 void mmix::cswap()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
         if (M(8, a) == R(Address(rP))) {
           M(8,a,R(x));
           R(x,1);
@@ -2774,7 +5850,19 @@ void mmix::cswap()
         }
  
 }
+void mmix::cswapi()
+{
+  return;
+}
+void mmix::preld()
+{
+  return;
+}
 void mmix::preldi()
+{
+  return;
+}
+void mmix::prego()
 {
   return;
 }
@@ -2787,10 +5875,35 @@ void mmix::goi()
   return;
 }
 void mmix::stunci()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   M(8, uy+z, R(x));
 }
+void mmix::syncd()
+{
+  return;
+}
 void mmix::syncdi()
+{
+  return;
+}
+void mmix::syncid()
+{
+  return;
+}
+void mmix::prest()
 {
   return;
 }
@@ -2811,7 +5924,20 @@ void mmix::trip()
   trap();
 }
 void mmix::trap()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
         switch (y.asChar()) {
         case Halt:
           return;
@@ -2850,32 +5976,112 @@ void mmix::resume()
 }
 
 void mmix::get()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   R(x, g(z));
 }
 
 void mmix::put()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   g(x, R(z));
 }
 
 void mmix::puti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   g(x, z);
 }
 
 void mmix::geta()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
+  Morsel ra = 4*( (uy<<8) & uz);
   R(x, ra);
 }
 
 void mmix::getab()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
+  Morsel ra = 4*( (uy<<8) & uz);
   R(x, -1*ra);
 }
 
 void mmix::jmp()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   Address target = getip()+stepsize;
   target = Address( (x<<16) & (y<<8) & (z<<0) );
   setip( target );
@@ -2922,41 +6128,145 @@ void mmix::ldbu()
 }
 
 void mmix::ldbui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   R(x, M(1, (uy+z)));
 }
 
 void mmix::ldw()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+
   R(x, M(2, a));
 }
 
 void mmix::ldwi()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   R(x, M(2, uy+z));
 }
 
 void mmix::ldwu()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+
   R(x, M(2, a) );
 }
 
 void mmix::ldwui()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   R(x, M(2, uy+z) );
 }
 
 void mmix::ldt()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+  Morsel a = ( (uy + uz) & Morsel(0xFFFFFFFFFFFFFFFF) );
+
   R(x, (M(4, a)) );
 }
 
 void mmix::ldti()
-{
+{Morsel x = M(1, getip()+1); 
+  Morsel y = M(1, getip()+2); 
+  Morsel z = M(1, getip()+3); 
+  Morsel ux = R(x); // unsigned values at the given addresses
+  Morsel uy = R(y);
+  Morsel uz = R(z);
+  Morsel sx = R(x); // signed values
+  Morsel sy = R(y);
+  Morsel sz = R(z);
+  Morsel fx = R(x); // signed double values
+  Morsel fy = R(y);
+  Morsel fz = R(z);
+  Morsel frE = R(Address(rE));
+
   R(x, (M(4, uy+z)) );
 }
 
 void mmix::swym()
+{
+  return;
+}
+
+void mmix::ldvts()
+{
+  return;
+}
+
+void mmix::ldvtsi()
 {
   return;
 }
