@@ -524,8 +524,281 @@ void mmix::step(int inst)
   Morsel ra = 4*( (uy<<8) & uz);
 */
 
-  static void (*syscalls[])(void) = {
-  };
+  typedef void (mmix::*instruction)(void);
+  typedef std::map<mmix::inst, instruction> instructions_map;
+    instructions_map instructions;
+      instructions[TRAP] = &mmix::trap;
+      instructions[FCMP] = &mmix::fcmp;
+      instructions[FUN] = &mmix::fun;
+      instructions[FEQL] = &mmix::feql;
+      instructions[FADD] = &mmix::fadd;
+      instructions[FIX] = &mmix::fix;
+      instructions[FSUB] = &mmix::fsub;
+      instructions[FIXU] = &mmix::fixu;
+      instructions[FLOT] = &mmix::flot;
+      instructions[FLOTI] = &mmix::floti;
+      instructions[FLOTU] = &mmix::flotu;
+      instructions[FLOTUI] = &mmix::flotui;
+      instructions[SFLOT] = &mmix::sflot;
+      instructions[SFLOTU] = &mmix::sflotu;
+      instructions[SFLOTI] = &mmix::sfloti;
+      instructions[SFLOTUI] = &mmix::sflotui;
+
+      instructions[FMUL] = &mmix::fmul;
+      instructions[FCMPE] = &mmix::fcmpe;
+      instructions[FUNE] = &mmix::fune;
+      instructions[FEQLE] = &mmix::fune;
+      instructions[FDIV] = &mmix::fune;
+      instructions[FSQRT] = &mmix::fune;
+      instructions[FREM] = &mmix::fune;
+      instructions[FINT] = &mmix::fune;
+      instructions[MUL] = &mmix::fune;
+      instructions[MULI] = &mmix::fune;
+      instructions[MULU] = &mmix::fune;
+      instructions[MULUI] = &mmix::fune;
+      instructions[DIV] = &mmix::fune;
+      instructions[DIVI] = &mmix::fune;
+      instructions[DIVU] = &mmix::fune;
+      instructions[DIVUI] = &mmix::fune;
+
+      instructions[ADDU] = &mmix::addu;
+      instructions[ADD] = &mmix::add;
+      instructions[SUB] = &mmix::sub;
+      instructions[SUBU] = &mmix::subu;
+      instructions[i2ADDU] = &mmix::i2addu;
+      instructions[i4ADDU] = &mmix::i4addu;
+      instructions[i8ADDU] = &mmix::i8addu;
+      instructions[i16ADDU] = &mmix::i16addu;
+      instructions[ADDI] = &mmix::addi;
+      instructions[SUBI] = &mmix::subi;
+      instructions[ADDUI] = &mmix::addui;
+      instructions[SUBUI] = &mmix::subui;
+      instructions[i2ADDUI] = &mmix::i2addui;
+      instructions[i4ADDUI] = &mmix::i4addui;
+      instructions[i8ADDUI] = &mmix::i8addui;
+      instructions[i16ADDUI] = &mmix::i16addui;
+
+      instructions[NEG] = &mmix::neg;
+      instructions[NEGU] = &mmix::negu;
+      instructions[SL] = &mmix::sl;
+      instructions[SLU] = &mmix::slu;
+      instructions[SR] = &mmix::sr;
+      instructions[SRU] = &mmix::sru;
+      instructions[CMP] = &mmix::cmp;
+      instructions[CMPU] = &mmix::cmpu;
+      instructions[CMPI] = &mmix::cmpi;
+      instructions[CMPUI] = &mmix::cmpui;
+      instructions[NEGI] = &mmix::negi;
+      instructions[NEGUI] = &mmix::negui;
+      instructions[SLI] = &mmix::sli;
+      instructions[SLUI] = &mmix::slui;
+      instructions[SRI] = &mmix::sri;
+      instructions[SRUI] = &mmix::srui;
+
+      instructions[BN] = &mmix::bn;
+      instructions[BZ] = &mmix::bz;
+      instructions[BP] = &mmix::bp;
+      instructions[BOD] = &mmix::bod;
+      instructions[BNN] = &mmix::bnn;
+      instructions[BNZ] = &mmix::bnz;
+      instructions[BNP] = &mmix::bnp;
+      instructions[BEV] = &mmix::bev;
+      instructions[BNB] = &mmix::bnb;
+      instructions[BZB] = &mmix::bzb;
+      instructions[BPB] = &mmix::bpb;
+      instructions[BODB] = &mmix::bodb;
+      instructions[BNNB] = &mmix::bnnb;
+      instructions[BNZB] = &mmix::bnzb;
+      instructions[BNPB] = &mmix::bnpb;
+      instructions[BEVB] = &mmix::bevb;
+
+      instructions[PBNB] = &mmix::pbnb;
+      instructions[PBZB] = &mmix::pbzb;
+      instructions[PBPB] = &mmix::pbpb;
+      instructions[PBODB] = &mmix::pbodb;
+      instructions[PBNNB] = &mmix::pbnnb;
+      instructions[PBNZB] = &mmix::pbnzb;
+      instructions[PBNPB] = &mmix::pbnpb;
+      instructions[PBEVB] = &mmix::pbevb;
+      instructions[PBN] = &mmix::pbn;
+      instructions[PBZ] = &mmix::pbz;
+      instructions[PBP] = &mmix::pbp;
+      instructions[PBOD] = &mmix::pbod;
+      instructions[PBNN] = &mmix::pbnn;
+      instructions[PBNZ] = &mmix::pbnz;
+      instructions[PBNP] = &mmix::pbnp;
+      instructions[PBEV] = &mmix::pbev;
+
+      instructions[CSN] = &mmix::csn;
+      instructions[CSZ] = &mmix::csz;
+      instructions[CSP] = &mmix::csp;
+      instructions[CSOD] = &mmix::csod;
+      instructions[CSNN] = &mmix::csnn;
+      instructions[CSNZ] = &mmix::csnz;
+      instructions[CSNP] = &mmix::csnp;
+      instructions[CSEV] = &mmix::csev;
+      instructions[CSNI] = &mmix::csni;
+      instructions[CSZI] = &mmix::cszi;
+      instructions[CSPI] = &mmix::cspi;
+      instructions[CSODI] = &mmix::csodi;
+      instructions[CSNNI] = &mmix::csnni;
+      instructions[CSNZI] = &mmix::csnzi;
+      instructions[CSNPI] = &mmix::csnpi;
+      instructions[CSEVI] = &mmix::csevi;
+
+      instructions[ZSN] = &mmix::zsn;
+      instructions[ZSZ] = &mmix::zsz;
+      instructions[ZSP] = &mmix::zsp;
+      instructions[ZSOD] = &mmix::zsod;
+      instructions[ZSNN] = &mmix::zsnn;
+      instructions[ZSNZ] = &mmix::zsnz;
+      instructions[ZSNP] = &mmix::zsnp;
+      instructions[ZSEV] = &mmix::zsev;
+      instructions[ZSNI] = &mmix::zsni;
+      instructions[ZSZI] = &mmix::zszi;
+      instructions[ZSPI] = &mmix::zspi;
+      instructions[ZSODI] = &mmix::zsodi;
+      instructions[ZSNNI] = &mmix::zsnni;
+      instructions[ZSNZI] = &mmix::zsnzi;
+      instructions[ZSNPI] = &mmix::zsnpi;
+      instructions[ZSEVI] = &mmix::zsevi;
+
+      instructions[LDB] = &mmix::ldb;
+      instructions[LDBU] = &mmix::ldbu;
+      instructions[LDW] = &mmix::ldw;
+      instructions[LDWU] = &mmix::ldwu;
+      instructions[LDT   ] = &mmix::ldt;
+      instructions[LDTU  ] = &mmix::ldtu;
+      instructions[LDO   ] = &mmix::ldo;
+      instructions[LDOU  ] = &mmix::ldou;
+      instructions[LDBI  ] = &mmix::ldbi;
+      instructions[LDBUI ] = &mmix::ldbui;
+      instructions[LDWI  ] = &mmix::ldwi;
+      instructions[LDWUI ] = &mmix::ldwui;
+      instructions[LDTI  ] = &mmix::ldti;
+      instructions[LDTUI ] = &mmix::ldtui;
+      instructions[LDOI  ] = &mmix::ldoi;
+      instructions[LDOUI ] = &mmix::ldoui;
+
+      instructions[LDHT  ] = &mmix::ldht;
+      instructions[LDSF  ] = &mmix::ldsf;
+      instructions[LDSFI ] = &mmix::ldsfi;
+      instructions[LDHTI ] = &mmix::ldhti;
+      instructions[CSWAP] = &mmix::cswap;
+      instructions[CSWAPI] = &mmix::cswapi;
+      instructions[LDUNC ] = &mmix::cswapi;
+      instructions[LDUNCI] = &mmix::cswapi;
+      instructions[LDVTS] = &mmix::ldvts;
+      instructions[LDVTSI] = &mmix::ldvtsi;
+      instructions[PRELD ] = &mmix::preld;
+      instructions[PRELDI] = &mmix::preldi;
+      instructions[PREGO ] = &mmix::prego;
+      instructions[PREGOI] = &mmix::pregoi;
+      instructions[GOI   ] = &mmix::goi;
+      instructions[GO    ] = &mmix::go;
+
+      instructions[STT] = &mmix::stt;
+      instructions[STBI] = &mmix::stbi;
+      instructions[STBU] = &mmix::stbu;
+      instructions[STBUI] = &mmix::stbui;
+      instructions[STW] = &mmix::stw;
+      instructions[STWI] = &mmix::stwi;
+      instructions[STWU] = &mmix::stwu;
+      instructions[STWUI] = &mmix::stwui;
+      instructions[STB] = &mmix::stb;
+      instructions[STTU] = &mmix::sttu;
+      instructions[STO] = &mmix::sto;
+      instructions[STOU] = &mmix::stou;
+      instructions[STTI] = &mmix::stti;
+      instructions[STTUI] = &mmix::sttui;
+      instructions[STOI] = &mmix::stoi;
+      instructions[STOUI] = &mmix::stoui;
+
+      instructions[STSF] = &mmix::stsf;
+      instructions[STSFI] = &mmix::stsfi;
+      instructions[STHT] = &mmix::stht;
+      instructions[STHTI] = &mmix::sthti;
+      instructions[STCO] = &mmix::stco;
+      instructions[STCOI] = &mmix::stcoi;
+      instructions[STUNC] = &mmix::stunc;
+      instructions[STUNCI] = &mmix::stunci;
+      instructions[SYNCD] = &mmix::syncd;
+      instructions[SYNCDI] = &mmix::syncdi;
+      instructions[PREST ] = &mmix::prest;
+      instructions[PRESTI] = &mmix::presti;
+      instructions[SYNCID] = &mmix::syncid;
+      instructions[SYNCIDI] = &mmix::syncidi;
+      instructions[PUSHGO] = &mmix::pushgo;
+      instructions[PUSHGOI] = &mmix::pushgoi;
+
+      instructions[AND] = &mmix::opcode_AND;
+      instructions[OR] = &mmix::opcode_OR;
+      instructions[XOR] = &mmix::opcode_xor;
+      instructions[ANDN] = &mmix::andn;
+      instructions[ORN] = &mmix::orn;
+      instructions[NAND] = &mmix::nand;
+      instructions[NOR] = &mmix::nor;
+      instructions[NXOR] = &mmix::nxor;
+      instructions[ORI] = &mmix::ori;
+      instructions[ORNI] = &mmix::orni;
+      instructions[NORI] = &mmix::nori;
+      instructions[XORI] = &mmix::xori;
+      instructions[ANDI] = &mmix::andi;
+      instructions[ANDNI] = &mmix::andni;
+      instructions[NANDI] = &mmix::nandi;
+      instructions[NXORI] = &mmix::nxori;
+
+      instructions[MUX] = &mmix::mux;
+      instructions[SADD] = &mmix::sadd;
+      instructions[BDIF] = &mmix::bdif;
+      instructions[WDIF] = &mmix::wdif;
+      instructions[TDIF] = &mmix::tdif;
+      instructions[ODIF] = &mmix::odif;
+      instructions[MOR] = &mmix::mor;
+      instructions[MXOR] = &mmix::mxor;
+      instructions[BDIFI] = &mmix::bdifi;
+      instructions[WDIFI] = &mmix::wdifi;
+      instructions[TDIFI] = &mmix::tdifi;
+      instructions[MUXI] = &mmix::muxi;
+      instructions[SADDI] = &mmix::saddi;
+      instructions[MORI] = &mmix::mori;
+      instructions[MXORI] = &mmix::mxori;
+      instructions[ODIFI] = &mmix::odifi;
+
+      instructions[SETH] = &mmix::seth;
+      instructions[SETMH] = &mmix::setmh;
+      instructions[SETML] = &mmix::setml;
+      instructions[SETL] = &mmix::setl;
+      instructions[INCH] = &mmix::inch;
+      instructions[INCMH] = &mmix::incmh;
+      instructions[INCML] = &mmix::incml;
+      instructions[INCL] = &mmix::incl;
+      instructions[ORH] = &mmix::orh;
+      instructions[ORMH] = &mmix::ormh;
+      instructions[ORML] = &mmix::orml;
+      instructions[ORL] = &mmix::orl;
+      instructions[ANDNH] = &mmix::andnh;
+      instructions[ANDNMH] = &mmix::andnmh;
+      instructions[ANDNL] = &mmix::andnl;
+      instructions[ANDNML] = &mmix::andnml;
+
+      instructions[JMP] = &mmix::jmp;
+      instructions[JMPB] = &mmix::jmpb;
+      instructions[PUSHJ] = &mmix::pushj;
+      instructions[PUSHJB] = &mmix::pushjb;
+      instructions[GETA] = &mmix::geta;
+      instructions[GETAB] = &mmix::getab;
+      instructions[PUT] = &mmix::put;
+      instructions[PUTI] = &mmix::puti;
+      instructions[POP] = &mmix::pop;
+      instructions[RESUME] = &mmix::resume;
+      instructions[SAVE] = &mmix::save;
+      instructions[UNSAVE] = &mmix::unsave;
+      instructions[SYNC] = &mmix::sync;
+      instructions[SWYM] = &mmix::swym;
+      instructions[GET] = &mmix::get;
+      instructions[TRIP] = &mmix::trip;
+
 // instruction_map[inst]();
   switch (inst)
   {
@@ -6267,6 +6540,10 @@ void mmix::ldvts()
 }
 
 void mmix::ldvtsi()
+{
+  return;
+}
+void mmix::sync()
 {
   return;
 }

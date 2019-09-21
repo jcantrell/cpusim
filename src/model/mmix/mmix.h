@@ -304,6 +304,7 @@ void prego();
 void pregoi();
 void goi();
 void stunci();
+void sync();
 void syncd();
 void syncdi();
 void prest();
