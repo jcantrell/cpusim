@@ -11,9 +11,11 @@ struct token
 
 class token_stream
 {
-	token * head;
-	token * gobble();
-	bool puke(token * bile);
+  private:
+	  token * head;
+	  token * gobble();
+  public:
+	  bool puke(token * bile);
 };
 
 extern void token_print(token *t);

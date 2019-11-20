@@ -29,3 +29,6 @@ leftparen -> "("
 rightparen -> ")"
 unaryip -> "\neq"
 binaryop -> "\Vec" | "\wedge" | "\rightarrow" | "\leftarrow"
+
+Morsel:
+always unsigned

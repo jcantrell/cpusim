@@ -30,7 +30,7 @@ class mmix : public cpu {
     };
 	public:
 		mmix(int byte_size, Address address_size);
-		void step(int inst);
+		void step(Morsel inst);
     void loadfile(string &filename);
 
     void wideMult(Morsel a, 

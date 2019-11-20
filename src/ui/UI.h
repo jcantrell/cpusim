@@ -1,4 +1,5 @@
 class UI {
 	public:
-		int user_loop();
+		virtual int user_loop();
+    virtual ~UI() = 0;
 };

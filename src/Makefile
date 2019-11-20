@@ -1,5 +1,8 @@
 CC=c++
-CFLAGS=-Wunused -Wunreachable-code -std=c++11 -I.
+#-Weffc++
+CFLAGS=-Wunused -Wunreachable-code --coverage -std=c++11 -I. \
+-pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused
+LDFLAGS=-lgcov --coverage
 OBJ:=controller/main.o \
 			ui/TextUI.o \
 			ui/parser/parser.o \
@@ -22,6 +25,8 @@ cpusim:	$(OBJ)
 
 #$(OBJ):
 #	$(CC) $(CFLAGS) -o $@
+check: ../bin/cpusim $(TESTS)
+	cppcheck . --enable=all
 
 test: ../bin/cpusim $(TESTS)
 	@echo

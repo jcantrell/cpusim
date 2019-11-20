@@ -395,7 +395,7 @@ class Morsel
     }
     return accumulator;
   }
-  friend Morsel operator*(int lhs, const Morsel& other)
+  friend Morsel operator*(unsigned int lhs, const Morsel& other)
   {
     Morsel lhsMorsel(lhs);
     return lhsMorsel*other;
@@ -425,11 +425,11 @@ class Morsel
 
     unsigned int count = 8;
     union myfloat temp;
-    union myfloat result = { .in=0 };
+    union myfloat result = { 0 };
     while (a != 0 && count != 0)
     {
       temp.in <<= 8;
-      temp.in = temp.in | ((unsigned char)a.asChar());
+      temp.in = temp.in | a.asChar();
       a = a>>8;
       count--;
     }

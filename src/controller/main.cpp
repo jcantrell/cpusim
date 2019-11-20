@@ -8,6 +8,7 @@ int main()
 	//test();
 	TextUI u;
 	UI* u2 = new TextUI;
-	((TextUI*) u2)->user_loop();
+	//((TextUI*) u2)->user_loop();
+	(dynamic_cast<TextUI*>( u2 ) )->user_loop();
 	return 0;
 }
