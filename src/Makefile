@@ -1,5 +1,5 @@
 CC=c++
-CFLAGS=-std=c++11 -I.
+CFLAGS=-Wunused -Wunreachable-code -std=c++11 -I.
 OBJ:=controller/main.o \
 			ui/TextUI.o \
 			ui/parser/parser.o \
@@ -24,30 +24,35 @@ cpusim:	$(OBJ)
 #	$(CC) $(CFLAGS) -o $@
 
 test: ../bin/cpusim $(TESTS)
+	@echo
 	./tests/unit/testmorsel
+	@echo
 	./tests/unit/testaddress
+	@echo
 	./tests/unit/testcpu
+	@echo
 	./tests/unit/testUnsignedMorsel
+	@echo
 	./tests/unit/testSignedMorsel
-	cd tests && mmixal hello.mms
+	@echo
+	cd tests/functional && mmixal hello.mms
+	@echo
 	cat script | ../bin/cpusim
 
-tests/unit/testcpu: tests/unit/testcpu.cpp
-	@echo "BEGIN testcpu"
-	$(CC) $(CFLAGS) -o $@ tests/unit/testcpu.cpp -I. model/cpu/Address.cpp model/cpu/cpu.cpp
-	@echo "END testcpu"
+tests/unit/testcpu: tests/unit/handrolled/testcpu.cpp
+	$(CC) $(CFLAGS) -o $@ tests/unit/handrolled/testcpu.cpp -I. model/cpu/Address.cpp model/cpu/cpu.cpp
 
-tests/unit/testSignedMorsel.o: tests/unit/testSignedMorsel.cpp
-	$(CC) $(CFLAGS) -c -o $@ tests/unit/testSignedMorsel.cpp
+tests/unit/testSignedMorsel.o: tests/unit/handrolled/testSignedMorsel.cpp
+	$(CC) $(CFLAGS) -c -o $@ tests/unit/handrolled/testSignedMorsel.cpp
 
-tests/unit/testUnsignedMorsel.o: tests/unit/testUnsignedMorsel.cpp
-	$(CC) $(CFLAGS) -c -o $@ tests/unit/testUnsignedMorsel.cpp
+tests/unit/testUnsignedMorsel.o: tests/unit/handrolled/testUnsignedMorsel.cpp
+	$(CC) $(CFLAGS) -c -o $@ tests/unit/handrolled/testUnsignedMorsel.cpp
 
-tests/unit/testmorsel.o: tests/unit/testmorsel.cpp
-	$(CC) $(CFLAGS) -c -o $@ tests/unit/testmorsel.cpp
+tests/unit/testmorsel.o: tests/unit/handrolled/testmorsel.cpp
+	$(CC) $(CFLAGS) -c -o $@ tests/unit/handrolled/testmorsel.cpp
 
-tests/unit/testaddress: tests/unit/testaddress.cpp model/cpu/Address.cpp
-	$(CC) $(CFLAGS) -o $@ tests/unit/testaddress.cpp model/cpu/Address.cpp
+tests/unit/testaddress: tests/unit/handrolled/testaddress.cpp model/cpu/Address.cpp
+	$(CC) $(CFLAGS) -o $@ tests/unit/handrolled/testaddress.cpp model/cpu/Address.cpp
 
 controller/main.o: controller/main.cpp ui/TextUI.h
 	$(CC) $(CFLAGS) -c -o $@ controller/main.cpp
@@ -79,4 +84,8 @@ clean:
 	find . -name "*.mmo" -type f -delete
 	find . -name "*.img" -type f -delete
 	find ../bin -name "*" -type f -delete
-	rm tests/unit/testcpu tests/unit/testaddress tests/unit/testmorsel
+	[ ! -f tests/unit/testcpu ] || rm tests/unit/testcpu
+	[ ! -f tests/unit/testaddress ] || rm tests/unit/testaddress
+	[ ! -e tests/unit/testmorsel ] || rm tests/unit/testmorsel
+	[ ! -e tests/unit/testUnsignedMorsel ] || rm tests/unit/testUnsignedMorsel
+	[ ! -e tests/unit/testSignedMorsel ] || rm tests/unit/testSignedMorsel

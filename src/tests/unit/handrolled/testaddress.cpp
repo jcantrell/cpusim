@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../../model/cpu/Address.h"
+#include "../../../../model/cpu/Address.h"
 class TestAddress : public Address
 {
 	public:

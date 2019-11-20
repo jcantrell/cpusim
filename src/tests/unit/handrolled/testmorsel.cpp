@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../../model/cpu/morsel.h"
+#include "../../../model/cpu/morsel.h"
 class TestMorsel : public Morsel
 {
 	public:
