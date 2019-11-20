@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../../model/cpu/SignedMorsel.h"
+#include "../../../model/cpu/SignedMorsel.h"
 class TestSignedMorsel : public SignedMorsel
 {
 	public:

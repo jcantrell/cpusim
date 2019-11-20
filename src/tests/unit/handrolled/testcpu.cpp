@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../../model/cpu/cpu.h"
+#include "../../../model/cpu/cpu.h"
 class TestCPU : public cpu
 {
   public:
