@@ -6,7 +6,7 @@
 class subleq : public cpu {
 	public:
 		subleq(int byte_in, Address address_in);
-		virtual void step(Morsel inst);
+		virtual void step(UnsignedMorsel inst);
 };
 
 #endif

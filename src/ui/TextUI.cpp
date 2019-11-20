@@ -79,8 +79,9 @@ int TextUI::user_loop()
 			printf("No cpu\n");
     else
     {
-      Morsel value;
-      value = atoi(args[2]);
+      UnsignedMorsel value;
+      unsigned int v = stoul(args[2]);
+      value = v;
       Address addr;
       addr = atoi(args[1]);
 	    //mycpu->load(atoi(args[1]), atoi(args[2]));
@@ -102,7 +103,7 @@ int TextUI::user_loop()
 	        address2 = atoi(args[2]);
 	    }
 
-	    Morsel value;
+	    UnsignedMorsel value;
       Address i;
       i=address1;
 	    for (i=address1; i<=address2; i++)
@@ -123,7 +124,7 @@ int TextUI::user_loop()
 		if (mycpu == NULL)
 			printf("No cpu\n");
     else
-	    mycpu->setip(Address(atoi(args[1])));
+	    mycpu->setip(Address(stoul(args[1])));
 	}
 	else if (0==strcmp("step",args[0]))
 	{
@@ -133,13 +134,13 @@ int TextUI::user_loop()
       continue;
     }
 
-	  Morsel inst = mycpu->view(mycpu->getip());
+	  UnsignedMorsel inst = mycpu->view(mycpu->getip());
 	  mycpu->step(inst);
 	}
 	else if (0==strcmp("help",args[0]))
 	{
-    int command_count = 10;
-		string commands[command_count] = {
+    //int command_count = 10;
+		vector<string> commands = {
 			"help:    display available commands\n"
 			"create <cpu>:  create a new cpu\n"
 			"memdump: dump the contents of RAM onto the screen\n"
@@ -151,9 +152,11 @@ int TextUI::user_loop()
 			"step:    execute the current instruction\n"
       "loadimg <path>: load a binary image file\n"
 		};
-		for (int i=0;i<command_count;i++)
+		//for (int i=0;i<command_count;i++)
+    for(vector<string>::iterator it = commands.begin(); it != commands.end(); ++it)
 		{
-			printf("%s",commands[i].c_str());
+			//printf("%s",commands[i].c_str());
+      printf("%s",(*it).c_str());
 		}
 	}
 	else if (0==strcmp("info",args[0]))

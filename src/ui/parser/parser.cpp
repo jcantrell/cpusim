@@ -53,7 +53,7 @@ bool match( token** stream, const token* compare, parse_node **out)
 
 	if (*stream != NULL && (*stream)->type == compare->type)
 	{
-		*out = (parse_node *)malloc(sizeof(parse_node));
+		*out = static_cast<parse_node *>(malloc(sizeof(parse_node)));
 		(*out)->p = token_p;
 		(*out)->t = (*stream);
 		(*out)->children[0] = NULL;
@@ -77,7 +77,7 @@ bool statement( token **stream, parse_node **out)
 
 	if (	load_statement(stream,&load_parse) )
 	{
-		*out = (parse_node*)malloc(sizeof(parse_node));
+		*out = static_cast<parse_node*>(malloc(sizeof(parse_node)));
 		(*out)->t = NULL;
 		(*out)->p = statement_p;
 		(*out)->children[0] = load_parse;
@@ -87,7 +87,7 @@ bool statement( token **stream, parse_node **out)
 		printf("RETURN TRUE\n");
 		return true;
 	} else if  (store_statement(stream,&store_parse)) {
-		*out = (parse_node*)malloc(sizeof(parse_node));
+		*out = static_cast<parse_node*>(malloc(sizeof(parse_node)));
 		(*out)->t = NULL;
 		(*out)->p = statement_p;
 		(*out)->children[0] = store_parse;
@@ -120,7 +120,7 @@ bool load_statement( token **stream, parse_node **out)
 		&&	match(stream,&identifier,&id_parse)
 		&&	match(stream,&value,&value_parse) )
 	{
-		*out = (parse_node*)malloc(sizeof(parse_node));
+		*out = static_cast<parse_node*>(malloc(sizeof(parse_node)));
 		(*out)->t = NULL;
 		(*out)->p = load_p;
 		(*out)->children[0] = load_parse;
@@ -158,7 +158,7 @@ bool store_statement( token **stream, parse_node ** out)
 		&& match(stream,&value,&val_1) 
 		&& match(stream,&value,&val_2 ) )
 	{
-		*out = (parse_node*)malloc(sizeof(parse_node));
+		*out = static_cast<parse_node*>(malloc(sizeof(parse_node)));
 		//(*out)->t = orig;
 		(*out)->t = NULL;
 		(*out)->p = store_p;
@@ -197,8 +197,15 @@ void parse_walk(parse_node * in)
 				case value_t:
 					printf("Doing value stuff\n");
 					break;
+    		case whitespace_t:
+    			printf("Doing statement stuff\n");
+    			break;
+        default:
+          break;
 			}
 			break;
+    default:
+      break;
 	}
 	for (int i=0;i<4;i++)
 		if (in->children[i])

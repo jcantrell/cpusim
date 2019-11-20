@@ -28,7 +28,7 @@ class UnsignedMorsel
   {
     dynamic_bitset<> out;
     bool a, b, carry;
-    int i;
+    unsigned int i;
     for (i=0, carry=false;i<other.size() && i<bs.size();i++) {
       a = bs[i];
       b = other.bs[i];
@@ -52,7 +52,7 @@ class UnsignedMorsel
     
     return UnsignedMorsel(out);
   }
-  UnsignedMorsel operator+(int rhs)
+  UnsignedMorsel operator+(unsigned int rhs)
   {
     UnsignedMorsel rhs_morsel(rhs);
     return *this + rhs_morsel;
@@ -72,7 +72,7 @@ class UnsignedMorsel
 		result.bs.resize(lhs.size());
 		return result;
   }
-  friend UnsignedMorsel operator-(int lhsInt, const UnsignedMorsel& other)
+  friend UnsignedMorsel operator-(unsigned int lhsInt, const UnsignedMorsel& other)
   {
     UnsignedMorsel lhs(lhsInt);
     return lhs - other;
@@ -111,7 +111,7 @@ class UnsignedMorsel
     UnsignedMorsel copy(*this);
     UnsignedMorsel reversed;
     reversed = 0;
-    for (int count=copy.size();count != 0;count--)
+    for (unsigned int count=copy.size();count != 0;count--)
     {
       reversed <<= 1;
       reversed = reversed | (copy & 1);
@@ -127,7 +127,7 @@ class UnsignedMorsel
     stringstream out;
     char const hex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c',
       'd','e','f'};
-    for (int count=reversed.size();count != 0;count-=8)
+    for (unsigned int count=reversed.size();count != 0;count-=8)
     {
       UnsignedMorsel chunk(0);
 
@@ -148,8 +148,8 @@ class UnsignedMorsel
   }
   bool operator<(const UnsignedMorsel other) const
   {
-    int this_index = bs.size()-1;
-    int other_index = other.bs.size()-1;
+    unsigned int this_index = bs.size()-1;
+    unsigned int other_index = other.bs.size()-1;
     for (;this_index > other_index; this_index--)
     {
       if (bs[this_index] == 1)
@@ -164,7 +164,7 @@ class UnsignedMorsel
           return true;
         }
     }
-    for (;this_index >= 0 && other_index >= 0; this_index--, other_index--)
+    for (;this_index != 0 && other_index != 0; this_index--, other_index--)
     {
       if ((bs[this_index] != other.bs[other_index]))
       {
@@ -178,7 +178,7 @@ class UnsignedMorsel
     }
     return false;
   }
-  bool operator<(int other)
+  bool operator<(unsigned int other)
   {
     UnsignedMorsel otherUnsignedMorsel;
     otherUnsignedMorsel = other;
@@ -188,22 +188,22 @@ class UnsignedMorsel
   {
     return *this < other || *this == other; 
   }
-  bool operator<=(int other)
+  bool operator<=(unsigned int other)
   {
     return *this < other || *this == other;
   }
-  friend bool operator<=(int lhs, const UnsignedMorsel& rhs)
+  friend bool operator<=(unsigned int lhs, const UnsignedMorsel& rhs)
   {
     UnsignedMorsel lhsUnsignedMorsel(lhs);
     return lhsUnsignedMorsel <= rhs;
   }
-  bool operator>(int other)
+  bool operator>(unsigned int other)
   {
     UnsignedMorsel otherUnsignedMorsel;
     otherUnsignedMorsel = other;
     return *this > otherUnsignedMorsel;
   }
-  friend bool operator>(int lhs, UnsignedMorsel rhs)
+  friend bool operator>(unsigned int lhs, UnsignedMorsel rhs)
   {
     UnsignedMorsel lhsUnsignedMorsel;
     lhsUnsignedMorsel = lhs;
@@ -237,7 +237,7 @@ class UnsignedMorsel
       return quotient;
     }
 
-    for (int i=dividend.bs.size()-1;i>=0;i--)
+    for (unsigned int i=dividend.bs.size()-1;i>0;i--)
     {
       remainder = remainder * radix + UnsignedMorsel(dividend.bs[i]);
 
@@ -280,7 +280,7 @@ class UnsignedMorsel
     if (lhs.bs.size() < rhs.bs.size()) lhs.bs.resize(rhs.bs.size());
     return lhs.bs==rhs.bs; 
   }
-  bool operator==(int other) const {
+  bool operator==(unsigned int other) const {
     UnsignedMorsel result;
     result = other;
     return *this == result;
@@ -306,7 +306,7 @@ class UnsignedMorsel
     result.bs = lhs.bs & rhs.bs;
     return result;
   }
-  UnsignedMorsel operator&(int otherInt)
+  UnsignedMorsel operator&(unsigned int otherInt)
   {
     UnsignedMorsel other(otherInt);
     return (*this) & other;
@@ -359,13 +359,13 @@ class UnsignedMorsel
     }
     return result;
   }
-  UnsignedMorsel operator<<(int other)
+  UnsignedMorsel operator<<(unsigned int other)
   {
     UnsignedMorsel otherUnsignedMorsel;
     otherUnsignedMorsel = other;
     return *this << otherUnsignedMorsel;
   }
-  UnsignedMorsel operator>>(int other)
+  UnsignedMorsel operator>>(unsigned int other)
   {
     UnsignedMorsel otherUnsignedMorsel;
     otherUnsignedMorsel = other;
@@ -394,7 +394,7 @@ class UnsignedMorsel
     }
     return accumulator;
   }
-  friend UnsignedMorsel operator*(int lhs, const UnsignedMorsel& other)
+  friend UnsignedMorsel operator*(unsigned int lhs, const UnsignedMorsel& other)
   {
     UnsignedMorsel lhsUnsignedMorsel(lhs);
     return lhsUnsignedMorsel*other;
@@ -424,11 +424,11 @@ class UnsignedMorsel
 
     unsigned int count = 8;
     union myfloat temp;
-    union myfloat result = { .in=0 };
+    union myfloat result; result.in = 0;
     while (a != 0 && count != 0)
     {
       temp.in <<= 8;
-      temp.in = temp.in | ((unsigned char)a.asChar());
+      temp.in = temp.in | a.asChar();
       a = a>>8;
       count--;
     }

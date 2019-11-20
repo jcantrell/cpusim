@@ -5,7 +5,7 @@ subleq::subleq(int byte_in, Address address_in) : cpu(byte_in, address_in, 0)
   printf("subleq constructor called!\n");
 }
 
-void subleq::step(Morsel inst)
+void subleq::step(UnsignedMorsel inst)
 {
   printf("subleq step called!\n");
 	    //switch (inst)
@@ -16,9 +16,9 @@ void subleq::step(Morsel inst)
 	                // instruction sets is implemented
 	                
 	            {
-							Morsel a = view(Address(view(getip()+1)));
-							Morsel b = view(Address(view(getip()+2)));
-							Morsel c = view(getip()+3);
+							UnsignedMorsel a = view(Address(view(getip()+1)));
+							UnsignedMorsel b = view(Address(view(getip()+2)));
+							UnsignedMorsel c = view(getip()+3);
 	            printf("loaded %s %s %s\n", 
                 a.asString().c_str(), b.asString().c_str(), 
                 c.asString().c_str());

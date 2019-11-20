@@ -1,16 +1,16 @@
 #ifndef ADDRESS_H
 #define ADDRESS_H
 #include <string>
-#include "./morsel.h"
+#include "./UnsignedMorsel.h"
 #include <boost/functional/hash.hpp>
 using namespace std;
 class Address {
   private:
-    Morsel m;
+    UnsignedMorsel m;
   public:
   Address();
   Address(const Address &other);
-  Address(Morsel in);
+  Address(UnsignedMorsel in);
   Address& operator=(int in);
   int asInt() const;
   string asString() const;
@@ -33,11 +33,11 @@ class Address {
   Address operator%(int in);
   bool operator==(const Address& other) const;
   bool operator==(int other);
-  bool operator<=(Morsel in);
+  bool operator<=(UnsignedMorsel in);
   Address operator&(const Address& other);
   Address operator&(uint64_t other);
   Address operator|(const Address& other);
-  Morsel asMorsel();
+  UnsignedMorsel asMorsel();
   Address operator/(const Address& other);
   Address operator/(int rhs);
   Address& resize(unsigned int newsize);

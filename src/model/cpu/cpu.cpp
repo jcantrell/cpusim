@@ -14,7 +14,7 @@ cpu::~cpu()
 	{
 	}
 
-void cpu::step(Morsel inst)
+void cpu::step(UnsignedMorsel inst)
 	{
 	}
 
@@ -53,17 +53,17 @@ void cpu::memdump(std::ostream& os)
 {
   unsigned lineWidth = (128 + byte_size - 1) / byte_size;
 
-  map<Address, Morsel> mymap;
-  for (std::pair<Address, Morsel> element : ram)
+  map<Address, UnsignedMorsel> mymap;
+  for (std::pair<Address, UnsignedMorsel> element : ram)
     mymap[element.first] = element.second;
 
-  std::vector<Morsel> line (lineWidth);
-  for (Morsel& element : line)
+  std::vector<UnsignedMorsel> line (lineWidth);
+  for (UnsignedMorsel& element : line)
     element.resize(byte_size);
 
   Address previous;
   previous = mymap.begin()->first;
-  for (std::pair<Address, Morsel> element : mymap)
+  for (std::pair<Address, UnsignedMorsel> element : mymap)
   {
     if ( !(previous / 128 == element.first / 128) )
     {
@@ -72,7 +72,7 @@ void cpu::memdump(std::ostream& os)
       {
         os << line[lineIndex].asString();
         if (lineIndex%2==1 && lineIndex!=(lineWidth-1)){os << " ";}
-        line[lineIndex] = Morsel(0);
+        line[lineIndex] = UnsignedMorsel(0);
       }
       os << endl;
     }
@@ -84,7 +84,7 @@ void cpu::memdump(std::ostream& os)
       {
         os << line[lineIndex].asString();
         if (lineIndex%2==1 && lineIndex!=(lineWidth-1)) os << " " ;
-        line[lineIndex] = Morsel(0);
+        line[lineIndex] = UnsignedMorsel(0);
       }
   os << endl;
 }
@@ -100,7 +100,7 @@ int cpu::loadimage(string filename)
   }  
 
   infile.seekg(0, infile.end);
-  int file_length = infile.tellg();
+  const unsigned int file_length = infile.tellg();
   std::cout << "file length: " << int(file_length) << std::endl;
   infile.seekg(0, infile.beg);
 
@@ -111,25 +111,25 @@ int cpu::loadimage(string filename)
   char buffer[file_length];
   infile.read(buffer, file_length);
   //Address i;
-  int i;
+  unsigned int i;
   for (i=0;i<file_length;i++)
   {
-    Address i_addr;
-    i_addr = i;
-    ram[i_addr] = buffer[i];
+    Address i_addr(i);
+    //i_addr = i;
+    ram[i_addr] = UnsignedMorsel(static_cast<unsigned char>(buffer[i]));
   }
   return 0;
 }
 
-Morsel cpu::load(Address address, Morsel value)
+UnsignedMorsel cpu::load(Address address, UnsignedMorsel value)
 	{
       value.resize(byte_size);
-	    Morsel ret = ram[address];
+	    UnsignedMorsel ret = ram[address];
 	    ram[address] = value;
 	    return ret;
 	}
 
-Morsel& cpu::view(Address address)
+UnsignedMorsel& cpu::view(Address address)
 	{
 	    return ram[address];
 	}
@@ -165,7 +165,7 @@ Morsel& cpu::view(Address address)
 
 	int cpu::div(Address a, Address b, Address dst)
 	{
-	    ram[dst] = (ram[b] == 0? Morsel(0) : ram[a]/ram[b]);
+	    ram[dst] = (ram[b] == 0? UnsignedMorsel(0) : ram[a]/ram[b]);
 	    return 0;
 	}
 
@@ -205,12 +205,12 @@ Morsel& cpu::view(Address address)
 	    return 0;
 	}
 
-Morsel cpu::regs(Address address)
+UnsignedMorsel cpu::regs(Address address)
 {
     return registers[address];
 }
 
-Morsel cpu::regs(Address address, Morsel value)
+UnsignedMorsel cpu::regs(Address address, UnsignedMorsel value)
 {
     registers[address] = value;
     return registers[address];

@@ -14,7 +14,7 @@ class mmix : public cpu {
     Address target;
     unsigned long long int register_stack_top;
     boost::unordered_map<int, int> special_registers;
-    boost::unordered_map<Address, Morsel> globals;
+    boost::unordered_map<Address, UnsignedMorsel> globals;
     enum inst {
 #include "model/mmix/opcodes_mmix.h"
     };
@@ -30,45 +30,45 @@ class mmix : public cpu {
     };
 	public:
 		mmix(int byte_size, Address address_size);
-		void step(Morsel inst);
+		void step(UnsignedMorsel inst);
     void loadfile(string &filename);
 
-    void wideMult(Morsel a, 
-                  Morsel b,
-                  Morsel *carry, 
-                  Morsel *result
+    void wideMult(UnsignedMorsel a, 
+                  UnsignedMorsel b,
+                  UnsignedMorsel *carry, 
+                  UnsignedMorsel *result
                  );
-    void wideDiv(Morsel numerator_hi,
-                 Morsel numerator_lo,
-                 Morsel divisor,
-                 Morsel *quotient,
-                 Morsel *remainder
+    void wideDiv(UnsignedMorsel numerator_hi,
+                 UnsignedMorsel numerator_lo,
+                 UnsignedMorsel divisor,
+                 UnsignedMorsel *quotient,
+                 UnsignedMorsel *remainder
                 );
 
-    void push(Morsel reg);
-    void pop(Morsel reg);
+    void push(UnsignedMorsel reg);
+    void pop(UnsignedMorsel reg);
     // Utility functions - see fascicle
     // Example: M_8(59) will give the octabyte at byte address 59,
     // by first rounding down to the nearest octabyte address
     // 63 / 8 = 56
     // So it concatenates the 8 bytes starting at byte address 56
-    Morsel M(unsigned int size, Address address);
+    UnsignedMorsel M(unsigned int size, Address address);
     // M(size, address, value) calculates the address the same way, and
     // stores the given value there
-    Morsel M(
+    UnsignedMorsel M(
       unsigned int size, 
 //      unsigned long long address,
       Address address,
       //unsigned long long value
-      Morsel value
+      UnsignedMorsel value
     );
 
     // Load/store registers
-    Morsel R(Address reg);
-    Morsel R(Address reg, Morsel value);
+    UnsignedMorsel R(Address reg);
+    UnsignedMorsel R(Address reg, UnsignedMorsel value);
     // Load/store special registers
-    Morsel g(Address reg);
-    Morsel g(Address reg, Morsel value);
+    UnsignedMorsel g(Address reg);
+    UnsignedMorsel g(Address reg, UnsignedMorsel value);
 
     // Is one double in the neighborhood of another?
     bool N(double, double, unsigned int, float);

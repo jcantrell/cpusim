@@ -38,27 +38,27 @@ union flagsint {
 class cpu {
 	private:
 		Address address_size;
-		boost::unordered_map<Address, Morsel> ram;
-		boost::unordered_map<Address, Morsel> registers;
+		boost::unordered_map<Address, UnsignedMorsel> ram;
+		boost::unordered_map<Address, UnsignedMorsel> registers;
 		Address ip;
 		struct sflags status;
 		union flagsint flagint;
 
 	public:
-		const int byte_size;  
+		const unsigned int byte_size;  
 		cpu(int byte_in, Address address_in, unsigned int reg_count);
 		virtual ~cpu() = 0;
 
 // Control methods
 		void memdump(std::ostream& os = std::cout);
-		Morsel load(Address address, Morsel value);
-		Morsel& view(Address address);
+		UnsignedMorsel load(Address address, UnsignedMorsel value);
+		UnsignedMorsel& view(Address address);
 		Address getip();
 		Address setip(Address in);
 		string toString();
-		virtual void step(Morsel inst);
-    Morsel regs(Address address);
-    Morsel regs(Address address, Morsel value);
+		virtual void step(UnsignedMorsel inst);
+    UnsignedMorsel regs(Address address);
+    UnsignedMorsel regs(Address address, UnsignedMorsel value);
     int loadimage(string filename);
     virtual void loadobject(string filename);
 

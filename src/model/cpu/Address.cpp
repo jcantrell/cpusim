@@ -7,11 +7,11 @@ Address::Address(const Address &other)
   {
     m = other.m;
   }
-Address::Address(Morsel in)
+Address::Address(UnsignedMorsel in)
   {
     m = in;
   }
-Address& Address::operator=(int in) 
+Address& Address::operator=(unsigned int in) 
 {
     m = in;
     return *this;
@@ -124,7 +124,7 @@ Address Address::operator*(int in)
     otherAddr = other;
     return *this == otherAddr;
   }
-  bool Address::operator<=(Morsel in)
+  bool Address::operator<=(UnsignedMorsel in)
   {
     return m <= in;
   }
@@ -148,7 +148,7 @@ Address Address::operator*(int in)
     result.m = result.m | other.m;
     return result;
   }
-  Morsel Address::asMorsel()
+  UnsignedMorsel Address::asMorsel()
   {
     return m;
   }

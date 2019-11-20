@@ -62,9 +62,11 @@ void token_print(token* t)
         case whitespace_t:
             printf("whitespace\n");
             break;
-		case identifier_t:
-			printf("identifier\n");
-			break;
+		    case identifier_t:
+			      printf("identifier\n");
+			      break;
+        default:
+            break;
     }
     printf(":%s:\n",t->value);
     printf("%d\n",t->len);
@@ -73,7 +75,7 @@ void token_print(token* t)
 
 bool match(char *s[], const char* in)
 {
-    int l = strlen(in);
+    size_t l = strlen(in);
     if (strncmp(*s,in,l) == 0)
     {
         *s = *s + l;
@@ -223,7 +225,7 @@ token *parse(char *s[])
 {
     bool flag = true;
     bool flag2 = true;
-    token *head = (token *)malloc( sizeof(token) );
+    token *head = static_cast<token*>(malloc( sizeof(token) ));
     token *c = head;
     c->next = NULL;
 
@@ -235,7 +237,7 @@ token *parse(char *s[])
 			|| 	value(s,c)
 			||	identifier(s,c))
         {
-            c->next = (token *)malloc( sizeof(token) );
+            c->next = static_cast<token*>(malloc(sizeof(token)));
             c = c->next;
             c->next = NULL;
             flag2 = true;
