@@ -46,7 +46,7 @@ class cpu {
 
 	public:
 		const unsigned int byte_size;  
-		cpu(int byte_in, Address address_in, unsigned int reg_count);
+		cpu(unsigned int byte_in, Address address_in, unsigned int reg_count);
 		virtual ~cpu() = 0;
 
 // Control methods

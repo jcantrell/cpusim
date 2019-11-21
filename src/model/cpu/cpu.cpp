@@ -1,13 +1,14 @@
 #include "model/cpu/cpu.h"
 #include <fstream>
 
-cpu::cpu(int byte_in, Address address_in, unsigned int reg_count) : byte_size(byte_in)
+cpu::cpu(unsigned int byte_in, Address address_in, unsigned int reg_count) : byte_size(byte_in)
 	{
     flagint.i = 42; //magic number 101010
     //byte_size = byte_in;
     address_size = address_in;
     ip = 0;
-    status = {0};
+    //status = {0};
+    status = sflags();
 	}
 
 cpu::~cpu()
@@ -67,8 +68,8 @@ void cpu::memdump(std::ostream& os)
   {
     if ( !(previous / 128 == element.first / 128) )
     {
-      os << (previous - previous % (128/byte_size)) << ": ";
-      for (int lineIndex=0;lineIndex<lineWidth;lineIndex++)
+      os << (previous - previous % (128/static_cast<int>(byte_size))) << ": ";
+      for (unsigned int lineIndex=0;lineIndex<lineWidth;lineIndex++)
       {
         os << line[lineIndex].asString();
         if (lineIndex%2==1 && lineIndex!=(lineWidth-1)){os << " ";}
@@ -76,22 +77,21 @@ void cpu::memdump(std::ostream& os)
       }
       os << endl;
     }
-    line[(element.first % lineWidth).asInt()] = element.second;
+    line[static_cast<unsigned int>((element.first % static_cast<int>(lineWidth)).asInt())] = element.second;
     previous = element.first;
   }
-      os << (previous - previous % (128/byte_size)) << ": ";
-      for (int lineIndex=0;lineIndex<lineWidth;lineIndex++)
-      {
-        os << line[lineIndex].asString();
-        if (lineIndex%2==1 && lineIndex!=(lineWidth-1)) os << " " ;
-        line[lineIndex] = UnsignedMorsel(0);
-      }
+  os << (previous - previous % (128/static_cast<int>(byte_size))) << ": ";
+  for (unsigned int lineIndex=0;lineIndex<lineWidth;lineIndex++)
+  {
+    os << line[lineIndex].asString();
+    if (lineIndex%2==1 && lineIndex!=(lineWidth-1)) os << " " ;
+    line[lineIndex] = UnsignedMorsel(0);
+  }
   os << endl;
 }
 
 int cpu::loadimage(string filename)
 {
-  std::cout << "loading file " << filename << std::endl;
   std::ifstream infile(filename, std::ifstream::binary);
   if (!infile)
   {
@@ -99,24 +99,27 @@ int cpu::loadimage(string filename)
     return 1;
   }  
 
+  /*
   infile.seekg(0, infile.end);
-  const unsigned int file_length = infile.tellg();
+  unsigned int file_length = infile.tellg();
   std::cout << "file length: " << int(file_length) << std::endl;
   infile.seekg(0, infile.beg);
 
   if (file_length > address_size)
     file_length = address_size.asInt();
-  std::cout << "file length: " << int(file_length) << std::endl;
+  */
+  //std::cout << "file length: " << int(file_length) << std::endl;
 
-  char buffer[file_length];
-  infile.read(buffer, file_length);
+  //char buffer[file_length];
+  //infile.read(buffer, file_length);
   //Address i;
-  unsigned int i;
-  for (i=0;i<file_length;i++)
-  {
-    Address i_addr(i);
+  unsigned int i = 0;
+  unsigned char inchar;
+  while (!infile.eof()) {
+    infile >> inchar;
+    Address i_addr(i++);
     //i_addr = i;
-    ram[i_addr] = UnsignedMorsel(static_cast<unsigned char>(buffer[i]));
+    ram[i_addr] = UnsignedMorsel(inchar);
   }
   return 0;
 }

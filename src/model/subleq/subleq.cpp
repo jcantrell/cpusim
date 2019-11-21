@@ -1,6 +1,6 @@
 #include "subleq.h"
 
-subleq::subleq(int byte_in, Address address_in) : cpu(byte_in, address_in, 0)
+subleq::subleq(unsigned int byte_in, Address address_in) : cpu(byte_in, address_in, 0)
 {
   printf("subleq constructor called!\n");
 }
