@@ -83,7 +83,7 @@ int TextUI::user_loop()
       unsigned int v = stoul(args[2]);
       value = v;
       Address addr;
-      addr = atoi(args[1]);
+      addr = static_cast<unsigned int>(atoi(args[1]));
 	    //mycpu->load(atoi(args[1]), atoi(args[2]));
       mycpu->load(addr,value);
     }
@@ -105,8 +105,8 @@ int TextUI::user_loop()
 
 	    UnsignedMorsel value;
       Address i;
-      i=address1;
-	    for (i=address1; i<=address2; i++)
+      i=static_cast<unsigned int>(address1);
+	    for (i=static_cast<unsigned int>(address1); i<=static_cast<unsigned int>(address2); i++)
 	    {
 	        value = mycpu->view(i);
 	        printf("%s: %s\n", i.asString().c_str(), value.asString().c_str());
@@ -134,7 +134,7 @@ int TextUI::user_loop()
       continue;
     }
 
-	  UnsignedMorsel inst = mycpu->view(mycpu->getip());
+	  unsigned int inst = (mycpu->view(mycpu->getip())).asInt();
 	  mycpu->step(inst);
 	}
 	else if (0==strcmp("help",args[0]))

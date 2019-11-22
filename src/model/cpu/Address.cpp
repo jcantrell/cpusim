@@ -35,7 +35,7 @@ Address Address::operator*(const Address& other)
     lhs.m = m * other.m;
     return lhs;
 }
-Address operator*(int lhs, const Address& rhs)
+Address operator*(unsigned int lhs, const Address& rhs)
   {
     Address lhs_addr;lhs_addr = lhs;
     return lhs_addr * rhs;
@@ -45,7 +45,7 @@ Address Address::operator*(int in)
     Address other(in);
     return (*this) * other;
   }
-  Address Address::operator<<(int other)
+  Address Address::operator<<(unsigned int other)
   {
     Address result(*this);
     result.m = result.m << other;
@@ -55,22 +55,23 @@ Address Address::operator*(int in)
   {
     return m < other.m;
   }
-  bool Address::operator<(int other)
+  bool Address::operator<(unsigned int other)
   {
     return m < other;
   }
-  bool Address::operator>(int other)
+  bool Address::operator>(unsigned int other)
   {
     return m > other;
   }
-  bool Address::operator<=(int other)
+  bool Address::operator<=(unsigned int other)
   {
     return m < other || m == other;
   }
   bool operator>(int other, Address rhs) {
-    return other > rhs.m;
+    //return other > rhs.m;
+    return rhs < other;
   }
-  Address Address::operator+(int in)
+  Address Address::operator+(unsigned int in)
   {
     Address result;
     result = in;
@@ -107,7 +108,7 @@ Address Address::operator*(int in)
     m++;
     return *this;
   }
-  Address Address::operator%(int in)
+  Address Address::operator%(unsigned int in)
   {
     Address result;
     result = in;
@@ -148,7 +149,7 @@ Address Address::operator*(int in)
     result.m = result.m | other.m;
     return result;
   }
-  UnsignedMorsel Address::asMorsel()
+  UnsignedMorsel Address::asUnsignedMorsel()
   {
     return m;
   }
@@ -175,7 +176,7 @@ Address Address::operator*(int in)
     return m.size();
   }
 
-size_t hash_value(Address const& in)
+size_t hash_value(const Address& in)
 {
   size_t hash = boost::hash_value(in.asInt());
   return hash;

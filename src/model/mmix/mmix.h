@@ -29,8 +29,8 @@ class mmix : public cpu {
       Fputws, Fseek, Ftell
     };
 	public:
-		mmix(int byte_size, Address address_size);
-		void step(UnsignedMorsel inst);
+		mmix(unsigned int byte_size_p, Address);
+		void step(unsigned int inst);
     void loadfile(string &filename);
 
     void wideMult(UnsignedMorsel a, 

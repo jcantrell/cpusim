@@ -5,7 +5,7 @@ subleq::subleq(unsigned int byte_in, Address address_in) : cpu(byte_in, address_
   printf("subleq constructor called!\n");
 }
 
-void subleq::step(UnsignedMorsel inst)
+void subleq::step(unsigned int inst)
 {
   printf("subleq step called!\n");
 	    //switch (inst)
@@ -42,7 +42,8 @@ void subleq::step(UnsignedMorsel inst)
 	                mycpu->setip(inst+1);
 */
 	            printf("c is %s\n", c.asString().c_str());
-	            printf("inst+1 is %s\n", (inst+1).asString().c_str());
+	            //printf("inst+1 is %s\n", (inst+1).asString().c_str());
+	            printf("inst+1 is %d\n", (inst+1));
 							setip( b-a <= 0 ? c : inst+1 );
 	            printf("ip is %s\n", getip().asString().c_str());
 	            }

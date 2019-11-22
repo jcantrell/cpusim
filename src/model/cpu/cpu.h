@@ -56,7 +56,7 @@ class cpu {
 		Address getip();
 		Address setip(Address in);
 		string toString();
-		virtual void step(UnsignedMorsel inst);
+		virtual void step(unsigned int inst);
     UnsignedMorsel regs(Address address);
     UnsignedMorsel regs(Address address, UnsignedMorsel value);
     int loadimage(string filename);

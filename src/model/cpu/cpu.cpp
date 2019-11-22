@@ -15,7 +15,7 @@ cpu::~cpu()
 	{
 	}
 
-void cpu::step(UnsignedMorsel inst)
+void cpu::step(unsigned int inst)
 	{
 	}
 
@@ -68,7 +68,7 @@ void cpu::memdump(std::ostream& os)
   {
     if ( !(previous / 128 == element.first / 128) )
     {
-      os << (previous - previous % (128/static_cast<int>(byte_size))) << ": ";
+      os << (previous - previous % (128/byte_size)) << ": ";
       for (unsigned int lineIndex=0;lineIndex<lineWidth;lineIndex++)
       {
         os << line[lineIndex].asString();
@@ -77,10 +77,10 @@ void cpu::memdump(std::ostream& os)
       }
       os << endl;
     }
-    line[static_cast<unsigned int>((element.first % static_cast<int>(lineWidth)).asInt())] = element.second;
+    line[static_cast<unsigned int>((element.first % lineWidth).asInt())] = element.second;
     previous = element.first;
   }
-  os << (previous - previous % (128/static_cast<int>(byte_size))) << ": ";
+  os << (previous - previous % (128/ byte_size)) << ": ";
   for (unsigned int lineIndex=0;lineIndex<lineWidth;lineIndex++)
   {
     os << line[lineIndex].asString();
