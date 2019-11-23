@@ -9,7 +9,7 @@ class TestAddress : public Address
 /*
 * Address();
 * Address(const Address &other);
-* Address(Morsel in);
+* Address(UnsignedMorsel in);
 */
   bool assignInt()
   { 
@@ -41,13 +41,13 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(95)), 0x5f}
-      ,{Address(Morsel(42)), 0x2a}
+       {Address(UnsignedMorsel(95)), 0x5f}
+      ,{Address(UnsignedMorsel(42)), 0x2a}
     };
 
     for (TestCase &t : tests)
     {
-      result = result && (t.in.asInt() == t.out);
+      result = result && (static_cast<unsigned int>(t.in.asInt()) == t.out);
     }
     return result;
 
@@ -55,7 +55,7 @@ class TestAddress : public Address
   }
   bool asString()
   {
-    Morsel a(95);
+    UnsignedMorsel a(95);
     Address b(a);
     bool result = (b.asString() == a.asString());
     return result;
@@ -69,8 +69,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(95)), "5f"}
-      ,{Address(Morsel(42)), "2a"}
+       {Address(UnsignedMorsel(95)), "5f"}
+      ,{Address(UnsignedMorsel(42)), "2a"}
     };
 
     for (TestCase &t : tests)
@@ -88,8 +88,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(7)) * Address(Morsel(3)), "15"}
-      ,{Address(Morsel(4)) * Address(Morsel(13)), "34"}
+       {Address(UnsignedMorsel(7)) * Address(UnsignedMorsel(3)), "15"}
+      ,{Address(UnsignedMorsel(4)) * Address(UnsignedMorsel(13)), "34"}
     };
 
     for (TestCase &t : tests)
@@ -107,8 +107,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {7 * Address(Morsel(3)), "15"}
-      ,{4 * Address(Morsel(13)), "34"}
+       {7 * Address(UnsignedMorsel(3)), "15"}
+      ,{4 * Address(UnsignedMorsel(13)), "34"}
     };
 
     for (TestCase &t : tests)
@@ -126,8 +126,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(7)) * 3, "15"}
-      ,{Address(Morsel(13)) * 4, "34"}
+       {Address(UnsignedMorsel(7)) * 3, "15"}
+      ,{Address(UnsignedMorsel(13)) * 4, "34"}
     };
 
     for (TestCase &t : tests)
@@ -149,8 +149,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(0xa5)) << 3, "28"}
-      ,{Address(Morsel(0xef)) << 4, "f0"}
+       {Address(UnsignedMorsel(0xa5)) << 3, "28"}
+      ,{Address(UnsignedMorsel(0xef)) << 4, "f0"}
     };
 
     for (TestCase &t : tests)
@@ -173,8 +173,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) < Address(Morsel(3)), false}
-      ,{Address(Morsel(27)) < Address(Morsel(46)), true}
+       {Address(UnsignedMorsel(23)) < Address(UnsignedMorsel(3)), false}
+      ,{Address(UnsignedMorsel(27)) < Address(UnsignedMorsel(46)), true}
     };
 
     for (TestCase &t : tests)
@@ -197,8 +197,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) <3, false}
-      ,{Address(Morsel(27)) <46, true}
+       {Address(UnsignedMorsel(23)) <3, false}
+      ,{Address(UnsignedMorsel(27)) <46, true}
     };
 
     for (TestCase &t : tests)
@@ -221,8 +221,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) >3, true}
-      ,{Address(Morsel(27)) >46, false}
+       {Address(UnsignedMorsel(23)) >3, true}
+      ,{Address(UnsignedMorsel(27)) >46, false}
     };
 
     for (TestCase &t : tests)
@@ -246,9 +246,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) <=3, false}
-      ,{Address(Morsel(27)) <=46, true}
-      ,{Address(Morsel(27)) <=27, true}
+       {Address(UnsignedMorsel(23)) <=3, false}
+      ,{Address(UnsignedMorsel(27)) <=46, true}
+      ,{Address(UnsignedMorsel(27)) <=27, true}
     };
 
     for (TestCase &t : tests)
@@ -271,9 +271,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       { 3 > Address(Morsel(23)), false}
-      ,{ 46 > Address(Morsel(27)), true}
-      ,{ 27 > Address(Morsel(27)), false}
+       { 3 > Address(UnsignedMorsel(23)), false}
+      ,{ 46 > Address(UnsignedMorsel(27)), true}
+      ,{ 27 > Address(UnsignedMorsel(27)), false}
     };
 
     for (TestCase &t : tests)
@@ -296,9 +296,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))+3,Address(Morsel(26))}
-      ,{Address(Morsel(27))+4,Address(Morsel(31))}
-      ,{Address(Morsel(27))+0,Address(Morsel(27))}
+       {Address(UnsignedMorsel(23))+3,Address(UnsignedMorsel(26))}
+      ,{Address(UnsignedMorsel(27))+4,Address(UnsignedMorsel(31))}
+      ,{Address(UnsignedMorsel(27))+0,Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -321,9 +321,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))+Address(Morsel(3)),Address(Morsel(26))}
-      ,{Address(Morsel(27))+Address(Morsel(4)),Address(Morsel(31))}
-      ,{Address(Morsel(27))+Address(Morsel(0)),Address(Morsel(27))}
+       {Address(UnsignedMorsel(23))+Address(UnsignedMorsel(3)),Address(UnsignedMorsel(26))}
+      ,{Address(UnsignedMorsel(27))+Address(UnsignedMorsel(4)),Address(UnsignedMorsel(31))}
+      ,{Address(UnsignedMorsel(27))+Address(UnsignedMorsel(0)),Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -346,9 +346,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))+=3,Address(Morsel(26))}
-      ,{Address(Morsel(27))+=4,Address(Morsel(31))}
-      ,{Address(Morsel(27))+=0,Address(Morsel(27))}
+       {Address(UnsignedMorsel(23))+=3,Address(UnsignedMorsel(26))}
+      ,{Address(UnsignedMorsel(27))+=4,Address(UnsignedMorsel(31))}
+      ,{Address(UnsignedMorsel(27))+=0,Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -371,9 +371,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))-Address(Morsel(3)),Address(Morsel(20))}
-      ,{Address(Morsel(27))-Address(Morsel(4)),Address(Morsel(23))}
-      ,{Address(Morsel(27))-Address(Morsel(0)),Address(Morsel(27))}
+       {Address(UnsignedMorsel(23))-Address(UnsignedMorsel(3)),Address(UnsignedMorsel(20))}
+      ,{Address(UnsignedMorsel(27))-Address(UnsignedMorsel(4)),Address(UnsignedMorsel(23))}
+      ,{Address(UnsignedMorsel(27))-Address(UnsignedMorsel(0)),Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -397,9 +397,9 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))-3,Address(Morsel(20))}
-      ,{Address(Morsel(27))-4,Address(Morsel(23))}
-      ,{Address(Morsel(27))-0,Address(Morsel(27))}
+       {Address(UnsignedMorsel(23))-3,Address(UnsignedMorsel(20))}
+      ,{Address(UnsignedMorsel(27))-4,Address(UnsignedMorsel(23))}
+      ,{Address(UnsignedMorsel(27))-0,Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -423,8 +423,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))++,Address(Morsel(24))}
-      ,{Address(Morsel(27))++,Address(Morsel(28))}
+       {Address(UnsignedMorsel(23))++,Address(UnsignedMorsel(24))}
+      ,{Address(UnsignedMorsel(27))++,Address(UnsignedMorsel(28))}
     };
 
     for (TestCase &t : tests)
@@ -447,8 +447,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))%7,Address(Morsel(2))}
-      ,{Address(Morsel(27))%11,Address(Morsel(5))}
+       {Address(UnsignedMorsel(23))%7,Address(UnsignedMorsel(2))}
+      ,{Address(UnsignedMorsel(27))%11,Address(UnsignedMorsel(5))}
     };
 
     for (TestCase &t : tests)
@@ -471,8 +471,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)),Address(Morsel(23))}
-      ,{Address(Morsel(27)),Address(Morsel(27))}
+       {Address(UnsignedMorsel(23)),Address(UnsignedMorsel(23))}
+      ,{Address(UnsignedMorsel(27)),Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -496,8 +496,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)),23}
-      ,{Address(Morsel(27)),27}
+       {Address(UnsignedMorsel(23)),23}
+      ,{Address(UnsignedMorsel(27)),27}
     };
 
     for (TestCase &t : tests)
@@ -511,7 +511,7 @@ class TestAddress : public Address
     }
     return result;
   }
-  bool AddressLEMorsel()
+  bool AddressLEUnsignedMorsel()
   {
     bool result = true;
     struct TestCase {
@@ -520,8 +520,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) <= Morsel(23),true}
-      ,{Address(Morsel(27)) <= Morsel(27),true}
+       {Address(UnsignedMorsel(23)) <= UnsignedMorsel(23),true}
+      ,{Address(UnsignedMorsel(27)) <= UnsignedMorsel(27),true}
     };
 
     for (TestCase &t : tests)
@@ -544,8 +544,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) & Address(Morsel(23)),Address(Morsel(23))}
-      ,{Address(Morsel(27)) & Address(Morsel(27)),Address(Morsel(27))}
+       {Address(UnsignedMorsel(23)) & Address(UnsignedMorsel(23)),Address(UnsignedMorsel(23))}
+      ,{Address(UnsignedMorsel(27)) & Address(UnsignedMorsel(27)),Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -569,8 +569,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) & 23, Address(Morsel(23))}
-      ,{Address(Morsel(27)) & 27, Address(Morsel(27))}
+       {Address(UnsignedMorsel(23)) & 23, Address(UnsignedMorsel(23))}
+      ,{Address(UnsignedMorsel(27)) & 27, Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -593,8 +593,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)) | Address(Morsel(23)), Address(Morsel(23))}
-      ,{Address(Morsel(27)) | Address(Morsel(27)), Address(Morsel(27))}
+       {Address(UnsignedMorsel(23)) | Address(UnsignedMorsel(23)), Address(UnsignedMorsel(23))}
+      ,{Address(UnsignedMorsel(27)) | Address(UnsignedMorsel(27)), Address(UnsignedMorsel(27))}
     };
 
     for (TestCase &t : tests)
@@ -608,7 +608,7 @@ class TestAddress : public Address
     }
     return result;
   }
-  bool asMorsel()
+  bool asUnsignedMorsel()
   {
     bool result = true;
     struct TestCase {
@@ -617,8 +617,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23)).asMorsel(), Morsel(23)}
-      ,{Address(Morsel(27)).asMorsel(), Morsel(27)}
+       {Address(UnsignedMorsel(23)).asUnsignedMorsel(), UnsignedMorsel(23)}
+      ,{Address(UnsignedMorsel(27)).asUnsignedMorsel(), UnsignedMorsel(27)}
     };
 
     for (TestCase &t : tests)
@@ -641,8 +641,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))/Address(Morsel(7)), Address(Morsel(3))}
-      ,{Address(Morsel(27))/Address(Morsel(4)), Address(Morsel(6))}
+       {Address(UnsignedMorsel(23))/Address(UnsignedMorsel(7)), Address(UnsignedMorsel(3))}
+      ,{Address(UnsignedMorsel(27))/Address(UnsignedMorsel(4)), Address(UnsignedMorsel(6))}
     };
 
     for (TestCase &t : tests)
@@ -665,8 +665,8 @@ class TestAddress : public Address
     };
 
     TestCase tests[] = {
-       {Address(Morsel(23))/7, Address(Morsel(3))}
-      ,{Address(Morsel(27))/4, Address(Morsel(6))}
+       {Address(UnsignedMorsel(23))/7, Address(UnsignedMorsel(3))}
+      ,{Address(UnsignedMorsel(27))/4, Address(UnsignedMorsel(6))}
     };
 
     for (TestCase &t : tests)
@@ -712,11 +712,11 @@ class TestAddress : public Address
   ,{"AddressModulusInt", &TestAddress::AddressModulusInt}
   ,{"AddressEQAddress", &TestAddress::AddressEQAddress}
   ,{"AddressEQInt", &TestAddress::AddressEQInt}
-  ,{"AddressLEMorsel", &TestAddress::AddressLEMorsel}
+  ,{"AddressLEUnsignedMorsel", &TestAddress::AddressLEUnsignedMorsel}
   ,{"AddressAndAddress", &TestAddress::AddressAndAddress}
   ,{"AddressAndInt", &TestAddress::AddressAndInt}
   ,{"AddressOrAddress", &TestAddress::AddressOrAddress}
-  ,{"asMorsel", &TestAddress::asMorsel}
+  ,{"asUnsignedMorsel", &TestAddress::asUnsignedMorsel}
   ,{"AddressDivAddress", &TestAddress::AddressDivAddress}
   ,{"AddressDivInt", &TestAddress::AddressDivInt}
 

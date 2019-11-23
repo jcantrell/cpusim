@@ -47,7 +47,7 @@ class cpu {
 	public:
 		const unsigned int byte_size;  
 		cpu(unsigned int byte_in, Address address_in, unsigned int reg_count);
-		virtual ~cpu() = 0;
+		~cpu();
 
 // Control methods
 		void memdump(std::ostream& os = std::cout);

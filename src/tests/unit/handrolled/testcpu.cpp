@@ -7,7 +7,7 @@ class TestCPU : public cpu
   TestCPU() : cpu(8, Address(65536), 32) {}
 	bool testmemdump()
   {
-    Morsel a(0x5f);
+    UnsignedMorsel a(0x5f);
     Address b(0x66);
     cpu mycpu(8, Address(65536), 32);
     mycpu.load(b, a);
@@ -22,11 +22,11 @@ class TestCPU : public cpu
   {
     bool result = true;
       
-    Morsel a(95);
+    UnsignedMorsel a(95);
     Address b(102);
     cpu mycpu(8, Address(65536), 32);
     mycpu.load(b, a);
-    Morsel c;
+    UnsignedMorsel c;
     c = mycpu.view(b);
     result = result && (a==c);
     if (!(a == c))
@@ -40,11 +40,11 @@ class TestCPU : public cpu
   {
     bool result = true;
       
-    Morsel a(95);
+    UnsignedMorsel a(95);
     Address b(102);
     cpu mycpu(8, Address(65536), 32);
     mycpu.load(b, a);
-    Morsel c;
+    UnsignedMorsel c;
     c = mycpu.view(b);
     result = result && (a==c);
     if (!(a == c))
@@ -60,13 +60,13 @@ class TestCPU : public cpu
 
     cpu mycpu(8, Address(65536), 32);
     mycpu.setip(Address(22));
-    Address ip = mycpu.getip();
+    Address tip = mycpu.getip();
 
-    result = result && (ip==Address(22));
-    if (!(ip  == Address(22)))
+    result = result && (tip==Address(22));
+    if (!(tip  == Address(22)))
     {
       cout << endl << "Expected: " << Address(22)
-                   << " Actual: " << ip << endl;
+                   << " Actual: " << tip << endl;
     }
     return result;
   }
@@ -76,13 +76,13 @@ class TestCPU : public cpu
 
     cpu mycpu(8, Address(65536), 32);
     mycpu.setip(Address(22));
-    Address ip = mycpu.getip();
+    Address tip = mycpu.getip();
 
-    result = result && (ip==Address(22));
-    if (!(ip  == Address(22)))
+    result = result && (tip==Address(22));
+    if (!(tip  == Address(22)))
     {
       cout << endl << "Expected: " << Address(22)
-                   << " Actual: " << ip << endl;
+                   << " Actual: " << tip << endl;
     }
     return result;
   }
@@ -108,11 +108,11 @@ class TestCPU : public cpu
   {
     bool result = true;
       
-    Morsel a(95);
+    UnsignedMorsel a(95);
     Address b(5);
     cpu mycpu(8, Address(65536), 32);
     mycpu.regs(b, a);
-    Morsel c;
+    UnsignedMorsel c;
     c = mycpu.regs(b);
     result = result && (a==c);
     if (!(a == c))
@@ -122,9 +122,31 @@ class TestCPU : public cpu
     }
     return result;
   }
-  bool testregsAddressMorsel()
+  bool testregsAddressUnsignedMorsel()
   {
-    return false;
+    cpu mycpu(8, Address(65536), 32);
+
+    bool result = true;
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+
+    TestCase tests[] = {
+       {mycpu.regs(Address(67),UnsignedMorsel(4)),UnsignedMorsel(4)}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in == t.out);
+      if (!(t.in == t.out))
+      {
+        cout << "failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in << endl;
+      }
+    }
+    return result;
   }
   bool testloadimage()
   {
@@ -147,7 +169,7 @@ class TestCPU : public cpu
 	,{"testsetip",&TestCPU::testsetip}
 	,{"testtoString",&TestCPU::testtoString}
   ,{"testregs",&TestCPU::testregs}
-  ,{"testregsAddressMorsel",&TestCPU::testregsAddressMorsel}
+  ,{"testregsAddressUnsignedMorsel",&TestCPU::testregsAddressUnsignedMorsel}
   ,{"testloadimage",&TestCPU::testloadimage}
     };
 

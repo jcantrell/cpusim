@@ -31,7 +31,7 @@ class TestUnsignedMorsel : public UnsignedMorsel
   {
     bool result;
     UnsignedMorsel a(7);
-    int b = 982;
+    unsigned int b = 982;
     UnsignedMorsel c(989);
     UnsignedMorsel d;
     d = a+b;
@@ -52,7 +52,7 @@ class TestUnsignedMorsel : public UnsignedMorsel
   bool testIntSubUnsignedMorsel()
   {
     bool result;
-    int a = 989;
+    unsigned int a = 989;
     UnsignedMorsel b(7);
     UnsignedMorsel c(982);
     UnsignedMorsel d;
@@ -79,10 +79,31 @@ class TestUnsignedMorsel : public UnsignedMorsel
   }
   bool testUnsignedMorselAssignInt()
   {
-    UnsignedMorsel a(95);
-    UnsignedMorsel b;
-    b = 95;
-    return (a==b);
+    bool result = true;
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+    TestCase tests[] = {
+       {95,UnsignedMorsel(95)}
+      ,{23,UnsignedMorsel(23)}
+      ,{7,UnsignedMorsel(7)}
+      ,{3,UnsignedMorsel(3)}
+      //,{UnsignedMorsel(27)/UnsignedMorsel(4),UnsignedMorsel(6)}
+      //{UnsignedMorsel(21)/UnsignedMorsel(7),UnsignedMorsel(3)}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in == t.out);
+      if (!(t.in == t.out))
+      {
+        cout << "Failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in << endl;
+      }
+    }
+    return result;
   }
   bool testUnsignedMorselAssignUnsignedMorsel()
   {
@@ -104,6 +125,7 @@ class TestUnsignedMorsel : public UnsignedMorsel
       ,{UnsignedMorsel(0x2a), "2a"}
       ,{UnsignedMorsel(0xf000), "f000"}
       ,{UnsignedMorsel(0x28), "28"}
+      ,{UnsignedMorsel(23),"17"}
     };
 
   //cout << "begin asString testloop" << endl;
@@ -144,9 +166,34 @@ class TestUnsignedMorsel : public UnsignedMorsel
   }
   bool testUnsignedMorselLessThanUnsignedMorsel()
   {
-    UnsignedMorsel a(95);
-    UnsignedMorsel b(100);
-    return a < b;
+    bool result = true;
+    struct TestCase {
+      bool in;
+      bool out;
+    };
+
+    TestCase tests[] = {
+       //{UnsignedMorsel(23)/UnsignedMorsel(7),UnsignedMorsel(3)}
+       {UnsignedMorsel(4)<UnsignedMorsel(5),true}
+      ,{UnsignedMorsel(5)<UnsignedMorsel(4),false}
+      ,{UnsignedMorsel(1)<UnsignedMorsel(4),true}
+      ,{UnsignedMorsel(5)<UnsignedMorsel(7),true}
+      ,{UnsignedMorsel(27)<UnsignedMorsel(4),false}
+      ,{UnsignedMorsel(21)<UnsignedMorsel(7),false}
+      ,{UnsignedMorsel(95)<UnsignedMorsel(100),true}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in == t.out);
+      if (!(t.in == t.out))
+      {
+        cout << "failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in << endl;
+      }
+    }
+    return result;
   }
   bool testUnsignedMorselLessThanInt()
   {
@@ -183,9 +230,35 @@ class TestUnsignedMorsel : public UnsignedMorsel
   }
   bool testUnsignedMorselGreaterThanUnsignedMorsel()
   {
-    UnsignedMorsel a(7);
-    UnsignedMorsel b(21);
-    return b > a;
+    bool result = true;
+    struct TestCase {
+      bool in;
+      bool out;
+    };
+
+    TestCase tests[] = {
+       //{UnsignedMorsel(23)/UnsignedMorsel(7),UnsignedMorsel(3)}
+       //{UnsignedMorsel(1)>UnsignedMorsel(4),false}
+      {UnsignedMorsel(4)>UnsignedMorsel(5),false}
+/*
+      ,{UnsignedMorsel(5)>UnsignedMorsel(7),false}
+      ,{UnsignedMorsel(27)>UnsignedMorsel(4),true}
+      ,{UnsignedMorsel(21)>UnsignedMorsel(7),true}
+      ,{UnsignedMorsel(95)>UnsignedMorsel(100),false}
+*/
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in == t.out);
+      if (!(t.in == t.out))
+      {
+        cout << "failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in << endl;
+      }
+    }
+    return result;
   }
   bool testUnsignedMorselGreaterOrEqualUnsignedMorsel()
   {
@@ -202,9 +275,12 @@ class TestUnsignedMorsel : public UnsignedMorsel
     };
 
     TestCase tests[] = {
-       {UnsignedMorsel(23)/UnsignedMorsel(7),UnsignedMorsel(3)}
+       {UnsignedMorsel(5)/UnsignedMorsel(4),UnsignedMorsel(1)}
+       //{UnsignedMorsel(23)/UnsignedMorsel(7),UnsignedMorsel(3)}
+      //{UnsignedMorsel(1)/UnsignedMorsel(4),UnsignedMorsel(0)}
+      //,{UnsignedMorsel(5)/UnsignedMorsel(7),UnsignedMorsel(0)}
       //,{UnsignedMorsel(27)/UnsignedMorsel(4),UnsignedMorsel(6)}
-      //{UnsignedMorsel(21)/UnsignedMorsel(7),UnsignedMorsel(3)}
+      //,{UnsignedMorsel(21)/UnsignedMorsel(7),UnsignedMorsel(3)}
     };
 
     for (TestCase &t : tests)
@@ -212,20 +288,39 @@ class TestUnsignedMorsel : public UnsignedMorsel
       result = result && (t.in == t.out);
       if (!(t.in == t.out))
       {
-        cout << endl << "Expected: " << t.out 
-                     << " Actual: " << t.in << endl;
+        cout << "failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in << endl;
       }
     }
     return result;
   }
   bool testUnsignedMorselModUnsignedMorsel()
   {
-    UnsignedMorsel a(25);
-    UnsignedMorsel b(7);
-    UnsignedMorsel c;
-    UnsignedMorsel d(4);
-    c = a % b;
-    return (c==d);
+    bool result = true;
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+
+    TestCase tests[] = {
+      {UnsignedMorsel(25)%UnsignedMorsel(7),UnsignedMorsel(4)}
+      ,{UnsignedMorsel(5)%UnsignedMorsel(7),UnsignedMorsel(5)}
+      ,{UnsignedMorsel(27)%UnsignedMorsel(4),UnsignedMorsel(3)}
+      ,{UnsignedMorsel(21)%UnsignedMorsel(7),UnsignedMorsel(0)}
+    };
+
+    for (TestCase &t : tests)
+    {
+      result = result && (t.in == t.out);
+      if (!(t.in == t.out))
+      {
+        cout << "failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in << endl;
+      }
+    }
+    return result;
   }
   bool testUnsignedMorselSize()
   {
@@ -241,7 +336,7 @@ class TestUnsignedMorsel : public UnsignedMorsel
   bool testUnsignedMorselEqualInt()
   {
     UnsignedMorsel a(27);
-    int b = 27;
+    unsigned int b = 27;
     return (a==b);
   }
   bool testUnsignedMorselAsInt()
@@ -332,7 +427,7 @@ class TestUnsignedMorsel : public UnsignedMorsel
   bool testUnsignedMorselLeftShiftInt()
   {
     UnsignedMorsel a(0xFF00);
-    int b = (4);
+    unsigned int b = (4);
     UnsignedMorsel c;
     c = a << b;
     UnsignedMorsel d(0xF000);
@@ -341,7 +436,7 @@ class TestUnsignedMorsel : public UnsignedMorsel
   bool testUnsignedMorselRightShiftInt()
   {
     UnsignedMorsel a(0xFF00);
-    int b = (4);
+    unsigned int b = (4);
     UnsignedMorsel c;
     c = a >> b;
     UnsignedMorsel d(0x0FF0);
@@ -409,10 +504,10 @@ class TestUnsignedMorsel : public UnsignedMorsel
     };
 
     TestCase tests[] = {
-       {UnsignedMorsel(0xDEAD), (unsigned char)0xAD}
-      ,{UnsignedMorsel(0x2a), (unsigned char)0x2a}
-      ,{UnsignedMorsel(0xf000), (unsigned char)0xf000}
-      ,{UnsignedMorsel(0x28), (unsigned char)0x28}
+       {UnsignedMorsel(0xDEAD), static_cast<unsigned char>(0xAD)}
+      ,{UnsignedMorsel(0x2a),   static_cast<unsigned char>(0x2a)}
+      ,{UnsignedMorsel(0xf000), static_cast<unsigned char>(0xf000)}
+      ,{UnsignedMorsel(0x28),   static_cast<unsigned char>(0x28)}
     };
 
     for (TestCase &t : tests)
@@ -420,8 +515,9 @@ class TestUnsignedMorsel : public UnsignedMorsel
       result = result && (t.in.asChar() == t.out);
       if (t.in.asChar() != t.out)
       {
-        cout << endl << "Expected: " << t.out 
-                     << " Actual: " << t.in.asString() << endl;
+        cout << "Failed" << endl 
+             << "Expected: " << t.out 
+             << " Actual: " << t.in.asString() << endl;
       }
     }
     return result;

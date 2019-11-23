@@ -151,7 +151,7 @@ class TestSignedMorsel : public SignedMorsel
   bool testSignedMorselLessThanInt()
   {
     SignedMorsel a(95);
-    unsigned b = 100;
+    int b = 100;
     return a < b;
   }
   bool testSignedMorselLessOrEqualSignedMorsel()
@@ -264,7 +264,7 @@ class TestSignedMorsel : public SignedMorsel
   bool testSignedMorselBitwiseAndInt()
   {
     SignedMorsel a(0xFF00);
-    unsigned b = 0x0F0F;
+    int b = 0x0F0F;
     SignedMorsel c;
     c = a & b;
     SignedMorsel d(0x0F00);
@@ -367,11 +367,11 @@ class TestSignedMorsel : public SignedMorsel
   }
   bool testSignedMorselIntMultiplySignedMorsel()
   {
-    unsigned int a = 3;
+    int a = 3;
     SignedMorsel b(7);
     SignedMorsel c(21);
     SignedMorsel d;
-    d = a * b;
+    d = a*b;
     return (c==d);
   }
   bool testSignedMorselLeftShiftAssignInt()
@@ -409,10 +409,10 @@ class TestSignedMorsel : public SignedMorsel
     };
 
     TestCase tests[] = {
-       {SignedMorsel(0xDEAD), (unsigned char)0xAD}
-      ,{SignedMorsel(0x2a), (unsigned char)0x2a}
-      ,{SignedMorsel(0xf000), (unsigned char)0xf000}
-      ,{SignedMorsel(0x28), (unsigned char)0x28}
+       {SignedMorsel(0xDEAD), static_cast<unsigned char>(0xAD)}
+      ,{SignedMorsel(0x2a), static_cast<unsigned char>(0x2a)}
+      ,{SignedMorsel(0xf000), static_cast<unsigned char>(0xf000)}
+      ,{SignedMorsel(0x28), static_cast<unsigned char>(0x28)}
     };
 
     for (TestCase &t : tests)

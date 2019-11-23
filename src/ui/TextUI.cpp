@@ -135,6 +135,7 @@ int TextUI::user_loop()
     }
 
 	  unsigned int inst = (mycpu->view(mycpu->getip())).asInt();
+    cout << "preparing to call step. inst: " << inst << " ip: " << mycpu->getip() << " value: " << mycpu->view(mycpu->getip()) << endl;
 	  mycpu->step(inst);
 	}
 	else if (0==strcmp("help",args[0]))

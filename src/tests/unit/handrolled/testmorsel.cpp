@@ -152,7 +152,7 @@ class TestMorsel : public Morsel
   {
     Morsel a(95);
     unsigned b = 100;
-    return a < b;
+    return a < static_cast<int>(b);
   }
   bool testMorselLessOrEqualMorsel()
   {
@@ -266,7 +266,7 @@ class TestMorsel : public Morsel
     Morsel a(0xFF00);
     unsigned b = 0x0F0F;
     Morsel c;
-    c = a & b;
+    c = a & static_cast<int>(b);
     Morsel d(0x0F00);
     return (c==d);
   }
@@ -409,10 +409,10 @@ class TestMorsel : public Morsel
     };
 
     TestCase tests[] = {
-       {Morsel(0xDEAD), (unsigned char)0xAD}
-      ,{Morsel(0x2a), (unsigned char)0x2a}
-      ,{Morsel(0xf000), (unsigned char)0xf000}
-      ,{Morsel(0x28), (unsigned char)0x28}
+       {Morsel(0xDEAD), static_cast<unsigned char>(0xAD)}
+      ,{Morsel(0x2a), static_cast<unsigned char>(0x2a)}
+      ,{Morsel(0xf000), static_cast<unsigned char>(0xf000)}
+      ,{Morsel(0x28), static_cast<unsigned char>(0x28)}
     };
 
     for (TestCase &t : tests)

@@ -52,6 +52,10 @@ string cpu::toString()
 // Print hex dump of memory contents to screen
 void cpu::memdump(std::ostream& os)
 {
+  struct lineStruct {
+    Address beg;
+    Address end;
+  } ls;
   unsigned lineWidth = (128 + byte_size - 1) / byte_size;
 
   map<Address, UnsignedMorsel> mymap;
@@ -66,14 +70,17 @@ void cpu::memdump(std::ostream& os)
   previous = mymap.begin()->first;
   for (std::pair<Address, UnsignedMorsel> element : mymap)
   {
+    ls.beg = (previous - previous % (128/byte_size)) ;
     if ( !(previous / 128 == element.first / 128) )
     {
-      os << (previous - previous % (128/byte_size)) << ": ";
+      //os << (previous - previous % (128/byte_size)) << ": ";
+      os << ls.beg << ": ";
       for (unsigned int lineIndex=0;lineIndex<lineWidth;lineIndex++)
       {
         os << line[lineIndex].asString();
         if (lineIndex%2==1 && lineIndex!=(lineWidth-1)){os << " ";}
         line[lineIndex] = UnsignedMorsel(0);
+
       }
       os << endl;
     }
@@ -99,20 +106,6 @@ int cpu::loadimage(string filename)
     return 1;
   }  
 
-  /*
-  infile.seekg(0, infile.end);
-  unsigned int file_length = infile.tellg();
-  std::cout << "file length: " << int(file_length) << std::endl;
-  infile.seekg(0, infile.beg);
-
-  if (file_length > address_size)
-    file_length = address_size.asInt();
-  */
-  //std::cout << "file length: " << int(file_length) << std::endl;
-
-  //char buffer[file_length];
-  //infile.read(buffer, file_length);
-  //Address i;
   unsigned int i = 0;
   unsigned char inchar;
   while (!infile.eof()) {
@@ -162,7 +155,7 @@ UnsignedMorsel& cpu::view(Address address)
 
 	int cpu::mul(Address a, Address b, Address dst)
 	{
-	    ram[dst] = ram[a] + ram[b];
+	    ram[dst] = ram[a] * ram[b];
 	    return 0;
 	}
 
@@ -172,7 +165,6 @@ UnsignedMorsel& cpu::view(Address address)
 	    return 0;
 	}
 
-	/* Bitwise logic operations */
 	int cpu::land(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] & ram[b];

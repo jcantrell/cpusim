@@ -18,7 +18,7 @@ Address& Address::operator=(unsigned int in)
   }
 int Address::asInt() const
   {
-    return m.asInt();
+    return static_cast<int>(m.asInt());
   }
 string Address::asString() const
   {
@@ -42,7 +42,7 @@ Address operator*(unsigned int lhs, const Address& rhs)
   }
 Address Address::operator*(int in)
   {
-    Address other(in);
+    Address other(static_cast<unsigned int>(in));
     return (*this) * other;
   }
   Address Address::operator<<(unsigned int other)
@@ -67,9 +67,9 @@ Address Address::operator*(int in)
   {
     return m < other || m == other;
   }
-  bool operator>(int other, Address rhs) {
+  bool operator>(unsigned int other, Address rhs) {
     //return other > rhs.m;
-    return rhs < other;
+    return rhs < static_cast<unsigned int>(other);
   }
   Address Address::operator+(unsigned int in)
   {
@@ -86,7 +86,7 @@ Address Address::operator*(int in)
   }
   Address& Address::operator+=(int in)
   {
-    m = m + in;
+    m = m + static_cast<unsigned int>(in);
     return *this;
   }
   Address Address::operator-(Address other)
@@ -122,7 +122,7 @@ Address Address::operator*(int in)
   bool Address::operator==(int other)
   {
     Address otherAddr;
-    otherAddr = other;
+    otherAddr = static_cast<unsigned int>(other);
     return *this == otherAddr;
   }
   bool Address::operator<=(UnsignedMorsel in)
@@ -161,7 +161,7 @@ Address Address::operator*(int in)
   }
   Address Address::operator/(int rhs)
   {
-    Address other(rhs);
+    Address other(static_cast<unsigned int>(rhs));
     Address result(*this);
     result.m = result.m / other.m;
     return result;

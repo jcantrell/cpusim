@@ -455,13 +455,12 @@ mmix::M(unsigned int size, Address address, UnsignedMorsel value)
 
 UnsignedMorsel mmix::R(Address reg)
 {
-  //return registers[reg];
   return regs(reg);
 }
 
 UnsignedMorsel mmix::R(Address reg, UnsignedMorsel value)
 {
-  UnsignedMorsel ret = regs(reg); // registers[reg];
+  UnsignedMorsel ret = regs(reg);
   //registers[reg] = value;
   regs(reg, value);
   return ret;
@@ -775,6 +774,7 @@ void mmix::step(unsigned int instr)
       instructions[TRIP] = &mmix::trip;
 
   //call the given instruction's member method
+	cout << "calling step with instr " << instr << endl;
   (this->*instructions[static_cast<mmix::inst>(instr)])();
 
   setip( target );
@@ -1473,22 +1473,15 @@ void mmix::addu()
 }
 
 void mmix::addui()
-{UnsignedMorsel x = M(1, getip()+1); 
+{
+	UnsignedMorsel x = M(1, getip()+1); 
   UnsignedMorsel y = M(1, getip()+2); 
   UnsignedMorsel z = M(1, getip()+3); 
   UnsignedMorsel ux = R(x); // unsigned values at the given addresses
-  UnsignedMorsel uy = R(y);
+	UnsignedMorsel uy = R(y);
   UnsignedMorsel uz = R(z);
-  UnsignedMorsel sx = R(x); // signed values
-  UnsignedMorsel sy = R(y);
-  UnsignedMorsel sz = R(z);
-  UnsignedMorsel fx = R(x); // signed double values
-  UnsignedMorsel fy = R(y);
-  UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
- 
-        R(x, (ux + z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
+  R(x, (ux + z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
 }
 
 void mmix::subu()
@@ -5291,6 +5284,7 @@ void mmix::trap()
           break;
         }
 }
+
 void mmix::resume()
 {
 }

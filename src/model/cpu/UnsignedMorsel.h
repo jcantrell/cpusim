@@ -148,27 +148,27 @@ class UnsignedMorsel
   }
   bool operator<(const UnsignedMorsel other) const
   {
-    unsigned int this_index = bs.size()-1;
-    unsigned int other_index = other.bs.size()-1;
+    int this_index = bs.size()-1;
+    int other_index = other.bs.size()-1;
     for (;this_index > other_index; this_index--)
     {
-      if (bs[this_index] == 1)
+      if (bs[static_cast<unsigned>(this_index)] == 1)
         {
           return false;
         }
     }
     for (;other_index > this_index; other_index--)
     {
-      if (other.bs[other_index] == 1)
+      if (other.bs[static_cast<unsigned>(other_index)] == 1)
         { 
           return true;
         }
     }
-    for (;this_index != 0 && other_index != 0; this_index--, other_index--)
+    for (;this_index >= 0 && other_index >= 0; this_index--, other_index--)
     {
-      if ((bs[this_index] != other.bs[other_index]))
+      if ((bs[static_cast<unsigned>(this_index)] != other.bs[static_cast<unsigned>(other_index)]))
       {
-        if (bs[this_index]==0)
+        if (bs[static_cast<unsigned>(this_index)]==0)
         {
           return true;
         } else {
@@ -219,14 +219,24 @@ class UnsignedMorsel
   }
   UnsignedMorsel operator/(const UnsignedMorsel& other)
   {
+    //cout << "CALLED div: " << asString() << " , " << other << endl;
+
     UnsignedMorsel dividend(*this);
     UnsignedMorsel divisor(other);
     UnsignedMorsel quotient(0);
     UnsignedMorsel remainder(0);
     UnsignedMorsel radix(2);
+    //cout << "dividend: " << dividend.asString() << " ,divisor: " << divisor.asString() << " cmd: " << (divisor > dividend) << " dividend bs: " << dividend.bs << endl;
 
-    if (divisor > dividend) return UnsignedMorsel(0);
-    if (divisor == dividend) return UnsignedMorsel(1);
+    if (divisor > dividend) {
+    //cout << "result: " << 0 << endl;
+return UnsignedMorsel(0);
+}
+    if (divisor == dividend){
+    //cout << "result: " << 1 << endl;
+ return UnsignedMorsel(1);
+}
+    //cout << "dividend: " << dividend << " div*radix: " << divisor*radix << endl << " cmp <=: " << (dividend <= divisor*radix) << endl;
     if (dividend <= divisor * radix)
     {
       while (dividend > divisor || dividend == divisor)
@@ -234,19 +244,34 @@ class UnsignedMorsel
         dividend = dividend - divisor;
         quotient = quotient + 1;
       }
+      //cout << "returning div: " << *this << " , " << other << endl;
+      //cout << "result: " << quotient << endl;
       return quotient;
     }
 
-    for (unsigned int i=dividend.bs.size()-1;i>0;i--)
+    for (int i=dividend.bs.size()-1;i>=0;i--)
     {
-      remainder = remainder * radix + UnsignedMorsel(dividend.bs[i]);
+      //cout << "rem: " << remainder << " "
+       //    << "radix: " << radix << " i: " << i << " " << UnsignedMorsel(dividend.bs[static_cast<unsigned>(i)]) << " " 
+        //   << "quotient: " << quotient << " " 
+      //     << "dividend: " << dividend.bs
+           //<< endl;
+      remainder = remainder * radix + UnsignedMorsel(dividend.bs[static_cast<unsigned>(i)]);
 
-      //push(remainder/divisor);
       quotient.resize(quotient.size()+1);
       quotient = (quotient << 1) | (remainder/divisor);
       
       remainder = remainder%divisor;
     }
+/*
+    cout << endl;
+      cout << "after rem: " << remainder << " "
+           << "after radix: " << radix << " "
+           << "after quotient: " << quotient
+           << endl;
+    cout << "result: " << quotient << endl;
+    //cout << "calling div: " << *this << " , " << other << endl;
+*/
     return quotient;
 /*
     UnsignedMorsel numerator(*this);

@@ -30,20 +30,20 @@ class Morsel
     dynamic_bitset<> out;
     bool a, b, carry;
     int i;
-    for (i=0, carry=false;i<other.size() && i<bs.size();i++) {
-      a = bs[i];
-      b = other.bs[i];
+    for (i=0, carry=false;static_cast<unsigned int>(i)<other.size() && i<static_cast<int>(bs.size());i++) {
+      a = bs[static_cast<unsigned int>(i)];
+      b = other.bs[static_cast<unsigned int>(i)];
       out.push_back( a xor b xor carry );
       carry = ( (b&&carry) || (a&&carry) || (a&&b) );
     }
-    for (;i<other.bs.size();i++) {
+    for (;static_cast<unsigned int>(i)<other.bs.size();i++) {
       a = false;
-      b = other.bs[i];
+      b = other.bs[static_cast<unsigned int>(i)];
       out.push_back( a xor b xor carry );
       carry = ( (b&&carry) || (a&&carry) || (a&&b) );
     }
-    for (;i<bs.size();i++) {
-      a = bs[i];
+    for (;static_cast<unsigned int>(i)<bs.size();i++) {
+      a = bs[static_cast<unsigned int>(i)];
       b = false;
       out.push_back( a xor b xor carry );
       carry = ( (b&&carry) || (a&&carry) || (a&&b) );
@@ -55,7 +55,7 @@ class Morsel
   }
   Morsel operator+(int rhs)
   {
-    Morsel rhs_morsel(rhs);
+    Morsel rhs_morsel(static_cast<unsigned int>(rhs));
     return *this + rhs_morsel;
   }
   Morsel operator-(const Morsel& other)
@@ -75,7 +75,7 @@ class Morsel
   }
   friend Morsel operator-(int lhsInt, const Morsel& other)
   {
-    Morsel lhs(lhsInt);
+    Morsel lhs(static_cast<unsigned int>(lhsInt));
     return lhs - other;
   }
   Morsel operator-=(const Morsel& other)
@@ -112,7 +112,7 @@ class Morsel
     Morsel copy(*this);
     Morsel reversed;
     reversed = 0;
-    for (int count=copy.size();count != 0;count--)
+    for (int count=static_cast<int>(copy.size());count != 0;count--)
     {
       reversed <<= 1;
       reversed = reversed | (copy & 1);
@@ -128,7 +128,7 @@ class Morsel
     stringstream out;
     char const hex[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c',
       'd','e','f'};
-    for (int count=reversed.size();count != 0;count-=8)
+    for (int count=static_cast<int>(reversed.size());count != 0;count-=8)
     {
       Morsel chunk(0);
 
@@ -153,23 +153,23 @@ class Morsel
     int other_index = other.bs.size()-1;
     for (;this_index > other_index; this_index--)
     {
-      if (bs[this_index] == 1)
+      if (bs[static_cast<unsigned int>(this_index)] == 1)
         {
           return false;
         }
     }
     for (;other_index > this_index; other_index--)
     {
-      if (other.bs[other_index] == 1)
+      if (other.bs[static_cast<unsigned int>(other_index)] == 1)
         { 
           return true;
         }
     }
     for (;this_index >= 0 && other_index >= 0; this_index--, other_index--)
     {
-      if ((bs[this_index] != other.bs[other_index]))
+      if ((bs[static_cast<unsigned int>(this_index)] != other.bs[static_cast<unsigned int>(other_index)]))
       {
-        if (bs[this_index]==0)
+        if (bs[static_cast<unsigned int>(this_index)]==0)
         {
           return true;
         } else {
@@ -182,7 +182,7 @@ class Morsel
   bool operator<(int other)
   {
     Morsel otherMorsel;
-    otherMorsel = other;
+    otherMorsel = static_cast<unsigned int>(other);
     return *this < otherMorsel;
   }
   bool operator<=(const Morsel& other)
@@ -195,19 +195,19 @@ class Morsel
   }
   friend bool operator<=(int lhs, const Morsel& rhs)
   {
-    Morsel lhsMorsel(lhs);
+    Morsel lhsMorsel(static_cast<unsigned int>(lhs));
     return lhsMorsel <= rhs;
   }
   bool operator>(int other)
   {
     Morsel otherMorsel;
-    otherMorsel = other;
+    otherMorsel = static_cast<unsigned int>(other);
     return *this > otherMorsel;
   }
   friend bool operator>(int lhs, Morsel rhs)
   {
     Morsel lhsMorsel;
-    lhsMorsel = lhs;
+    lhsMorsel = static_cast<unsigned int>(lhs);
     return lhsMorsel > rhs;
   }
   bool operator>(Morsel other)
@@ -240,7 +240,7 @@ class Morsel
 
     for (int i=dividend.bs.size()-1;i>=0;i--)
     {
-      remainder = remainder * radix + Morsel(dividend.bs[i]);
+      remainder = remainder * radix + Morsel(dividend.bs[static_cast<unsigned int>(i)]);
 
       //push(remainder/divisor);
       quotient.resize(quotient.size()+1);
@@ -283,7 +283,7 @@ class Morsel
   }
   bool operator==(int other) const {
     Morsel result;
-    result = other;
+    result = static_cast<unsigned int>(other);
     return *this == result;
   }
   unsigned int asInt() const
@@ -309,7 +309,7 @@ class Morsel
   }
   Morsel operator&(int otherInt)
   {
-    Morsel other(otherInt);
+    Morsel other(static_cast<unsigned int>(otherInt));
     return (*this) & other;
   }
   Morsel operator|(const Morsel& other)
@@ -363,13 +363,13 @@ class Morsel
   Morsel operator<<(int other)
   {
     Morsel otherMorsel;
-    otherMorsel = other;
+    otherMorsel = static_cast<long long unsigned int>(other);
     return *this << otherMorsel;
   }
   Morsel operator>>(int other)
   {
     Morsel otherMorsel;
-    otherMorsel = other;
+    otherMorsel = static_cast<long long unsigned int>(other);
     return *this >> otherMorsel;
   }
   Morsel operator>>(const Morsel& other)
