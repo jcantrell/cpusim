@@ -31,8 +31,10 @@ std::ostream& operator<<(std::ostream& stream, const Address& addr)
 }
 Address Address::operator*(const Address& other)
 {
+    cout << "CALLED MUL" << endl;
     Address lhs(m);
     lhs.m = m * other.m;
+    cout << "END CALLED MUL" << endl;
     return lhs;
 }
 Address operator*(unsigned int lhs, const Address& rhs)
