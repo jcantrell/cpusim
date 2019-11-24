@@ -44,6 +44,8 @@ test: ../bin/cpusim $(TESTS)
 	cd tests/functional && mmixal hello.mms
 	@echo
 	cat script | ../bin/cpusim
+	lcov --capture --directory . --output-file coverage.info
+	genhtml coverage.info --output-dir ../doc/reports
 
 tests/unit/testcpu: tests/unit/handrolled/testcpu.cpp
 	$(CC) $(CFLAGS) -o $@ tests/unit/handrolled/testcpu.cpp -I. model/cpu/Address.cpp model/cpu/cpu.cpp

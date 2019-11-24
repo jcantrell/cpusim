@@ -3,10 +3,28 @@
 #include "../../../model/cpu/cpu.h"
 class TestCPU : public cpu
 {
+  private:
+    template <typename T>
+    bool runCases(vector<T> tests) {
+      bool result = true;
+      for (auto &t : tests)
+      {
+        result = result && (t.in == t.out);
+        if (!(t.in == t.out)) {
+          cout << endl << "Expected: " << t.out << " Actual: " << t.in << endl;
+        }
+      }
+      return result;
+    }
   public:
   TestCPU() : cpu(8, Address(65536), 32) {}
 	bool testmemdump()
   {
+    struct TestCase {
+      string in;
+      string out;
+    };
+
     UnsignedMorsel a(0x5f);
     Address b(0x66);
     cpu mycpu(8, Address(65536), 32);
@@ -15,11 +33,19 @@ class TestCPU : public cpu
     std::ostringstream exp;
     mycpu.memdump(oss);
     exp << "60: 0000 0000 0000 5f00 0000 0000 0000 0000" << endl;
-    bool result = (oss.str() == exp.str());
-    return result;
+
+    vector<TestCase> tests = {
+      {oss.str(), exp.str()}
+    };
+    return runCases(tests);
   }
 	bool testload()
   {
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+
     bool result = true;
       
     UnsignedMorsel a(95);
@@ -28,17 +54,18 @@ class TestCPU : public cpu
     mycpu.load(b, a);
     UnsignedMorsel c;
     c = mycpu.view(b);
-    result = result && (a==c);
-    if (!(a == c))
-    {
-      cout << endl << "Expected: " << a
-                   << " Actual: " << c << endl;
-    }
-    return result;
+
+    vector<TestCase> tests = {
+      {a,c}
+    };
+    return runCases(tests);
   }
 	bool testview()
   {
-    bool result = true;
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
       
     UnsignedMorsel a(95);
     Address b(102);
@@ -46,81 +73,82 @@ class TestCPU : public cpu
     mycpu.load(b, a);
     UnsignedMorsel c;
     c = mycpu.view(b);
-    result = result && (a==c);
-    if (!(a == c))
-    {
-      cout << endl << "Expected: " << a
-                   << " Actual: " << c << endl;
-    }
-    return result;
+
+    vector<TestCase> tests = {
+      {a,c}
+    };
+    return runCases(tests);
   }
 	bool testgetip()
   {
-    bool result = true;
+    struct TestCase {
+      Address in;
+      Address out;
+    };
 
     cpu mycpu(8, Address(65536), 32);
     mycpu.setip(Address(22));
     Address tip = mycpu.getip();
 
-    result = result && (tip==Address(22));
-    if (!(tip  == Address(22)))
-    {
-      cout << endl << "Expected: " << Address(22)
-                   << " Actual: " << tip << endl;
-    }
-    return result;
+    vector<TestCase> tests = {
+      {tip,Address(22)}
+    };
+    return runCases(tests);
   }
 	bool testsetip()
   {
-    bool result = true;
+    struct TestCase {
+      Address in;
+      Address out;
+    };
 
     cpu mycpu(8, Address(65536), 32);
     mycpu.setip(Address(22));
     Address tip = mycpu.getip();
 
-    result = result && (tip==Address(22));
-    if (!(tip  == Address(22)))
-    {
-      cout << endl << "Expected: " << Address(22)
-                   << " Actual: " << tip << endl;
-    }
-    return result;
+    vector<TestCase> tests = {
+      {tip,Address(22)}
+    };
+    return runCases(tests);
   }
 	bool testtoString()
   {
-    bool result = true;
+    struct TestCase {
+      string in;
+      string out;
+    };
+
     cpu mycpu(8, Address(65536), 32);
-    string actual = "Byte width: 8\nAddress size: 010000\nIP: 00\nFlags: 42\n";
+    string actual 
+            = "Byte width: 8\nAddress size: 010000\nIP: 00\nFlags: 42\n";
     actual += "-----------------------------------------------\n";
     actual += "| OF | DF | INF | TF | SF | ZF | AF | PF | CF |\n";
     actual += "-----------------------------------------------\n";
     actual += "|  0 |  0 |   0 |  1 |  0 |  1 |  0 |  1 |  0 |\n";
     actual += "-----------------------------------------------\n";
-    result = result && (mycpu.toString() == actual);
-    if (!( mycpu.toString() == actual))
-    {
-      cout << endl << "Expected: " << mycpu.toString()
-                   << " Actual: " << actual << endl;
-    }
-    return result;
+
+    vector<TestCase> tests = {
+      {mycpu.toString(),actual}
+    };
+    return runCases(tests);
   }
   bool testregs()
   {
-    bool result = true;
-      
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+
+    cpu mycpu(8, Address(65536), 32);
     UnsignedMorsel a(95);
     Address b(5);
-    cpu mycpu(8, Address(65536), 32);
     mycpu.regs(b, a);
-    UnsignedMorsel c;
-    c = mycpu.regs(b);
-    result = result && (a==c);
-    if (!(a == c))
-    {
-      cout << endl << "Expected: " << a
-                   << " Actual: " << c << endl;
-    }
-    return result;
+
+    vector<TestCase> tests = {
+      {mycpu.regs(b), UnsignedMorsel(95)}
+    };
+
+    return runCases(tests);
   }
   bool testregsAddressUnsignedMorsel()
   {
@@ -132,21 +160,11 @@ class TestCPU : public cpu
       UnsignedMorsel out;
     };
 
-    TestCase tests[] = {
+    vector<TestCase> tests = {
        {mycpu.regs(Address(67),UnsignedMorsel(4)),UnsignedMorsel(4)}
     };
 
-    for (TestCase &t : tests)
-    {
-      result = result && (t.in == t.out);
-      if (!(t.in == t.out))
-      {
-        cout << "failed" << endl 
-             << "Expected: " << t.out 
-             << " Actual: " << t.in << endl;
-      }
-    }
-    return result;
+    return runCases(tests);
   }
   bool testloadimage()
   {
