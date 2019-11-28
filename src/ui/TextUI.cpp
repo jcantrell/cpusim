@@ -1,16 +1,15 @@
 #include "TextUI.h"
-
 int TextUI::user_loop()
 {
 	char input[MAX_STR_LEN];
 	char *args[MAX_ARGS];
 	int arg_count=0;
 	cpu* mycpu = NULL;
+  //Loader loader;
 
 	while (1)
 	{
-	arg_count = 0;
-
+  arg_count=0;
 	printf(":");
 	if (fgets(input, MAX_STR_LEN, stdin) == NULL)
     exit(1);
@@ -35,9 +34,7 @@ int TextUI::user_loop()
 	{
 	    args[arg_count++] = input+i;
  	   //printf("first letter at %d is %c\n",i,input[i]);
-	} 
-	else if (in_word && !letter)
-	{
+	} else if (in_word && !letter) {
 	//    printf("putting 0 at %d\n",i);
 	    input[i] = '\0';
 	}
@@ -67,7 +64,11 @@ int TextUI::user_loop()
 		if (mycpu == NULL)
 			printf("No cpu\n");
 		else
+    {
+      printf("calling memdump\n");
 			mycpu->memdump();
+      printf("end calling memdump\n");
+    }
 	} 
 	else if (0==strcmp("exit",input))
 	{
@@ -90,7 +91,7 @@ int TextUI::user_loop()
 	}
 	else if (0==strcmp("view",args[0]))
 	{
-		if (mycpu == NULL)
+    if (mycpu == NULL)
     {
 			printf("No cpu\n");
       continue;
@@ -156,7 +157,6 @@ int TextUI::user_loop()
 		//for (int i=0;i<command_count;i++)
     for(vector<string>::iterator it = commands.begin(); it != commands.end(); ++it)
 		{
-			//printf("%s",commands[i].c_str());
       printf("%s",(*it).c_str());
 		}
 	}
@@ -180,7 +180,8 @@ int TextUI::user_loop()
   }
   else if (0==strcmp("loadobject",args[0]))
   {
-    mycpu->loadobject(string(args[1]));
+    //mycpu->loadobject(string(args[1]));
+    loader.loadobject(*mycpu,string(static_cast<string>(args[1])));
   }
 	else
 	{

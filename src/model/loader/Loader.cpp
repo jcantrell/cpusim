@@ -270,5 +270,9 @@ Loader::loadobject(cpu& mycpu, string filename)
   }
 	
   in.close();
+  cout << "dumping ram" << endl;
+  UnsignedMorsel m1 = mycpu.view(Address(256));
+  cout << "m1: " << m1 << endl;
+  mycpu.memdump();
   return;
 }
