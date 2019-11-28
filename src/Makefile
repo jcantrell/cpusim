@@ -16,12 +16,19 @@ OBJ:=$(BUILDDIR)/controller/main.cpp.o \
 			$(BUILDDIR)/model/cpu/cpu.cpp.o \
 			$(BUILDDIR)/model/subleq/subleq.cpp.o \
 			$(BUILDDIR)/model/mmix/mmix.cpp.o \
+			$(BUILDDIR)/model/loader/Loader.cpp.o \
 			$(BUILDDIR)/model/cpu/Address.cpp.o
 TESTS:= $(BINDIR)/testmorsel \
 				$(BINDIR)/testaddress \
 				$(BINDIR)/testUnsignedMorsel \
 				$(BINDIR)/testSignedMorsel \
 				$(BINDIR)/testcpu
+  # BUILD_DIR ?= ./build
+  # SRC_DIRS ?= ./src
+  # 
+  # SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+  # OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+  # DEPS := $(OBJS:.o=.d)
 
 $(BINDIR)/cpusim: $(OBJ)
 	mkdir -p $(BINDIR)
@@ -44,9 +51,10 @@ test: $(BINDIR)/cpusim $(TESTS)
 	cd tests/functional && mmixal hello.mms
 	@echo
 	cat tests/functional/script | $(BINDIR)/cpusim
-	lcov --capture --directory ../build -b . --output-file coverage.info
+	cat tests/functional/subleqtest | $(BINDIR)/cpusim
+	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
 	#lcov --remove coverage.info '/usr/include/boost'
-	genhtml coverage.info --output-dir ../doc/reports
+	genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
 
 $(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o
 	$(CC) $(CXXFLAGS) -o $@ $?
@@ -64,10 +72,8 @@ $(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUI
 	$(CC) $(CXXFLAGS) -o $@ $?
 
 $(BUILDDIR)/%.cpp.o: %.cpp
-	@echo THIS IS A THING
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-	@echo END THIS IS A THING
 
 clean:
 	find . -type f \( -name "*.o" -o -name "*.mmo" -o -name "*.img" -o -name "*gcda" -o -name "*gcno" \) -delete
