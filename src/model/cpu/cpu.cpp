@@ -21,6 +21,7 @@ void cpu::step(unsigned int inst)
 
 void cpu::loadobject(string filename)
 {
+  cout << "cpu loadobject" << endl;
 }
 
 string cpu::toString()
@@ -141,7 +142,7 @@ UnsignedMorsel& cpu::view(Address address)
 			return ip;
 	}
 
-	/* Arithmetic operations */
+/*
 	int cpu::add(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] + ram[b];
@@ -199,6 +200,7 @@ UnsignedMorsel& cpu::view(Address address)
 	    ram[a] = ram[a]>>ram[b];
 	    return 0;
 	}
+*/
 
 UnsignedMorsel cpu::regs(Address address)
 {

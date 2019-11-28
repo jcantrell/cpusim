@@ -63,6 +63,7 @@ class cpu {
     virtual void loadobject(string filename);
 
 // CPU instructions
+/*
 		int add(Address a, Address b, Address dst);
 		int sub(Address a, Address b, Address dst);
 		int mul(Address a, Address b, Address dst);
@@ -73,5 +74,6 @@ class cpu {
 		int lxor(Address a, Address b, Address dst);
 		int lshift(Address a, Address b);
 		int rshift(Address a, Address b);
+*/
 };
 #endif
