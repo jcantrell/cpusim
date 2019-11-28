@@ -11,18 +11,20 @@ cpu::cpu(unsigned int byte_in, Address address_in, unsigned int reg_count) : byt
     status = sflags();
 	}
 
-cpu::~cpu()
-	{
-	}
 
 void cpu::step(unsigned int inst)
 	{
 	}
 
+/*
+cpu::~cpu()
+	{
+	}
 void cpu::loadobject(string filename)
 {
   cout << "cpu loadobject" << endl;
 }
+*/
 
 string cpu::toString()
 {
