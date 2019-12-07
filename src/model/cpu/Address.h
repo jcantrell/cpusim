@@ -31,16 +31,19 @@ class Address {
   Address operator-(uint64_t other);
   Address& operator++(int) ;
   Address operator%(unsigned int in);
+  Address operator<<(Address other);
   bool operator==(const Address& other) const;
   bool operator==(int other);
   bool operator<=(UnsignedMorsel in);
   Address operator&(const Address& other);
   Address operator&(uint64_t other);
   Address operator|(const Address& other);
+  Address operator^(unsigned int other);
   UnsignedMorsel asUnsignedMorsel();
   Address operator/(const Address& other);
   Address operator/(int rhs);
   Address& resize(unsigned int newsize);
+  Address& pb(unsigned int other);
   unsigned int size();
 };
 

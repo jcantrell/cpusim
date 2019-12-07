@@ -68,7 +68,10 @@ class UnsignedMorsel
 		rhs.bs.flip();
     rhs = rhs + 1;
 		UnsignedMorsel result;
+    //cout << "lhs: " << (*this) << " rhs: " << other << endl;
+    //cout << lhs << " " << rhs;
 		result = lhs + rhs;
+    //cout << result << endl;
 		result.bs.resize(lhs.size());
 		return result;
   }
@@ -91,6 +94,7 @@ class UnsignedMorsel
   {
     unsigned long long int in_copy = in;
     unsigned size = 0;
+    unsigned sz = bs.size();
     do
     {
       bs.push_back( in & 1 );
@@ -98,6 +102,7 @@ class UnsignedMorsel
       size++;
     } while (in != 0);
     bs = (bs >> (bs.size() - size)) ;
+    //cout << "after = " << in_copy << " is " << bs << endl;
     bs.resize(size);
     return *this;
   }
@@ -346,6 +351,21 @@ return UnsignedMorsel(0);
     result.bs = lhs.bs | rhs.bs;
     return result;
   }
+  UnsignedMorsel operator^(const unsigned int& otherInt)
+  {
+    UnsignedMorsel other(otherInt);
+    return (*this) ^ other;
+  }
+  UnsignedMorsel operator^(const UnsignedMorsel& other)
+  {
+    UnsignedMorsel lhs(*this);
+    UnsignedMorsel rhs(other);
+    if (lhs.bs.size() < rhs.bs.size()) lhs.bs.resize(rhs.bs.size());
+    if (rhs.bs.size() < lhs.bs.size()) rhs.bs.resize(lhs.bs.size());
+    UnsignedMorsel result;
+    result.bs = lhs.bs ^ rhs.bs;
+    return result;
+  }
   UnsignedMorsel operator|=(const UnsignedMorsel& other)
   {
     UnsignedMorsel result;
@@ -390,6 +410,12 @@ return UnsignedMorsel(0);
     otherUnsignedMorsel = other;
     return *this << otherUnsignedMorsel;
   }
+  UnsignedMorsel pb(unsigned int other)
+  {
+    resize(size() + other);
+    *this = *this << other;
+    return *this;
+  }
   UnsignedMorsel operator>>(unsigned int other)
   {
     UnsignedMorsel otherUnsignedMorsel;
@@ -409,15 +435,17 @@ return UnsignedMorsel(0);
   }
   UnsignedMorsel operator*(const UnsignedMorsel& other)
   {
-    UnsignedMorsel accumulator(0);
-    UnsignedMorsel decrementor(other);
-    UnsignedMorsel zero(0);
-    while (!(zero==decrementor))
-    {
-      accumulator = accumulator + (*this);
-      decrementor = decrementor - 1;
+    UnsignedMorsel lhs(*this);
+    UnsignedMorsel rhs(other);
+    if (lhs == 0 || rhs == 0) return UnsignedMorsel(0);
+    if (lhs == 1) return rhs;
+    if (rhs == 1) return lhs;
+    UnsignedMorsel accum(0);
+    for (unsigned i=0;i<other.size();i++) {
+      accum = accum + (lhs*(rhs&1u)).pb(i);
+      rhs = rhs>>1;
     }
-    return accumulator;
+    return accum;
   }
   friend UnsignedMorsel operator*(unsigned int lhs, const UnsignedMorsel& other)
   {

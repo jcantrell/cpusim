@@ -22,7 +22,8 @@ TESTS:= $(BINDIR)/testmorsel \
 				$(BINDIR)/testaddress \
 				$(BINDIR)/testUnsignedMorsel \
 				$(BINDIR)/testSignedMorsel \
-				$(BINDIR)/testcpu
+				$(BINDIR)/testcpu \
+				$(BINDIR)/testLoader
   # BUILD_DIR ?= ./build
   # SRC_DIRS ?= ./src
   # 
@@ -37,21 +38,23 @@ $(BINDIR)/cpusim: $(OBJ)
 check: $(BINDIR)/cpusim $(TESTS)
 	cppcheck . --enable=all
 
-test: $(BINDIR)/cpusim $(TESTS)
+test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	@echo 
-	$(BINDIR)/testmorsel && echo
-	$(BINDIR)/testUnsignedMorsel
+	#$(BINDIR)/testmorsel && echo
+	$(BINDIR)/testLoader && echo
+	#$(BINDIR)/testUnsignedMorsel
 	@echo
-	$(BINDIR)/testSignedMorsel
+	#$(BINDIR)/testSignedMorsel
+	#@echo
+	#$(BINDIR)/testaddress
 	@echo
-	$(BINDIR)/testaddress
+	#$(BINDIR)/testcpu
 	@echo
-	$(BINDIR)/testcpu
+	cd tests/functional && mmixal hello.mms && mmixal test.mms
 	@echo
-	cd tests/functional && mmixal hello.mms
-	@echo
-	cat tests/functional/script | $(BINDIR)/cpusim
-	cat tests/functional/subleqtest | $(BINDIR)/cpusim
+	#cat tests/functional/script | $(BINDIR)/cpusim
+	cat tests/functional/script2 | $(BINDIR)/cpusim
+	#cat tests/functional/subleqtest | $(BINDIR)/cpusim
 	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
 	#lcov --remove coverage.info '/usr/include/boost'
 	genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
@@ -69,6 +72,9 @@ $(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o
 	$(CC) $(CXXFLAGS) -o $@ $?
 
 $(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o
+	$(CC) $(CXXFLAGS) -o $@ $?
+
+$(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/loader/Loader.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/mmix/mmix.cpp.o
 	$(CC) $(CXXFLAGS) -o $@ $?
 
 $(BUILDDIR)/%.cpp.o: %.cpp

@@ -14,5 +14,6 @@ class TextUI : public UI {
   private:
     Loader loader;
 	public:
+    void create(vector<string>);
 		int user_loop();
 };

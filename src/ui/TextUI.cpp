@@ -1,11 +1,14 @@
 #include "TextUI.h"
+void TextUI::create(vector<string> args) {
+}
+
 int TextUI::user_loop()
 {
 	char input[MAX_STR_LEN];
 	char *args[MAX_ARGS];
 	int arg_count=0;
+  vector<string> argv;
 	cpu* mycpu = NULL;
-  //Loader loader;
 
 	while (1)
 	{
@@ -20,25 +23,24 @@ int TextUI::user_loop()
 	/* Scan user input for seperate args */
 	for (int i=0; input[i]!='\0'; i++)
 	{
-	bool letter = ((input[i] >= 'a' && input[i] <= 'z')
+	  bool letter = ((input[i] >= 'a' && input[i] <= 'z')
 	    || (input[i] >= '0' && input[i] <= '9')
       || (input[i] == '/')
       || (input[i] =='.'));
 	
-	//printf("char is %c %d %s %s\n",input[i],input[i],
-	//    (in_word?"true":"false"),(letter?"true":"false"));
-	
+	  //printf("char is %c %d %s %s\n",input[i],input[i],
+	  //    (in_word?"true":"false"),(letter?"true":"false"));
 
-	// If we find the first letter of a word
-	if (!in_word && letter)
-	{
+	  // If we find the first letter of a word
+	  if (!in_word && letter)
+	  {
 	    args[arg_count++] = input+i;
- 	   //printf("first letter at %d is %c\n",i,input[i]);
-	} else if (in_word && !letter) {
-	//    printf("putting 0 at %d\n",i);
+ 	    //printf("first letter at %d is %c\n",i,input[i]);
+	  } else if (in_word && !letter) {
+	  //    printf("putting 0 at %d\n",i);
 	    input[i] = '\0';
-	}
-	in_word = letter;
+	  }
+	  in_word = letter;
 	}
 
   printf("Entered text: %s\n", input);

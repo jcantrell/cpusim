@@ -3,6 +3,19 @@
 #include "../../../model/cpu/UnsignedMorsel.h"
 class TestUnsignedMorsel : public UnsignedMorsel
 {
+  private:
+    template <typename T>
+    bool runCases(vector<T> tests) {
+      bool result = true;
+      for (auto &t : tests)
+      {
+        result = result && (t.in == t.out);
+        if (!(t.in == t.out)) {
+          cout << endl << "Expected: " << t.out << " Actual: " << t.in << endl;
+        }
+      }
+      return result;
+    }
 	public:
   TestUnsignedMorsel() : UnsignedMorsel() {}
   TestUnsignedMorsel(dynamic_bitset<> in) : UnsignedMorsel(in) {}
@@ -84,15 +97,25 @@ class TestUnsignedMorsel : public UnsignedMorsel
       UnsignedMorsel in;
       UnsignedMorsel out;
     };
-    TestCase tests[] = {
-       {95,UnsignedMorsel(95)}
-      ,{23,UnsignedMorsel(23)}
-      ,{7,UnsignedMorsel(7)}
-      ,{3,UnsignedMorsel(3)}
+    UnsignedMorsel a(0xFFFFFFFFFFFFFFFF);
+    a = 2;
+   // TestCase tests[] = {
+    vector<TestCase> tests = {
+       {UnsignedMorsel(0),UnsignedMorsel(95)}
+      ,{UnsignedMorsel(0),UnsignedMorsel(23)}
+      ,{UnsignedMorsel(0),UnsignedMorsel(7)}
+      ,{UnsignedMorsel(0),UnsignedMorsel(3)}
+      ,{a,UnsignedMorsel(0x0000000000000002)}
       //,{UnsignedMorsel(27)/UnsignedMorsel(4),UnsignedMorsel(6)}
       //{UnsignedMorsel(21)/UnsignedMorsel(7),UnsignedMorsel(3)}
     };
+    tests[0].in = 95;
+    tests[1].in = 23;
+    tests[2].in = 7;
+    tests[3].in = 3;
+    //tests[4].in = 95;
 
+/*
     for (TestCase &t : tests)
     {
       result = result && (t.in == t.out);
@@ -104,6 +127,9 @@ class TestUnsignedMorsel : public UnsignedMorsel
       }
     }
     return result;
+  vector<TestCase> tests = {
+*/
+    return runCases(tests);
   }
   bool testUnsignedMorselAssignUnsignedMorsel()
   {
@@ -403,35 +429,46 @@ class TestUnsignedMorsel : public UnsignedMorsel
   {
     bool result = true;
     struct TestCase {
-      UnsignedMorsel in;
+      //UnsignedMorsel in;
+      string in;
       string out;
     };
 
-    TestCase tests[] = {
-       {UnsignedMorsel(0xa5) << 3, "28"}
-      ,{UnsignedMorsel(0xef) << 4, "f0"}
-      ,{UnsignedMorsel(0xFF00) << 4, "f000"}
+    vector<TestCase> tests = {
+       {(UnsignedMorsel(0xa5) << 3).asString(), "28"}
+      ,{(UnsignedMorsel(0xef) << 4).asString(), "f0"}
+      ,{(UnsignedMorsel(0xFF00) << 4).asString(), "f000"}
+      ,{UnsignedMorsel(0x0000000000000002).asString(), "0000000000000200"}
     };
+    UnsignedMorsel t(0x0000000000000002);
+    t.resize(64);
+    t = t << 8;
+    tests[3].in = t.asString();
 
-    for (TestCase &t : tests)
-    {
-      result = result && (t.in.asString() == t.out);
-      if (t.in.asString() != t.out)
-      {
-        cout << endl << "Expected: " << t.out 
-                     << " Actual: " << t.in.asString() << endl;
-      }
-    }
-    return result;
+    return runCases(tests);
   }
   bool testUnsignedMorselLeftShiftInt()
   {
-    UnsignedMorsel a(0xFF00);
-    unsigned int b = (4);
-    UnsignedMorsel c;
-    c = a << b;
-    UnsignedMorsel d(0xF000);
-    return (c==d);
+  struct  TestCase {
+    UnsignedMorsel in;
+    UnsignedMorsel out;
+  };
+
+  UnsignedMorsel t;
+  t = 2;
+  t.resize(56);
+  t = (t<<8);
+  //t<<=8;
+  vector<TestCase> tests = {
+     {UnsignedMorsel(0xFF00)<<4, UnsignedMorsel(0xF000)}
+    ,{UnsignedMorsel(2), UnsignedMorsel(0x0200)}
+    ,{t, UnsignedMorsel(0x0000000000000200)}
+  };
+
+  tests[1].in.resize(64);
+  tests[1].in = tests[1].in<<8;
+
+  return runCases(tests);
   }
   bool testUnsignedMorselRightShiftInt()
   {
@@ -453,21 +490,35 @@ class TestUnsignedMorsel : public UnsignedMorsel
   }
   bool testUnsignedMorselMultiplyUnsignedMorsel()
   {
-    UnsignedMorsel a(3);
-    UnsignedMorsel b(7);
-    UnsignedMorsel c(21);
-    UnsignedMorsel d;
-    d = a * b;
-    return (c==d);
+    bool result = true;
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+
+    vector<TestCase> tests = {
+        {UnsignedMorsel(2)*UnsignedMorsel(2),UnsignedMorsel(4)}
+       ,{UnsignedMorsel(3)*UnsignedMorsel(7),UnsignedMorsel(21)}
+       ,{UnsignedMorsel(6)*UnsignedMorsel(12),UnsignedMorsel(72)}
+    };
+
+    return runCases(tests);
   }
   bool testUnsignedMorselIntMultiplyUnsignedMorsel()
   {
-    unsigned int a = 3;
-    UnsignedMorsel b(7);
-    UnsignedMorsel c(21);
-    UnsignedMorsel d;
-    d = a * b;
-    return (c==d);
+    bool result = true;
+    struct TestCase {
+      UnsignedMorsel in;
+      UnsignedMorsel out;
+    };
+
+    vector<TestCase> tests = {
+        {2u*UnsignedMorsel(2),UnsignedMorsel(4)}
+       ,{3u*UnsignedMorsel(7),UnsignedMorsel(21)}
+       ,{6u*UnsignedMorsel(12),UnsignedMorsel(72)}
+    };
+
+    return runCases(tests);
   }
   bool testUnsignedMorselLeftShiftAssignInt()
   {

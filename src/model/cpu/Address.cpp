@@ -51,6 +51,11 @@ Address Address::operator*(int in)
     result.m = result.m << other;
     return result;
   }
+  Address& Address::pb(unsigned int other)
+  {
+    m.pb(other);
+    return *this;
+  }
   bool Address::operator<(const Address other) const
   {
     return m < other.m;
@@ -115,6 +120,12 @@ Address Address::operator*(int in)
     result.m = m % result.m;
     return result;
   }
+  Address Address::operator<<(Address other)
+  {
+    Address result(other);
+    result.m = m << other.m;
+    return result;
+  }
   bool Address::operator==(const Address& other) const
   {
     return m == other.m;
@@ -147,6 +158,12 @@ Address Address::operator*(int in)
   {
     Address result(*this);
     result.m = result.m | other.m;
+    return result;
+  }
+  Address Address::operator^(unsigned int other)
+  {
+    Address result(*this);
+    result.m = result.m ^ other;
     return result;
   }
   UnsignedMorsel Address::asUnsignedMorsel()
