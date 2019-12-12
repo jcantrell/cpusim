@@ -4,6 +4,7 @@
 #include <boost/functional/hash.hpp>
 #include <iostream>
 //#include "Address.h"
+#include "UnsignedMorsel.h"
 class Address;
 using namespace std;
 using namespace boost;
@@ -25,6 +26,21 @@ class SignedMorsel
   {
     *this = in;
   }
+/*
+  SignedMorsel(UnsignedMorsel in, int misc)
+  {
+    UnsignedMorsel other(in);
+    SignedMorsel res(0);
+    res.resize(other.size());
+    
+    while (other != 0)
+    {
+      res = res + 1;
+      other = other - 1;
+    }
+    *this = res;
+  }
+*/
   SignedMorsel operator+(const SignedMorsel& other) 
   {
     dynamic_bitset<> out;

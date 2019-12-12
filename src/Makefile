@@ -55,9 +55,9 @@ test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	#cat tests/functional/script | $(BINDIR)/cpusim
 	cat tests/functional/script2 | $(BINDIR)/cpusim
 	#cat tests/functional/subleqtest | $(BINDIR)/cpusim
-	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
+	#lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
 	#lcov --remove coverage.info '/usr/include/boost'
-	genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
+	#genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
 
 $(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o
 	$(CC) $(CXXFLAGS) -o $@ $?

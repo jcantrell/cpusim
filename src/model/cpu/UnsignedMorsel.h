@@ -3,6 +3,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
+
+#include "SignedMorsel.h"
 class Address;
 using namespace std;
 using namespace boost;
@@ -24,6 +26,48 @@ class UnsignedMorsel
   {
     *this = in;
   }
+/*
+  UnsignedMorsel(SignedMorsel in)
+  {
+*/
+/*
+    UnsignedMorsel other(in);
+    SignedMorsel res(0);
+    res.resize(other.size());
+    
+    while (other != 0)
+    {
+      res = res + 1;
+      other = other - 1;
+    }
+    *this = res;
+*/
+/*
+    UnsignedMorsel other(in);
+    SignedMorsel res(0);
+    res.resize(other.size());
+    
+    while (other != 0)
+    {
+      cout << "STEP 4 before: " << res << endl;
+      res = res << SignedMorsel(1);
+      cout << "STEP 4 after: " << res << endl;
+      UnsignedMorsel t;
+      cout << "STEP 4.1: " << other << endl;
+      t = (other&1);
+      cout << "STEP 4.2: " << t << endl;
+      res = res | t;
+      cout << "STEP 4.3: " << res << endl;
+      cout << "STEP 5 other: " << other << endl;
+      other = other >> 1;
+      cout << "STEP 5 after: " << other << endl;
+      cout << "STEP 5 comp: " << (other != 0) << endl;
+    }
+  cout << "CAST 6 FIXRX" << endl;
+    *this = res;
+  cout << "CAST 7 FIXRX" << endl;
+  }
+*/
   UnsignedMorsel operator+(const UnsignedMorsel& other) 
   {
     dynamic_bitset<> out;
