@@ -16,7 +16,7 @@ class Loader {
 //    Address address;
     std::ifstream in;
   public:
-    Loader() : quoted_flag(false), in_stab(false), lambda(0) {};
+    Loader() : quoted_flag(false), in_stab(false), lambda(UnsignedMorsel(0)) {};
     void loadobject(cpu& mycpu, string filename);
     void step(cpu& mycpu, unsigned char w, unsigned char x, unsigned char y, unsigned char z);
     void setfile(string filename);

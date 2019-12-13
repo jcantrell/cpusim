@@ -2,6 +2,7 @@
 #define ADDRESS_H
 #include <string>
 #include "./UnsignedMorsel.h"
+#include "./SignedMorsel.h"
 #include <boost/functional/hash.hpp>
 using namespace std;
 class Address {
@@ -10,7 +11,9 @@ class Address {
   public:
   Address();
   Address(const Address &other);
+  Address(unsigned long long int in);
   Address(UnsignedMorsel in);
+  Address(SignedMorsel in);
   Address& operator=(unsigned int in);
   int asInt() const;
   string asString() const;

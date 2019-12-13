@@ -11,6 +11,16 @@ Address::Address(UnsignedMorsel in)
   {
     m = in;
   }
+Address::Address(SignedMorsel in)
+{
+  UnsignedMorsel u(in);
+  m = u;
+}
+Address::Address(unsigned long long int in)
+{
+  UnsignedMorsel u(static_cast<unsigned>(in));
+  m = u;
+}
 Address& Address::operator=(unsigned int in) 
 {
     m = in;

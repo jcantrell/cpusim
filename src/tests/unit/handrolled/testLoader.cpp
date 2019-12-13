@@ -3,6 +3,7 @@
 #include "model/mmix/mmix.h"
 #include <fstream>
 #include "model/loader/Loader.h"
+#include "model/cpu/UnsignedMorsel.h"
 //#include <stdint.h>
 //#include <vector>
 class TestLoader : public Loader
@@ -68,8 +69,8 @@ bool TestLoader::TestLoc() {
   // save address
 
   vector<TestCase> tests = {
-     {Address(0), Address(0x0200000000000100)}
-    ,{Address(0), Address(0xDEADBEEFCAFEBABE)}
+     {Address(0), Address(UnsignedMorsel(0x0200000000000100))}
+    ,{Address(0), Address(UnsignedMorsel(0xDEADBEEFCAFEBABE))}
   };
 
   in = std::ifstream("tests/functional/t", std::ifstream::binary);

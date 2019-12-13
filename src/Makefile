@@ -8,8 +8,8 @@ CXXFLAGS=-I$(INCDIR) -Wunused -Wunreachable-code --coverage -std=c++11 \
 -fprofile-arcs -ftest-coverage
 LDFLAGS=-lgcov --coverage
 #find controller/ ui/ model/ -type f -name "*.cpp"
-OBJ:=$(BUILDDIR)/controller/main.cpp.o \
-			$(BUILDDIR)/ui/TextUI.cpp.o \
+EX:=$(BUILDDIR)/controller/main.cpp.o
+OBJ:=$(BUILDDIR)/ui/TextUI.cpp.o \
 			$(BUILDDIR)/ui/parser/parser.cpp.o \
 			$(BUILDDIR)/ui/parser/lexer.cpp.o \
 			$(BUILDDIR)/ui/parser/abstracter.cpp.o \
@@ -33,14 +33,14 @@ TESTS:= $(BINDIR)/testmorsel \
   # OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
   # DEPS := $(OBJS:.o=.d)
 
-$(BINDIR)/cpusim: $(OBJ)
+$(BINDIR)/cpusim: $(EX) $(OBJ)
 	mkdir -p $(BINDIR)
-	$(CC) $(CXXFLAGS) -o $(BINDIR)/cpusim $(OBJ)
+	$(CC) $(CXXFLAGS) -o $(BINDIR)/cpusim $(EX) $(OBJ)
 
 check: $(BINDIR)/cpusim $(TESTS)
 	cppcheck . --enable=all
 
-test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
+test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
 	@echo 
 	#$(BINDIR)/testmorsel && echo
 	#$(BINDIR)/testLoader && echo
@@ -61,28 +61,28 @@ test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	#lcov --remove coverage.info '/usr/include/boost'
 	#genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
 
-#$(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o
-$(BINDIR)/testcpu: $(OBJ)
+$(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testcpu: $(OBJ) $(TESTS)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-#$(BINDIR)/testSignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testSignedMorsel.cpp.o
-$(BINDIR)/testSignedMorsel: $(OBJ)
+$(BINDIR)/testSignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testSignedMorsel.cpp.o  $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testSignedMorsel: $(OBJ) $(TESTS)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-#$(BINDIR)/testUnsignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testUnsignedMorsel.cpp.o
-$(BINDIR)/testUnsignedMorsel: $(OBJ)
+$(BINDIR)/testUnsignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testUnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o
+#$(BINDIR)/testUnsignedMorsel: $(OBJ) $(TESTS)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-#$(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o
-$(BINDIR)/testmorsel: $(OBJ)
+$(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testmorsel: $(OBJ) $(TESTS)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-#$(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o
-$(BINDIR)/testaddress: $(OBJ)
-	$(CC) $(CXXFLAGS) -o $@ $?
+$(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testaddress: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) $? -o $@
 
-#$(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/loader/Loader.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/mmix/mmix.cpp.o
-$(BINDIR)/testLoader: $(OBJ)
+$(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/loader/Loader.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/mmix/mmix.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o
+#$(BINDIR)/testLoader: $(OBJ) $(TESTS)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
 $(BUILDDIR)/%.cpp.o: %.cpp

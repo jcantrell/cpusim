@@ -18,7 +18,7 @@ class TestAddress : public Address
     }
 	public:
   TestAddress() : Address() {}
-  TestAddress(dynamic_bitset<> in) : Address(in) {}
+  TestAddress(dynamic_bitset<> in) : Address(SignedMorsel(in)) {}
   bool assignInt()
   { 
     struct TestCase {

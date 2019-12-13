@@ -122,6 +122,7 @@ int cpu::loadimage(string filename)
 
 UnsignedMorsel cpu::load(Address address, UnsignedMorsel value)
 	{
+    cout << "cpu load " << value << " to " << address << endl;
       value.resize(byte_size);
 	    UnsignedMorsel ret = ram[address];
 	    ram[address] = value;

@@ -14,13 +14,22 @@
   SignedMorsel::SignedMorsel(const UnsignedMorsel in)
   {
     UnsignedMorsel other(in);
-    SignedMorsel res(0);
-    res.resize(other.size());
+    SignedMorsel rev(0);
+    rev.resize(other.size());
     
+    int c=0;
     while (other != 0)
     {
-      res = res * 2;
-      other = other / 2;
+      c++;
+      rev = ((rev.pb(1)) | (((other & 1) == 1) ? 1 : 0));
+      other = (other >> 1);
+    }
+    SignedMorsel res(0);
+    res.resize(other.size());
+    for (;c>0;c--)
+    {
+      res = ((res.pb(1)) | (((rev & 1) == 1) ? 1 : 0));
+      rev = (rev >> 1);
     }
     *this = res;
   }
