@@ -17,6 +17,8 @@ OBJ:=$(BUILDDIR)/controller/main.cpp.o \
 			$(BUILDDIR)/model/subleq/subleq.cpp.o \
 			$(BUILDDIR)/model/mmix/mmix.cpp.o \
 			$(BUILDDIR)/model/loader/Loader.cpp.o \
+			$(BUILDDIR)/model/cpu/SignedMorsel.cpp.o \
+			$(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o \
 			$(BUILDDIR)/model/cpu/Address.cpp.o
 TESTS:= $(BINDIR)/testmorsel \
 				$(BINDIR)/testaddress \
@@ -41,7 +43,7 @@ check: $(BINDIR)/cpusim $(TESTS)
 test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	@echo 
 	#$(BINDIR)/testmorsel && echo
-	$(BINDIR)/testLoader && echo
+	#$(BINDIR)/testLoader && echo
 	#$(BINDIR)/testUnsignedMorsel
 	@echo
 	#$(BINDIR)/testSignedMorsel
@@ -59,22 +61,28 @@ test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	#lcov --remove coverage.info '/usr/include/boost'
 	#genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
 
-$(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o
+#$(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o
+$(BINDIR)/testcpu: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-$(BINDIR)/testSignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testSignedMorsel.cpp.o
+#$(BINDIR)/testSignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testSignedMorsel.cpp.o
+$(BINDIR)/testSignedMorsel: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-$(BINDIR)/testUnsignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testUnsignedMorsel.cpp.o
+#$(BINDIR)/testUnsignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testUnsignedMorsel.cpp.o
+$(BINDIR)/testUnsignedMorsel: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-$(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o
+#$(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o
+$(BINDIR)/testmorsel: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-$(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o
+#$(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o
+$(BINDIR)/testaddress: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
-$(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/loader/Loader.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/mmix/mmix.cpp.o
+#$(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/loader/Loader.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/mmix/mmix.cpp.o
+$(BINDIR)/testLoader: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
 $(BUILDDIR)/%.cpp.o: %.cpp

@@ -82,7 +82,9 @@ Loader::fixrx(cpu& c, unsigned char y, unsigned char z)
   cout << "DEBUG: fixrx cur_loc " << curLoc << endl;
   for (unsigned i=0; i<4u; i++) 
   {
-    in.get(d); tet.pb(8); tet = tet | Address(static_cast<unsigned char>(d));
+    in.get(d);
+    tet.pb(8);
+    tet = tet | SignedMorsel(static_cast<unsigned char>(d));
     if (i==0) first = d;
   }
   tet.resize(8*4);
@@ -92,50 +94,27 @@ Loader::fixrx(cpu& c, unsigned char y, unsigned char z)
   //cout << "DEBUG: fixrx tet high: " << (tet >= 0x1000000) << endl;
   cout << "DEBUG: fixrx tet high: " << !(tet < 0x1000000) << endl;
   cout << "DEBUG: fixrx tet & " << (tet & 0xFFFFFF) << endl;
-  cout << "DEBUG: fixrx 1 << j " <<  (SignedMorsel(1)<<z) << endl;
-  cout << "DEBUG: fixrx diff " << ((tet&0xffffff) - (SignedMorsel(1)<<z)) << endl;
-  cout << "STARTED 5 FIXRX" << delta << endl;
+  cout << "DEBUG: fixrx 1 << j " <<  (SignedMorsel(1).pb(z)) << endl;
+  cout << "DEBUG: fixrx diff " << ((tet&0xffffff) - (SignedMorsel(1).pb(z))) << endl;
+  cout << "DEBUG: fixrx tri " << -( tet >= 0x1000000 ? (tet & 0xffffff) - (SignedMorsel(1).pb(z)) :tet) << endl;
+  cout << "DEBUG: fixrx neg shift " << (-( tet >= 0x1000000 ? (tet & 0xffffff) - (SignedMorsel(1).pb(z)) :tet ) << 2) << endl;
+
+  cout << "DEBUG: fixrx tmp " << tet << endl;
+  cout << "DEBUG: fixrx cur_loc " << lambda << endl;
+  cout << "DEBUG: fixrx delta arg " << (-delta<<2) << endl;
+  cout << "DEBUG: fixrx incr " << (SignedMorsel(lambda.asUnsignedMorsel())+(-delta<<2)) << endl;
+//1018             printf("DEBUG: fixrx tet %08x\n", tet);
+
   if (first == 1) {
     //tet = (tet&0xFFFFFF)-(SignedMorsel(1).pb(z));
     tet = (tet&0xFFFFFF)-(SignedMorsel(1)<< z);
   }
   cout << "STARTED 6 FIXRX" << delta << endl;
-  c.load(lambda,UnsignedMorsel(delta<<2));
+  //c.load(lambda,UnsignedMorsel(delta<<2));
   cout << "STARTED 7 FIXRX" << (delta<<2) << endl;
 /*
  delta=(tet>=0x1000000? (tet&0xffffff)-(1<<j): tet);
-
-            printf("DEBUG: fixrx cur_loc %08x\n", cur_loc);
-            printf("DEBUG: fixrx tet %08x\n", tet);
-            printf("DEBUG: fixrx tet high: %08x\n", (tet >= 0x1000000));
-            printf("DEBUG: fixrx tet & %08x\n", (tet & 0xFFFFFF));
-            printf("DEBUG: fixrx 1 << j %08x\n", (1<<j));
-            printf("DEBUG: fixrx diff %08x\n", (tet&0xffffff) - (1<<j));
-            printf("DEBUG: fixrx tri %08x\n", -( tet >= 0x1000000 ? (tet & 0xffffff) - (1<<j) :tet ));
-            printf("DEBUG: fixrx neg shift %08x\n", -( tet >= 0x1000000 ? (tet & 0xffffff) - (1<<j) :tet ) << 2);
-
-            printf("DEBUG: fixrx tmp %08x\n", tet);
-            printf("DEBUG: fixrx delta arg %08x\n", -delta<<2);
-
  mmo_load(incr(cur_loc,-delta<<2),tet);
-
-
-  cout << "fixrx lambda: " << lambda << " y: " << y << " z: " << z;
-  cout << " sigma: " << sigma << endl;
-  Address P;
-  Address psigma(sigma);
-  if (first == 1)
-    psigma = 4*((Address(sigma) & 0x00FFFFFFu)-(Address(1u).pb(z)));
-  Address fx(4*sigma);
-  cout << " sigma after: " << sigma << endl;
-  fx.resize(32);
-  P = lambda - fx; 
-  P.resize(32);
-  cout << "lambda: " << lambda << " 4x: " << (fx) << endl;
-  cout << "P: " << P << endl;
-  P.resize(8*4);
-  //c.load(P, (c.view(P) & 0xFFFF0000) | (UnsignedMorsel(y)<<8u) | z ); 
-  cout << "loading to " << P << " " << sigma << endl;
   c.load(P,sigma.asUnsignedMorsel());
 */
 }
