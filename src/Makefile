@@ -86,6 +86,17 @@ model/mmix/mmix.o: model/mmix/mmix.cpp model/mmix/mmix.h
 model/mmix/Address.o: model/cpu/Address.cpp
 	$(CC) $(CFLAGS) -c -o $@ model/cpu/Address.cpp
 
+prereqs:
+	apt install libboost-all-dev lcov
+	wget http://www.mmix.cs.hm.edu/bin/mmix -P ~/.bin
+	wget http://www.mmix.cs.hm.edu/bin/mmixal -P ~/.bin
+	wget http://www.mmix.cs.hm.edu/bin/mmmix -P ~/.bin
+	wget http://www.mmix.cs.hm.edu/bin/mmotype -P ~/.bin
+	chmod a+x ~/.bin/mmix
+	chmod a+x ~/.bin/mmixal
+	chmod a+x ~/.bin/mmmix
+	chmod a+x ~/.bin/mmotype
+
 clean:
 	find . -name "*.o" -type f -delete
 	find . -name "*.exe" -type f -delete
