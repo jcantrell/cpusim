@@ -1,1 +1,9 @@
-memdump is slow - clean up code and speed up
+- [ ] memdump is slow - clean up code and speed up
+- [ ] write tests for Loader
+- [ ] write tests for subleq
+- [ ] write tests for mmix
+- [x] lop_fixrx currently functions similarly to other simulators, but the output is wrong compared to mmotype\
+- [ ] convert uses of Addresss and UnsignedMorsel into uses of SignedMorsel
+- [ ] Check that loading test.mmo properly sets registers
+- [ ] Load and run hello.mmo
+- [ ] Load and run test.mmo
