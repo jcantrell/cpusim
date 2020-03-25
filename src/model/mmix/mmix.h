@@ -21,9 +21,6 @@ class mmix : public cpu {
     enum special_registers {
 #include "model/mmix/special_registers_mmix.h"
     };
-    enum loader_opcodes {
-#include "model/mmix/loader_opcodes.h"
-    };
     enum sys_calls {
       Halt, Fopen, Fclose, Fread, Fgets, Fgetws, Fwrite, Fputs,
       Fputws, Fseek, Ftell
@@ -74,7 +71,7 @@ class mmix : public cpu {
     bool N(double, double, unsigned int, float);
 
     // load a .mmo file
-    void loadobject(string filename);
+    //void loadobject(string filename);
 
 
     //Instruction set

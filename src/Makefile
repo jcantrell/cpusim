@@ -1,90 +1,92 @@
 CC=c++
+BINDIR := ../bin
+BUILDDIR ?= ../build
+INCDIR ?= .
 #-Weffc++
-CFLAGS=-Wunused -Wunreachable-code --coverage -std=c++11 -I. \
+CXXFLAGS=-I$(INCDIR) -Wunused -Wunreachable-code --coverage -std=c++11 \
 -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror -Wno-unused \
 -fprofile-arcs -ftest-coverage
 LDFLAGS=-lgcov --coverage
-OBJ:=controller/main.o \
-			ui/TextUI.o \
-			ui/parser/parser.o \
-			ui/parser/lexer.o \
-			model/cpu/cpu.o \
-			model/subleq/subleq.o \
-			model/mmix/mmix.o \
-			model/cpu/Address.o
-TESTS:=tests/unit/testmorsel \
-				tests/unit/testaddress \
-				tests/unit/testUnsignedMorsel \
-				tests/unit/testSignedMorsel \
-				tests/unit/testcpu
+#find controller/ ui/ model/ -type f -name "*.cpp"
+EX:=$(BUILDDIR)/controller/main.cpp.o
+OBJ:=$(BUILDDIR)/ui/TextUI.cpp.o \
+			$(BUILDDIR)/ui/parser/parser.cpp.o \
+			$(BUILDDIR)/ui/parser/lexer.cpp.o \
+			$(BUILDDIR)/ui/parser/abstracter.cpp.o \
+			$(BUILDDIR)/model/cpu/cpu.cpp.o \
+			$(BUILDDIR)/model/subleq/subleq.cpp.o \
+			$(BUILDDIR)/model/mmix/mmix.cpp.o \
+			$(BUILDDIR)/model/loader/Loader.cpp.o \
+			$(BUILDDIR)/model/cpu/SignedMorsel.cpp.o \
+			$(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o \
+			$(BUILDDIR)/model/cpu/Address.cpp.o
+TESTS:= $(BINDIR)/testmorsel \
+				$(BINDIR)/testaddress \
+				$(BINDIR)/testUnsignedMorsel \
+				$(BINDIR)/testSignedMorsel \
+				$(BINDIR)/testcpu \
+				$(BINDIR)/testLoader
+  # BUILD_DIR ?= ./build
+  # SRC_DIRS ?= ./src
+  # 
+  # SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+  # OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+  # DEPS := $(OBJS:.o=.d)
 
-../bin/cpusim: cpusim
+$(BINDIR)/cpusim: $(EX) $(OBJ)
+	mkdir -p $(BINDIR)
+	$(CC) $(CXXFLAGS) -o $(BINDIR)/cpusim $(EX) $(OBJ)
 
-cpusim:	$(OBJ)
-	mkdir -p ../bin
-	$(CC) $(CFLAGS) -o ../bin/cpusim $(OBJ)
-
-#$(OBJ):
-#	$(CC) $(CFLAGS) -o $@
-check: ../bin/cpusim $(TESTS)
+check: $(BINDIR)/cpusim $(TESTS)
 	cppcheck . --enable=all
 
-test: ../bin/cpusim $(TESTS)
+test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
+	@echo 
+	$(BINDIR)/testmorsel && echo
+	$(BINDIR)/testLoader && echo
+	$(BINDIR)/testUnsignedMorsel
 	@echo
-	./tests/unit/testmorsel
+	$(BINDIR)/testSignedMorsel
 	@echo
-	./tests/unit/testUnsignedMorsel
+	$(BINDIR)/testaddress
 	@echo
-	./tests/unit/testSignedMorsel
+	$(BINDIR)/testcpu
 	@echo
-	./tests/unit/testaddress
+	cd tests/functional && mmixal hello.mms && mmixal test.mms
 	@echo
-	./tests/unit/testcpu
-	@echo
-	cd tests/functional && mmixal hello.mms
-	@echo
-	cat script | ../bin/cpusim
-	lcov --capture --directory . --output-file coverage.info
-	genhtml coverage.info --output-dir ../doc/reports
+	cat tests/functional/script | $(BINDIR)/cpusim
+	cat tests/functional/script2 | $(BINDIR)/cpusim
+	#lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
+	#lcov --remove coverage.info '/usr/include/boost'
+	#genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
 
-tests/unit/testcpu: tests/unit/handrolled/testcpu.cpp
-	$(CC) $(CFLAGS) -o $@ tests/unit/handrolled/testcpu.cpp -I. model/cpu/Address.cpp model/cpu/cpu.cpp
+$(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testcpu: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) -o $@ $?
 
-tests/unit/testSignedMorsel.o: tests/unit/handrolled/testSignedMorsel.cpp
-	$(CC) $(CFLAGS) -c -o $@ tests/unit/handrolled/testSignedMorsel.cpp
+$(BINDIR)/testSignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testSignedMorsel.cpp.o  $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testSignedMorsel: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) -o $@ $?
 
-tests/unit/testUnsignedMorsel.o: tests/unit/handrolled/testUnsignedMorsel.cpp
-	$(CC) $(CFLAGS) -c -o $@ tests/unit/handrolled/testUnsignedMorsel.cpp
+$(BINDIR)/testUnsignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testUnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o
+#$(BINDIR)/testUnsignedMorsel: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) -o $@ $?
 
-tests/unit/testmorsel.o: tests/unit/handrolled/testmorsel.cpp
-	$(CC) $(CFLAGS) -c -o $@ tests/unit/handrolled/testmorsel.cpp
+$(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testmorsel: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) -o $@ $?
 
-tests/unit/testaddress: tests/unit/handrolled/testaddress.cpp model/cpu/Address.cpp
-	$(CC) $(CFLAGS) -o $@ tests/unit/handrolled/testaddress.cpp model/cpu/Address.cpp
+$(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
+#$(BINDIR)/testaddress: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) $? -o $@
 
-controller/main.o: controller/main.cpp ui/TextUI.h
-	$(CC) $(CFLAGS) -c -o $@ controller/main.cpp
+$(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/loader/Loader.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/mmix/mmix.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o
+#$(BINDIR)/testLoader: $(OBJ) $(TESTS)
+	$(CC) $(CXXFLAGS) -o $@ $?
 
-ui/TextUI.o: ui/TextUI.cpp ui/UI.h ui/TextUI.h
-	$(CC) $(CFLAGS) -c -o $@ ui/TextUI.cpp
-
-ui/parser/parser.o: ui/parser/parser.cpp ui/parser/parser.h
-	$(CC) $(CFLAGS) -c -o $@ ui/parser/parser.cpp
-
-ui/parser/lexer.o: ui/parser/lexer.cpp ui/parser/lexer.h
-	$(CC) $(CFLAGS) -c -o $@ ui/parser/lexer.cpp
-
-model/cpu/cpu.o: model/cpu/cpu.cpp model/cpu/cpu.h model/cpu/Address.cpp
-	$(CC) $(CFLAGS) -c -o $@ model/cpu/cpu.cpp
-
-model/subleq/subleq.o: model/subleq/subleq.cpp model/subleq/subleq.h
-	$(CC) $(CFLAGS) -c -o $@ model/subleq/subleq.cpp
-
-model/mmix/mmix.o: model/mmix/mmix.cpp model/mmix/mmix.h
-	$(CC) $(CFLAGS) -c -o $@ model/mmix/mmix.cpp
-
-model/mmix/Address.o: model/cpu/Address.cpp
-	$(CC) $(CFLAGS) -c -o $@ model/cpu/Address.cpp
+$(BUILDDIR)/%.cpp.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 prereqs:
 	apt install libboost-all-dev lcov
@@ -98,13 +100,6 @@ prereqs:
 	chmod a+x ~/.bin/mmotype
 
 clean:
-	find . -name "*.o" -type f -delete
-	find . -name "*.exe" -type f -delete
-	find . -name "*.mmo" -type f -delete
-	find . -name "*.img" -type f -delete
-	find ../bin -name "*" -type f -delete
-	[ ! -f tests/unit/testcpu ] || rm tests/unit/testcpu
-	[ ! -f tests/unit/testaddress ] || rm tests/unit/testaddress
-	[ ! -e tests/unit/testmorsel ] || rm tests/unit/testmorsel
-	[ ! -e tests/unit/testUnsignedMorsel ] || rm tests/unit/testUnsignedMorsel
-	[ ! -e tests/unit/testSignedMorsel ] || rm tests/unit/testSignedMorsel
+	find . -type f \( -name "*.o" -o -name "*.mmo" -o -name "*.img" -o -name "*gcda" -o -name "*gcno" \) -delete
+	find $(BINDIR) -name "*" -type f -executable -delete
+	rm -rf $(TESTS) $(BUILDDIR)/*

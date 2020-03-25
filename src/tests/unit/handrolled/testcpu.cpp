@@ -32,7 +32,7 @@ class TestCPU : public cpu
     std::ostringstream oss;
     std::ostringstream exp;
     mycpu.memdump(oss);
-    exp << "60: 0000 0000 0000 5f00 0000 0000 0000 0000" << endl;
+    exp << "0060: 0000 0000 0000 5f00 0000 0000 0000 0000" << endl;
 
     vector<TestCase> tests = {
       {oss.str(), exp.str()}
@@ -193,8 +193,11 @@ class TestCPU : public cpu
 
     for (UnitTest &t : tests)
     {
-	    std::cout << "Test " << t.funcName << " " 
-        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
+	    std::cout << "Test " 
+        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") 
+        << " " 
+        << t.funcName 
+        << endl;
     }
  
   }

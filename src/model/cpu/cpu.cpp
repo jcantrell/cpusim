@@ -11,17 +11,10 @@ cpu::cpu(unsigned int byte_in, Address address_in, unsigned int reg_count) : byt
     status = sflags();
 	}
 
-cpu::~cpu()
-	{
-	}
 
 void cpu::step(unsigned int inst)
 	{
 	}
-
-void cpu::loadobject(string filename)
-{
-}
 
 string cpu::toString()
 {
@@ -141,7 +134,7 @@ UnsignedMorsel& cpu::view(Address address)
 			return ip;
 	}
 
-	/* Arithmetic operations */
+/*
 	int cpu::add(Address a, Address b, Address dst)
 	{
 	    ram[dst] = ram[a] + ram[b];
@@ -199,6 +192,7 @@ UnsignedMorsel& cpu::view(Address address)
 	    ram[a] = ram[a]>>ram[b];
 	    return 0;
 	}
+*/
 
 UnsignedMorsel cpu::regs(Address address)
 {

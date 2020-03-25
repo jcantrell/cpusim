@@ -18,7 +18,7 @@ class TestAddress : public Address
     }
 	public:
   TestAddress() : Address() {}
-  TestAddress(dynamic_bitset<> in) : Address(in) {}
+  TestAddress(dynamic_bitset<> in) : Address(SignedMorsel(in)) {}
   bool assignInt()
   { 
     struct TestCase {
@@ -37,13 +37,13 @@ class TestAddress : public Address
   bool asInt()
   {
     struct TestCase {
-      Address in;
+      int in;
       int out;
     };
 
     vector<TestCase> tests = {
-       {Address(UnsignedMorsel(95)), 0x5f}
-      ,{Address(UnsignedMorsel(42)), 0x2a}
+       {Address(UnsignedMorsel(95)).asInt(), 0x5f}
+      ,{Address(UnsignedMorsel(42)).asInt(), 0x2a}
     };
 
     return runCases(tests);
@@ -60,6 +60,30 @@ class TestAddress : public Address
     };
     return runCases(tests);
   }
+/*
+  bool ostreamAddress()
+  {
+    struct TestCase {
+      string in;
+      string out;
+    };
+
+    std::ostream z;
+    z << Address(UnsignedMorsel(95));
+    std::ostream s2;
+    s2 << Address(UnsignedMorsel(42));
+
+    std::stringstream s3; s3 << s1.rdbuf();
+    std::stringstream s4; s4 << s1.rdbuf();
+
+    vector<TestCase> tests = {
+        {s3.str(), "5f"}
+       ,{s4.str(), "2a"}
+    };
+
+    return runCases(tests);
+  }
+*/
   bool streamAddress()
   {
     struct TestCase {
@@ -67,9 +91,14 @@ class TestAddress : public Address
       string out;
     };
 
+    std::stringstream s1;
+    s1 << Address(UnsignedMorsel(95));
+    std::stringstream s2;
+    s2 << Address(UnsignedMorsel(42));
+
     vector<TestCase> tests = {
-       {Address(UnsignedMorsel(95)).asString(), "5f"}
-      ,{Address(UnsignedMorsel(42)).asString(), "2a"}
+        {s1.str(), "5f"}
+       ,{s2.str(), "2a"}
     };
 
     return runCases(tests);
@@ -445,6 +474,38 @@ class TestAddress : public Address
     return runCases(tests);
   }
 
+  bool TestSize()
+  {
+    struct TestCase {
+      unsigned in;
+      unsigned out;
+    };
+
+    vector<TestCase> tests = {
+       {Address(UnsignedMorsel(23)).size(), 5}
+      ,{Address(UnsignedMorsel(27)).size(), 5}
+    };
+
+    return runCases(tests);
+  }
+
+  bool TestResize()
+  {
+    struct TestCase {
+      unsigned in;
+      unsigned out;
+    };
+
+    Address a(UnsignedMorsel(23)); a.resize(3);
+    Address b(UnsignedMorsel(32)); b.resize(15);
+
+    vector<TestCase> tests = {
+       {a.size(), 3}
+      ,{b.size(), 15}
+    };
+
+    return runCases(tests);
+  }
   void runAllTests()
   {
     TestAddress tm;
@@ -483,13 +544,19 @@ class TestAddress : public Address
   ,{"asUnsignedMorsel", &TestAddress::asUnsignedMorsel}
   ,{"AddressDivAddress", &TestAddress::AddressDivAddress}
   ,{"AddressDivInt", &TestAddress::AddressDivInt}
+//  ,{"ostreamAddress", &TestAddress::ostreamAddress}
+  ,{"AddressSize", &TestAddress::TestSize}
+  ,{"TestResize", &TestAddress::TestResize}
 
     };
     cout << "TestAddress" << endl;
     for (NameResultPair &t : tests)
     {
-	    std::cout << "Test " << t.funcName << " " 
-        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
+	    std::cout << "Test " 
+        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") 
+        << " " 
+        << t.funcName 
+        << endl;
     }
   }
 };

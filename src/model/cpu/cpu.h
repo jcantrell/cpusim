@@ -47,7 +47,7 @@ class cpu {
 	public:
 		const unsigned int byte_size;  
 		cpu(unsigned int byte_in, Address address_in, unsigned int reg_count);
-		~cpu();
+		//~cpu();
 
 // Control methods
 		void memdump(std::ostream& os = std::cout);
@@ -56,13 +56,14 @@ class cpu {
 		Address getip();
 		Address setip(Address in);
 		string toString();
-		virtual void step(unsigned int inst);
+		void step(unsigned int inst);
     UnsignedMorsel regs(Address address);
     UnsignedMorsel regs(Address address, UnsignedMorsel value);
     int loadimage(string filename);
-    virtual void loadobject(string filename);
+    //virtual void loadobject(string filename) = 0;
 
 // CPU instructions
+/*
 		int add(Address a, Address b, Address dst);
 		int sub(Address a, Address b, Address dst);
 		int mul(Address a, Address b, Address dst);
@@ -73,5 +74,6 @@ class cpu {
 		int lxor(Address a, Address b, Address dst);
 		int lshift(Address a, Address b);
 		int rshift(Address a, Address b);
+*/
 };
 #endif

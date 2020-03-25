@@ -8,8 +8,12 @@
 #include "model/cpu/cpu.h"
 #include "model/subleq/subleq.h"
 #include "model/mmix/mmix.h"
+#include "model/loader/Loader.h"
 
 class TextUI : public UI {
+  private:
+    Loader loader;
 	public:
+    void create(vector<string>);
 		int user_loop();
 };
