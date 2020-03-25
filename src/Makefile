@@ -1,6 +1,7 @@
 CC=c++
 BINDIR := ../bin
 BUILDDIR ?= ../build
+DOCDIR ?= ../doc
 INCDIR ?= .
 #-Weffc++
 CXXFLAGS=-I$(INCDIR) -Wunused -Wunreachable-code --coverage -std=c++11 \
@@ -56,9 +57,9 @@ test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	@echo
 	cat tests/functional/script | $(BINDIR)/cpusim
 	cat tests/functional/script2 | $(BINDIR)/cpusim
-	#lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
-	#lcov --remove coverage.info '/usr/include/boost'
-	#genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports
+	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
+	lcov --remove $(BUILDDIR)/coverage.info -o $(BUILDDIR)/stripped_coverage.info "boost*" "c++*" "/usr/include/*"
+	genhtml $(BUILDDIR)/stripped_coverage.info --output-dir $(DOCDIR)/reports
 
 $(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
 #$(BINDIR)/testcpu: $(OBJ) $(TESTS)
@@ -102,4 +103,4 @@ prereqs:
 clean:
 	find . -type f \( -name "*.o" -o -name "*.mmo" -o -name "*.img" -o -name "*gcda" -o -name "*gcno" \) -delete
 	find $(BINDIR) -name "*" -type f -executable -delete
-	rm -rf $(TESTS) $(BUILDDIR)/*
+	rm -rf $(TESTS) $(BUILDDIR)/* $(DOCDIR)/reports/*
