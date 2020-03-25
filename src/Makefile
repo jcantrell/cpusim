@@ -42,21 +42,20 @@ check: $(BINDIR)/cpusim $(TESTS)
 
 test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
 	@echo 
-	#$(BINDIR)/testmorsel && echo
-	#$(BINDIR)/testLoader && echo
-	#$(BINDIR)/testUnsignedMorsel
+	$(BINDIR)/testmorsel && echo
+	$(BINDIR)/testLoader && echo
+	$(BINDIR)/testUnsignedMorsel
 	@echo
-	#$(BINDIR)/testSignedMorsel
-	#@echo
-	#$(BINDIR)/testaddress
+	$(BINDIR)/testSignedMorsel
 	@echo
-	#$(BINDIR)/testcpu
+	$(BINDIR)/testaddress
+	@echo
+	$(BINDIR)/testcpu
 	@echo
 	cd tests/functional && mmixal hello.mms && mmixal test.mms
 	@echo
-	#cat tests/functional/script | $(BINDIR)/cpusim
+	cat tests/functional/script | $(BINDIR)/cpusim
 	cat tests/functional/script2 | $(BINDIR)/cpusim
-	#cat tests/functional/subleqtest | $(BINDIR)/cpusim
 	#lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
 	#lcov --remove coverage.info '/usr/include/boost'
 	#genhtml $(BUILDDIR)/coverage.info --output-dir ../doc/reports

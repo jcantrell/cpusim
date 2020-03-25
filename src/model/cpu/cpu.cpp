@@ -16,16 +16,6 @@ void cpu::step(unsigned int inst)
 	{
 	}
 
-/*
-cpu::~cpu()
-	{
-	}
-void cpu::loadobject(string filename)
-{
-  cout << "cpu loadobject" << endl;
-}
-*/
-
 string cpu::toString()
 {
 	string s = "";
@@ -122,7 +112,6 @@ int cpu::loadimage(string filename)
 
 UnsignedMorsel cpu::load(Address address, UnsignedMorsel value)
 	{
-    cout << "cpu load " << value << " to " << address << endl;
       value.resize(byte_size);
 	    UnsignedMorsel ret = ram[address];
 	    ram[address] = value;

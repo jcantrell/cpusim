@@ -12,6 +12,7 @@ class Loader {
     bool spec_flag;
     unsigned filenum;
     unsigned linenum;
+    unsigned long long timestamp;
     Address lambda;
 //    Address address;
     std::ifstream in;

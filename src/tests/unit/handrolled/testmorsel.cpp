@@ -483,8 +483,11 @@ class TestMorsel : public Morsel
     for (NameResultPair &t : tests)
     {
       if (t.runTest)
-	      std::cout << "Test " << t.funcName << " " 
-          << ( (tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
+	    std::cout << "Test " 
+        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") 
+        << " " 
+        << t.funcName 
+        << endl;
     }
   }
 };

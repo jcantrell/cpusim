@@ -73,12 +73,12 @@ bool TestLoader::TestLoc() {
     ,{Address(0), Address(UnsignedMorsel(0xDEADBEEFCAFEBABE))}
   };
 
-  in = std::ifstream("tests/functional/t", std::ifstream::binary);
+  in = std::ifstream("tests/functional/testLoader/testLoc1", std::ifstream::binary);
   if (!in) { printf("No such file!\n"); return false; }
   loc(2, 1);
   tests[0].in = lambda;
 
-  in = std::ifstream("tests/functional/w", std::ifstream::binary);
+  in = std::ifstream("tests/functional/testLoader/testLoc2", std::ifstream::binary);
   if (!in) { printf("No such file!\n"); return false; }
   loc(0x15, 2);
   tests[1].in = lambda;
@@ -127,7 +127,7 @@ bool TestLoader::TestPost() {
     UnsignedMorsel in;
     UnsignedMorsel out;
   };
-  in = std::ifstream("tests/functional/u", std::ifstream::binary);
+  in = std::ifstream("tests/functional/testLoader/testPost1", std::ifstream::binary);
   mmix mycpu(8, Address(65536));
   post(mycpu, 246);
 
@@ -142,11 +142,13 @@ bool TestLoader::TestFixrx() {
     UnsignedMorsel in;
     UnsignedMorsel out;
   };
-  in = std::ifstream("tests/functional/x", std::ifstream::binary);
+  in = std::ifstream("tests/functional/testLoader/testFixrx1", std::ifstream::binary);
   mmix mycpu(8, Address(65536));
   fixrx(mycpu, 0, 16u);
   vector<TestCase> tests = {
-    {mycpu.view(Address(0x2Cu)), UnsignedMorsel(0x00000010u)}
+  // the sample file for this test case has been lost
+  //  {mycpu.view(Address(0x2Cu)), UnsignedMorsel(0x00000010u)}
+    {mycpu.view(Address(0xFEDADAE0u)), UnsignedMorsel(0x4Bu)}
   };
   return runCases(tests);
 }
@@ -161,7 +163,7 @@ bool TestLoader::TestPre() {
   mmix mycpu(8, Address(65536));
   pre(1);
   vector<TestCase> tests = {
-    {UnsignedMorsel(0x0u), UnsignedMorsel(0x0u)}
+    {timestamp, UnsignedMorsel(0x7fffu)}
   };
   return runCases(tests);
 }
@@ -185,11 +187,14 @@ void TestLoader::runAllTests()
       ,{TestLoader(), "TestPost",  &TestLoader::TestPost}
       ,{TestLoader(), "TestFixrx", &TestLoader::TestFixrx}
     };
-    cout << "TestLoader" << endl;
+
     for (NameResultPair &t : tests)
     {
-	    std::cout << "Test " << t.funcName << " " 
-        << ( (t.tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
+	    std::cout << "Test " 
+        << ( (t.tm.*(t.funcPtr))() ? "passed" : "failed") 
+        << " " 
+        << t.funcName 
+        << endl;
     }
   }
 

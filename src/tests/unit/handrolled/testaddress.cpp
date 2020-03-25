@@ -111,13 +111,11 @@ class TestAddress : public Address
       string out;
     };
 
-    cout << "CALLING ADDRESS MULT" << endl;
     vector<TestCase> tests = {
        {(Address(UnsignedMorsel(7)) * Address(UnsignedMorsel(3))).asString(), "15"}
       ,{(Address(UnsignedMorsel(4)) * Address(UnsignedMorsel(13))).asString(), "34"}
     };
 
-    cout << "END CALLING ADDRESS MULT" << endl;
     return runCases(tests);
   }
   bool IntMultiplyAddress()
@@ -554,8 +552,11 @@ class TestAddress : public Address
     cout << "TestAddress" << endl;
     for (NameResultPair &t : tests)
     {
-	    std::cout << "Test " << t.funcName << " " 
-        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") << endl;
+	    std::cout << "Test " 
+        << ( (tm.*(t.funcPtr))() ? "passed" : "failed") 
+        << " " 
+        << t.funcName 
+        << endl;
     }
   }
 };
