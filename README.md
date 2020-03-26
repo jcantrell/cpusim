@@ -7,6 +7,8 @@ in the book *The Art of Computer Programming*
 
 - [Install](#install)
 - [Usage](#usage)
+- [Notes](#Notes)
+- [Todo](#todo)
 
 ## Install
 
