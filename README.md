@@ -22,18 +22,25 @@ in the book *The Art of Computer Programming*
 
 create
 :  Creates a new virtual cpu
+
 memdump
 :  prints contents of memory
+
 exit
 :  exits simulator
+
 load
 :  load a value into memory address
+
 view
 :  view the contents of a given memory address
+
 viewip
 :  view the instruction pointer
+
 setip
 :  set the instruction pointer
+
 step
 :  step through one instruction
 
