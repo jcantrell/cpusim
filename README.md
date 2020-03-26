@@ -1,7 +1,7 @@
 # cpusim
 
-This project aims to imlement an emulator for the MMIX computer described in the
-book *The Art of Computer Programming*
+This project aims to imlement an emulator for the MMIX computer described
+in the book *The Art of Computer Programming*
 
 ## Table of Contents
 
@@ -17,6 +17,25 @@ book *The Art of Computer Programming*
 
 ```sh
 ```
+
+### Commands
+
+create
+:  Creates a new virtual cpu
+memdump
+:  prints contents of memory
+exit
+:  exits simulator
+load
+:  load a value into memory address
+view
+:  view the contents of a given memory address
+viewip
+:  view the instruction pointer
+setip
+:  set the instruction pointer
+step
+:  step through one instruction
 
 ## Loader
 
