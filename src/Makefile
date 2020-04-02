@@ -21,8 +21,7 @@ OBJ:=$(BUILDDIR)/ui/TextUI.cpp.o \
 			$(BUILDDIR)/model/cpu/SignedMorsel.cpp.o \
 			$(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o \
 			$(BUILDDIR)/model/cpu/Address.cpp.o
-TESTS:= $(BINDIR)/testmorsel \
-				$(BINDIR)/testaddress \
+TESTS:= $(BINDIR)/testaddress \
 				$(BINDIR)/testUnsignedMorsel \
 				$(BINDIR)/testSignedMorsel \
 				$(BINDIR)/testcpu \
@@ -43,7 +42,6 @@ check: $(BINDIR)/cpusim $(TESTS)
 
 test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
 	@echo 
-	$(BINDIR)/testmorsel && echo
 	$(BINDIR)/testLoader && echo
 	$(BINDIR)/testUnsignedMorsel
 	@echo
@@ -71,10 +69,6 @@ $(BINDIR)/testSignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testSignedMorsel.c
 
 $(BINDIR)/testUnsignedMorsel: $(BUILDDIR)/tests/unit/handrolled/testUnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o
 #$(BINDIR)/testUnsignedMorsel: $(OBJ) $(TESTS)
-	$(CC) $(CXXFLAGS) -o $@ $?
-
-$(BINDIR)/testmorsel: $(BUILDDIR)/tests/unit/handrolled/testmorsel.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
-#$(BINDIR)/testmorsel: $(OBJ) $(TESTS)
 	$(CC) $(CXXFLAGS) -o $@ $?
 
 $(BINDIR)/testaddress: $(BUILDDIR)/tests/unit/handrolled/testaddress.cpp.o $(BUILDDIR)/model/cpu/Address.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
