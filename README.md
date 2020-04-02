@@ -249,6 +249,7 @@ parse tree nodes:
 
 ## TODO
 
+- [ ] Construct SignedMorsel from UnsignedMorsel wrongly adds 0s at beginning - fix this
 - [x] memdump is slow - clean up code and speed up
 - [x] write tests for Loader
 - [ ] write tests for subleq
