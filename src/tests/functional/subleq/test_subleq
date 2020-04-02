@@ -1,0 +1,20 @@
+create subleq
+load 1 4
+load 2 5
+load 3 8
+load 4 7
+load 5 7
+load 9 4
+load 10 5
+memdump
+step
+memdump
+step
+memdump
+step
+memdump
+step
+memdump
+step
+memdump
+exit
