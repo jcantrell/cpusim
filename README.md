@@ -249,14 +249,14 @@ parse tree nodes:
 
 ## TODO
 
-- [ ] Compose SignedMorsel from UnsignedMorsel, not from bitset
-- [ ] Construct SignedMorsel from UnsignedMorsel wrongly adds 0s at beginning - fix this
+- [x] Compose SignedMorsel from UnsignedMorsel, not from bitset
+- [x] Construct SignedMorsel from UnsignedMorsel wrongly adds 0s at beginning - fix this
 - [x] memdump is slow - clean up code and speed up
 - [x] write tests for Loader
-- [ ] write tests for subleq
+- [x] write tests for subleq
 - [ ] write tests for mmix
 - [x] lop_fixrx currently functions similarly to other simulators, but the output is wrong compared to mmotype\
-- [ ] convert uses of Addresss and UnsignedMorsel into uses of SignedMorsel
+- [x] convert uses of Addresss and UnsignedMorsel into uses of SignedMorsel
 - [ ] Check that loading test.mmo properly sets registers
 - [ ] Load and run hello.mmo
 - [ ] Load and run test.mmo
