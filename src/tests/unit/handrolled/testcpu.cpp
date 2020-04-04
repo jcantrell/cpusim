@@ -17,7 +17,7 @@ class TestCPU : public cpu
       return result;
     }
   public:
-  TestCPU() : cpu(8, Address(65536), 32) {}
+  TestCPU() : cpu(8, UnsignedMorsel(65536), 32) {}
 	bool testmemdump()
   {
     struct TestCase {
@@ -26,8 +26,8 @@ class TestCPU : public cpu
     };
 
     UnsignedMorsel a(0x5f);
-    Address b(0x66);
-    cpu mycpu(8, Address(65536), 32);
+    UnsignedMorsel b(0x66);
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
     mycpu.load(b, a);
     std::ostringstream oss;
     std::ostringstream exp;
@@ -49,8 +49,8 @@ class TestCPU : public cpu
     bool result = true;
       
     UnsignedMorsel a(95);
-    Address b(102);
-    cpu mycpu(8, Address(65536), 32);
+    UnsignedMorsel b(102);
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
     mycpu.load(b, a);
     UnsignedMorsel c;
     c = mycpu.view(b);
@@ -68,8 +68,8 @@ class TestCPU : public cpu
     };
       
     UnsignedMorsel a(95);
-    Address b(102);
-    cpu mycpu(8, Address(65536), 32);
+    UnsignedMorsel b(102);
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
     mycpu.load(b, a);
     UnsignedMorsel c;
     c = mycpu.view(b);
@@ -82,32 +82,32 @@ class TestCPU : public cpu
 	bool testgetip()
   {
     struct TestCase {
-      Address in;
-      Address out;
+      UnsignedMorsel in;
+      UnsignedMorsel out;
     };
 
-    cpu mycpu(8, Address(65536), 32);
-    mycpu.setip(Address(22));
-    Address tip = mycpu.getip();
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
+    mycpu.setip(UnsignedMorsel(22));
+    UnsignedMorsel tip = mycpu.getip();
 
     vector<TestCase> tests = {
-      {tip,Address(22)}
+      {tip,UnsignedMorsel(22)}
     };
     return runCases(tests);
   }
 	bool testsetip()
   {
     struct TestCase {
-      Address in;
-      Address out;
+      UnsignedMorsel in;
+      UnsignedMorsel out;
     };
 
-    cpu mycpu(8, Address(65536), 32);
-    mycpu.setip(Address(22));
-    Address tip = mycpu.getip();
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
+    mycpu.setip(UnsignedMorsel(22));
+    UnsignedMorsel tip = mycpu.getip();
 
     vector<TestCase> tests = {
-      {tip,Address(22)}
+      {tip,UnsignedMorsel(22)}
     };
     return runCases(tests);
   }
@@ -118,9 +118,9 @@ class TestCPU : public cpu
       string out;
     };
 
-    cpu mycpu(8, Address(65536), 32);
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
     string actual 
-            = "Byte width: 8\nAddress size: 010000\nIP: 00\nFlags: 42\n";
+            = "Byte width: 8\nUnsignedMorsel size: 010000\nIP: 00\nFlags: 42\n";
     actual += "-----------------------------------------------\n";
     actual += "| OF | DF | INF | TF | SF | ZF | AF | PF | CF |\n";
     actual += "-----------------------------------------------\n";
@@ -139,9 +139,9 @@ class TestCPU : public cpu
       UnsignedMorsel out;
     };
 
-    cpu mycpu(8, Address(65536), 32);
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
     UnsignedMorsel a(95);
-    Address b(5);
+    UnsignedMorsel b(5);
     mycpu.regs(b, a);
 
     vector<TestCase> tests = {
@@ -150,9 +150,9 @@ class TestCPU : public cpu
 
     return runCases(tests);
   }
-  bool testregsAddressUnsignedMorsel()
+  bool testregsUnsignedMorselUnsignedMorsel()
   {
-    cpu mycpu(8, Address(65536), 32);
+    cpu mycpu(8, UnsignedMorsel(65536), 32);
 
     bool result = true;
     struct TestCase {
@@ -161,7 +161,7 @@ class TestCPU : public cpu
     };
 
     vector<TestCase> tests = {
-       {mycpu.regs(Address(67),UnsignedMorsel(4)),UnsignedMorsel(4)}
+       {mycpu.regs(UnsignedMorsel(67),UnsignedMorsel(4)),UnsignedMorsel(4)}
     };
 
     return runCases(tests);
@@ -187,7 +187,7 @@ class TestCPU : public cpu
 	,{"testsetip",&TestCPU::testsetip}
 	,{"testtoString",&TestCPU::testtoString}
   ,{"testregs",&TestCPU::testregs}
-  ,{"testregsAddressUnsignedMorsel",&TestCPU::testregsAddressUnsignedMorsel}
+  ,{"testregsUnsignedMorselUnsignedMorsel",&TestCPU::testregsUnsignedMorselUnsignedMorsel}
   ,{"testloadimage",&TestCPU::testloadimage}
     };
 

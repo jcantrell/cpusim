@@ -11,10 +11,10 @@ class mmix : public cpu {
     unsigned int stepsize = 4;
     unsigned char L;
     unsigned char G;
-    Address target;
+    UnsignedMorsel target;
     unsigned long long int register_stack_top;
     boost::unordered_map<int, int> special_registers;
-    boost::unordered_map<Address, UnsignedMorsel> globals;
+    boost::unordered_map<UnsignedMorsel, UnsignedMorsel> globals;
     enum inst {
 #include "model/mmix/opcodes_mmix.h"
     };
@@ -26,7 +26,7 @@ class mmix : public cpu {
       Fputws, Fseek, Ftell
     };
 	public:
-		mmix(unsigned int byte_size_p, Address);
+		mmix(unsigned int byte_size_p, UnsignedMorsel);
 		void step(unsigned int inst);
     void loadfile(string &filename);
 
@@ -49,23 +49,23 @@ class mmix : public cpu {
     // by first rounding down to the nearest octabyte address
     // 63 / 8 = 56
     // So it concatenates the 8 bytes starting at byte address 56
-    UnsignedMorsel M(unsigned int size, Address address);
+    UnsignedMorsel M(unsigned int size, UnsignedMorsel address);
     // M(size, address, value) calculates the address the same way, and
     // stores the given value there
     UnsignedMorsel M(
       unsigned int size, 
 //      unsigned long long address,
-      Address address,
+      UnsignedMorsel address,
       //unsigned long long value
       UnsignedMorsel value
     );
 
     // Load/store registers
-    UnsignedMorsel R(Address reg);
-    UnsignedMorsel R(Address reg, UnsignedMorsel value);
+    UnsignedMorsel R(UnsignedMorsel reg);
+    UnsignedMorsel R(UnsignedMorsel reg, UnsignedMorsel value);
     // Load/store special registers
-    UnsignedMorsel g(Address reg);
-    UnsignedMorsel g(Address reg, UnsignedMorsel value);
+    UnsignedMorsel g(UnsignedMorsel reg);
+    UnsignedMorsel g(UnsignedMorsel reg, UnsignedMorsel value);
 
     // Is one double in the neighborhood of another?
     bool N(double, double, unsigned int, float);

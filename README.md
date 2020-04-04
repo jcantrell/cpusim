@@ -249,6 +249,7 @@ parse tree nodes:
 
 ## TODO
 
+- [ ] Compose SignedMorsel from UnsignedMorsel, not from bitset
 - [ ] Construct SignedMorsel from UnsignedMorsel wrongly adds 0s at beginning - fix this
 - [x] memdump is slow - clean up code and speed up
 - [x] write tests for Loader

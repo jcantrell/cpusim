@@ -4,9 +4,8 @@
 #include <boost/functional/hash.hpp>
 #include <iostream>
 
-#include "SignedMorsel.h"
-class Address;
-class SignedMorsel;
+//#include "SignedMorsel.h"
+//class SignedMorsel;
 using namespace std;
 using namespace boost;
 class UnsignedMorsel 
@@ -18,12 +17,12 @@ class UnsignedMorsel
   size_t count();
   UnsignedMorsel(dynamic_bitset<> in);
   UnsignedMorsel(unsigned long long int in);
-  UnsignedMorsel(const SignedMorsel in);
   UnsignedMorsel operator+(const UnsignedMorsel& other) ;
   UnsignedMorsel operator+(unsigned int rhs);
   UnsignedMorsel operator-(const UnsignedMorsel& other);
   friend UnsignedMorsel operator-(unsigned int lhsInt, const UnsignedMorsel& other);
   UnsignedMorsel operator-=(const UnsignedMorsel& other);
+  UnsignedMorsel& operator+=(int in);
   UnsignedMorsel& operator++(int);
   UnsignedMorsel& operator=(unsigned long long int in);
   UnsignedMorsel& operator=(const UnsignedMorsel& other);
@@ -66,4 +65,5 @@ class UnsignedMorsel
   unsigned char asChar();
   UnsignedMorsel& resize(unsigned int newsize);
 };
+size_t hash_value(const UnsignedMorsel& in);
 #endif

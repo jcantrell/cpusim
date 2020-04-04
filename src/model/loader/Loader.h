@@ -13,8 +13,8 @@ class Loader {
     unsigned filenum;
     unsigned linenum;
     unsigned long long timestamp;
-    Address lambda;
-//    Address address;
+    UnsignedMorsel lambda;
+//    UnsignedMorsel address;
     std::ifstream in;
   public:
     Loader() : quoted_flag(false), in_stab(false), lambda(UnsignedMorsel(0)) {};

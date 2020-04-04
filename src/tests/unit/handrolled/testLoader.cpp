@@ -1,4 +1,4 @@
-#include "model/cpu/Address.h"
+#include "model/cpu/UnsignedMorsel.h"
 #include "model/cpu/cpu.h"
 #include "model/mmix/mmix.h"
 #include <fstream>
@@ -50,7 +50,7 @@ bool TestLoader::TestQuote() {
     quote(0,1);
     bool q2 = quoted_flag;
 
-    Address t;
+    UnsignedMorsel t;
     vector<TestCase> tests = {
        {q1, false}
       ,{q2, true}
@@ -61,16 +61,16 @@ bool TestLoader::TestQuote() {
 
 bool TestLoader::TestLoc() {
   struct TestCase {
-    Address in;
-    Address out;
+    UnsignedMorsel in;
+    UnsignedMorsel out;
   };
 
   // read from file
   // save address
 
   vector<TestCase> tests = {
-     {Address(0), Address(UnsignedMorsel(0x0200000000000100))}
-    ,{Address(0), Address(UnsignedMorsel(0xDEADBEEFCAFEBABE))}
+     {UnsignedMorsel(0), UnsignedMorsel(UnsignedMorsel(0x0200000000000100))}
+    ,{UnsignedMorsel(0), UnsignedMorsel(UnsignedMorsel(0xDEADBEEFCAFEBABE))}
   };
 
   in = std::ifstream("tests/functional/testLoader/testLoc1", std::ifstream::binary);
@@ -88,13 +88,13 @@ bool TestLoader::TestLoc() {
 
 bool TestLoader::TestSkip() {
   struct  TestCase {
-    Address in;
-    Address out;
+    UnsignedMorsel in;
+    UnsignedMorsel out;
   };
 
   skip(2, 55);
   vector<TestCase> tests = {
-    {lambda, Address(0x0000000000000237)}
+    {lambda, UnsignedMorsel(0x0000000000000237)}
   };
 
   return runCases(tests);
@@ -128,11 +128,11 @@ bool TestLoader::TestPost() {
     UnsignedMorsel out;
   };
   in = std::ifstream("tests/functional/testLoader/testPost1", std::ifstream::binary);
-  mmix mycpu(8, Address(65536));
+  mmix mycpu(8, UnsignedMorsel(65536));
   post(mycpu, 246);
 
   vector<TestCase> tests = {
-    {mycpu.regs(Address(255)), UnsignedMorsel(0x48494a4b4c4d4e4ful)}
+    {mycpu.regs(UnsignedMorsel(255)), UnsignedMorsel(0x48494a4b4c4d4e4ful)}
   };
   return runCases(tests);
 }
@@ -143,12 +143,12 @@ bool TestLoader::TestFixrx() {
     UnsignedMorsel out;
   };
   in = std::ifstream("tests/functional/testLoader/testFixrx1", std::ifstream::binary);
-  mmix mycpu(8, Address(65536));
+  mmix mycpu(8, UnsignedMorsel(65536));
   fixrx(mycpu, 0, 16u);
   vector<TestCase> tests = {
   // the sample file for this test case has been lost
-  //  {mycpu.view(Address(0x2Cu)), UnsignedMorsel(0x00000010u)}
-    {mycpu.view(Address(0xFEDADAE0u)), UnsignedMorsel(0x4Bu)}
+  //  {mycpu.view(UnsignedMorsel(0x2Cu)), UnsignedMorsel(0x00000010u)}
+    {mycpu.view(UnsignedMorsel(0xFEDADAE0u)), UnsignedMorsel(0x4Bu)}
   };
   return runCases(tests);
 }
@@ -160,7 +160,7 @@ bool TestLoader::TestPre() {
   };
   Loader l;
   setfile("tests/functional/testLoader/testPre1");
-  mmix mycpu(8, Address(65536));
+  mmix mycpu(8, UnsignedMorsel(65536));
   pre(1);
   vector<TestCase> tests = {
     {timestamp, UnsignedMorsel(0x7fffu)}

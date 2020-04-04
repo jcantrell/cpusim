@@ -1,5 +1,5 @@
 #include "model/cpu/SignedMorsel.h"
-#include "model/cpu/Address.h"
+#include "model/cpu/UnsignedMorsel.h"
 #include "model/cpu/cpu.h"
 #include <iomanip>
 #include <fstream>
@@ -8,7 +8,7 @@
 void
 Loader::quote(unsigned char y, unsigned char z)
 {
-  if ((Address(y).pb(8) | Address(z)) == Address(1))
+  if ((UnsignedMorsel(y).pb(8) | UnsignedMorsel(z)) == UnsignedMorsel(1))
     quoted_flag = true;
 }
 
@@ -16,13 +16,13 @@ void
 Loader::loc(unsigned char y, unsigned char z)
 {
   //cout << "START LOC" << endl;
-  Address address(Address(y).pb(56));
-  Address offset(0);
+  UnsignedMorsel address(UnsignedMorsel(y).pb(56));
+  UnsignedMorsel offset(0);
   char c;
    // cout << "loc: ";
   for (unsigned i=0; i<4u*z; i++) 
   {
-    in.get(c); offset.pb(8); offset = offset | Address(static_cast<unsigned char>(c));
+    in.get(c); offset.pb(8); offset = offset | UnsignedMorsel(static_cast<unsigned char>(c));
     //cout << std::hex << setfill('0') << std::setw(2)
     //<< static_cast<int>(static_cast<unsigned char>(c));
   }
@@ -35,7 +35,7 @@ Loader::loc(unsigned char y, unsigned char z)
 void
 Loader::skip(unsigned char y, unsigned char z)
 {
-  Address address(Address(y).pb(56));
+  UnsignedMorsel address(UnsignedMorsel(y).pb(56));
   //UnsignedMorsel t;
   //t = y;
   //t.resize(64);
@@ -57,9 +57,9 @@ Loader::fixo(cpu& c, unsigned char y, unsigned char z)
   in.read(tetra.ar, 4);
   tmp |= SignedMorsel(tetra.num);
 
-  SignedMorsel curLoc(lambda.asUnsignedMorsel());
+  SignedMorsel curLoc(lambda);
   for (int i=7;i>=0;i--) {
-    c.load(tmp+i, curLoc&0xFF);
+    c.load((tmp+i).asUnsignedMorsel(), (curLoc&0xFF).asUnsignedMorsel());
     curLoc = curLoc >> 8;
   }
 }
@@ -72,14 +72,14 @@ Loader::fixr(cpu& mycpu, unsigned char y, unsigned char z)
           delta = (delta.pb(8))|z;
           delta.resize(64);
           SignedMorsel address;
-          address = SignedMorsel(lambda.asUnsignedMorsel()) + (-delta<<2);
+          address = SignedMorsel(lambda) + (-delta<<2);
     address.resize(64);
-  SignedMorsel curLoc(lambda.asUnsignedMorsel());
+  SignedMorsel curLoc(lambda);
   for (int i=1;i>=0;i--) {
-    mycpu.load(address+i+2, delta&0xFF);
+    mycpu.load((address+i+2).asUnsignedMorsel(), (delta&0xFF).asUnsignedMorsel());
     delta = delta >> 8;
   }
-  for (int j=0;j<2;j++) mycpu.load(address+j, 0x00);
+  for (int j=0;j<2;j++) mycpu.load((address+j).asUnsignedMorsel(), 0x00);
 }
 
 void
@@ -97,10 +97,10 @@ Loader::fixrx(cpu& c, unsigned char y, unsigned char z)
   tet.resize(8*4);
   SignedMorsel delta;
   delta = ((tet & 0x1000000) != 0) ? ((tet&0xFFFFFF)-(SignedMorsel(1).pb(z))) : tet;
-  c.load( (SignedMorsel(lambda.asUnsignedMorsel())+(-delta<<2)),(tet>>24)&0xFF );
-  c.load( (SignedMorsel(lambda.asUnsignedMorsel())+(-delta<<2))+1,(tet>>16)&0xFF );
-  c.load( (SignedMorsel(lambda.asUnsignedMorsel())+(-delta<<2))+2,(tet>>8)&0xFF );
-  c.load( (SignedMorsel(lambda.asUnsignedMorsel())+(-delta<<2))+3,tet&0xFF );
+  c.load( (SignedMorsel(lambda)+(-delta<<2)).asUnsignedMorsel(),((tet>>24)&0xFF).asUnsignedMorsel() );
+  c.load( ((SignedMorsel(lambda)+(-delta<<2))+1).asUnsignedMorsel(),((tet>>16)&0xFF).asUnsignedMorsel() );
+  c.load( ((SignedMorsel(lambda)+(-delta<<2))+2).asUnsignedMorsel(),((tet>>8)&0xFF).asUnsignedMorsel() );
+  c.load( ((SignedMorsel(lambda)+(-delta<<2))+3).asUnsignedMorsel(),(tet&0xFF).asUnsignedMorsel() );
 /*
  delta=(tet>=0x1000000? (tet&0xffffff)-(1<<j): tet);
  mmo_load(incr(cur_loc,-delta<<2),tet);
@@ -184,7 +184,7 @@ Loader::post(cpu& mycpu,unsigned char z)
   union tetra_union t1;
   union tetra_union t2;
   UnsignedMorsel rG(6);
-  mycpu.regs(Address(rG),UnsignedMorsel(z)); // TODO: this should be rG
+  mycpu.regs(UnsignedMorsel(rG),UnsignedMorsel(z)); // TODO: this should be rG
   for (unsigned int i=0;(256-mycpu.regs(rG))*2u>i;i+=2)
   {
     in.read(t1.ar,4);
