@@ -3,6 +3,19 @@
 #include "../../../model/cpu/SignedMorsel.h"
 class TestSignedMorsel : public SignedMorsel
 {
+  private:
+    template <typename T>
+    bool runCases(vector<T> tests) {
+      bool result = true;
+      for (auto &t : tests)
+      {
+        result = result && (t.in == t.out);
+        if (!(t.in == t.out)) {
+          cout << endl << "Expected: " << t.out << " Actual: " << t.in << endl;
+        }
+      }
+      return result;
+    }
 	public:
   TestSignedMorsel() : SignedMorsel() {}
   TestSignedMorsel(dynamic_bitset<> in) : SignedMorsel(in) {}
@@ -144,9 +157,16 @@ class TestSignedMorsel : public SignedMorsel
   }
   bool testSignedMorselLessThanSignedMorsel()
   {
-    SignedMorsel a(95);
-    SignedMorsel b(100);
-    return a < b;
+    struct  TestCase {
+      bool in;
+      bool out;
+    };
+
+    vector<TestCase> tests = {
+      {SignedMorsel(95) < SignedMorsel(100), true}
+    };
+
+    return runCases(tests);
   }
   bool testSignedMorselLessThanInt()
   {
@@ -183,9 +203,16 @@ class TestSignedMorsel : public SignedMorsel
   }
   bool testSignedMorselGreaterThanSignedMorsel()
   {
-    SignedMorsel a(7);
-    SignedMorsel b(21);
-    return b > a;
+    struct  TestCase {
+      bool in;
+      bool out;
+    };
+
+    vector<TestCase> tests = {
+      {SignedMorsel(21).resize(8) > SignedMorsel(7).resize(8), true}
+    };
+
+    return runCases(tests);
   }
   bool testSignedMorselGreaterOrEqualSignedMorsel()
   {

@@ -74,7 +74,7 @@ class UnsignedMorsel;
     {
       UnsignedMorsel l = (~SignedMorsel(*this)+1).asUnsignedMorsel();
       UnsignedMorsel r = (~SignedMorsel(other)+1).asUnsignedMorsel();
-      return l<r;
+      return l>r;
     } 
   }
   bool SignedMorsel::operator<(int other)
