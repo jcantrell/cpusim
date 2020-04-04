@@ -33,6 +33,11 @@
     }
     *this = res;
   }
+  UnsignedMorsel& UnsignedMorsel::operator+=(int in)
+  {
+    *this = *this + static_cast<unsigned int>(in);
+    return *this;
+  }
 /*
   UnsignedMorsel::UnsignedMorsel(SignedMorsel in)
   {
@@ -555,3 +560,8 @@ return UnsignedMorsel(0);
     bs.resize(newsize);
     return *this;
   }
+size_t hash_value(const UnsignedMorsel& in)
+{
+  size_t hash = boost::hash_value(in.asInt());
+  return hash;
+}

@@ -6,7 +6,7 @@
 //#include <unordered_map>
 #include <iostream>
 #include <string>
-#include "model/cpu/Address.h"
+#include "model/cpu/UnsignedMorsel.h"
 #include <boost/unordered_map.hpp>
 
 #define MAX_STR_LEN 512
@@ -37,43 +37,43 @@ union flagsint {
 
 class cpu {
 	private:
-		Address address_size;
-		boost::unordered_map<Address, UnsignedMorsel> ram;
-		boost::unordered_map<Address, UnsignedMorsel> registers;
-		Address ip;
+		UnsignedMorsel address_size;
+		boost::unordered_map<UnsignedMorsel, UnsignedMorsel> ram;
+		boost::unordered_map<UnsignedMorsel, UnsignedMorsel> registers;
+		UnsignedMorsel ip;
 		struct sflags status;
 		union flagsint flagint;
 
 	public:
 		const unsigned int byte_size;  
-		cpu(unsigned int byte_in, Address address_in, unsigned int reg_count);
+		cpu(unsigned int byte_in, UnsignedMorsel address_in, unsigned int reg_count);
 		//~cpu();
 
 // Control methods
 		void memdump(std::ostream& os = std::cout);
-		UnsignedMorsel load(Address address, UnsignedMorsel value);
-		UnsignedMorsel& view(Address address);
-		Address getip();
-		Address setip(Address in);
+		UnsignedMorsel load(UnsignedMorsel address, UnsignedMorsel value);
+		UnsignedMorsel& view(UnsignedMorsel address);
+		UnsignedMorsel getip();
+		UnsignedMorsel setip(UnsignedMorsel in);
 		string toString();
 		void step(unsigned int inst);
-    UnsignedMorsel regs(Address address);
-    UnsignedMorsel regs(Address address, UnsignedMorsel value);
+    UnsignedMorsel regs(UnsignedMorsel address);
+    UnsignedMorsel regs(UnsignedMorsel address, UnsignedMorsel value);
     int loadimage(string filename);
     //virtual void loadobject(string filename) = 0;
 
 // CPU instructions
 /*
-		int add(Address a, Address b, Address dst);
-		int sub(Address a, Address b, Address dst);
-		int mul(Address a, Address b, Address dst);
-		int div(Address a, Address b, Address dst);
-		int land(Address a, Address b, Address dst);
-		int lor(Address a, Address b, Address dst);
-		int lnot(Address a, Address dst);
-		int lxor(Address a, Address b, Address dst);
-		int lshift(Address a, Address b);
-		int rshift(Address a, Address b);
+		int add(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int sub(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int mul(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int div(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int land(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int lor(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int lnot(UnsignedMorsel a, UnsignedMorsel dst);
+		int lxor(UnsignedMorsel a, UnsignedMorsel b, UnsignedMorsel dst);
+		int lshift(UnsignedMorsel a, UnsignedMorsel b);
+		int rshift(UnsignedMorsel a, UnsignedMorsel b);
 */
 };
 #endif

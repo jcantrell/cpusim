@@ -1,6 +1,6 @@
 #include "subleq.h"
 
-subleq::subleq(unsigned int byte_in, Address address_in) : cpu(byte_in, address_in, 0)
+subleq::subleq(unsigned int byte_in, UnsignedMorsel address_in) : cpu(byte_in, address_in, 0)
 {
   printf("subleq constructor called!\n");
 }
@@ -16,8 +16,8 @@ void subleq::step(unsigned int inst)
 	                // instruction sets is implemented
 	                
 	            {
-							UnsignedMorsel a = view(Address(view(getip()+1)));
-							UnsignedMorsel b = view(Address(view(getip()+2)));
+							UnsignedMorsel a = view(UnsignedMorsel(view(getip()+1)));
+							UnsignedMorsel b = view(UnsignedMorsel(view(getip()+2)));
 							UnsignedMorsel c = view(getip()+3);
 	            printf("loaded %s %s %s\n", 
                 a.asString().c_str(), b.asString().c_str(), 
@@ -28,13 +28,13 @@ void subleq::step(unsigned int inst)
               Morsel instCopy(inst);
               Morsel t_inst = instCopy+2;
               Morsel t_view = view(instCopy+2);
-              Address t_addr(t_view);
+              UnsignedMorsel t_addr(t_view);
               Morsel t_diff;
               t_diff = b-a;
               load( t_addr, t_diff );
 */
 
-	            load( Address(view(Address(inst+2))), b-a);
+	            load( UnsignedMorsel(view(UnsignedMorsel(inst+2))), b-a);
 /*
 	            if (b-a <= 0)
 	                mycpu->setip(c);

@@ -3,9 +3,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
-//#include "Address.h"
 #include "UnsignedMorsel.h"
-//class Address;
 using namespace std;
 using namespace boost;
 class UnsignedMorsel;

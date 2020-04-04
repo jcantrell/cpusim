@@ -3,7 +3,7 @@
 #include <math.h>
 #include <iomanip>
 
-mmix::mmix(unsigned int byte_size_p, Address address_size_p) : cpu(byte_size_p, address_size_p,32)  , target(getip()+stepsize)
+mmix::mmix(unsigned int byte_size_p, UnsignedMorsel address_size_p) : cpu(byte_size_p, address_size_p,32)  , target(getip()+stepsize)
 {
   register_stack_top = 0;
 }
@@ -106,11 +106,11 @@ void mmix::wideDiv(UnsignedMorsel numerator_hi,
 // Use size to determine whether to return byte, wyde, tetra, or octa
 UnsignedMorsel
 mmix::M(unsigned int size,
-        Address address)
+        UnsignedMorsel address)
 {
   const unsigned int octasize = 8;
   UnsignedMorsel octabyte[octasize];
-  Address base = address % size;
+  UnsignedMorsel base = address % size;
 
   // Load data into byte array
   for (unsigned int i=0;i<octasize;i++)
@@ -132,11 +132,11 @@ mmix::M(unsigned int size,
 }
 
 UnsignedMorsel
-mmix::M(unsigned int size, Address address, UnsignedMorsel value)
+mmix::M(unsigned int size, UnsignedMorsel address, UnsignedMorsel value)
 {
   const unsigned int octasize = 8;
   UnsignedMorsel octabyte[octasize];
-  Address base;
+  UnsignedMorsel base;
   base = address - (address % size);
   UnsignedMorsel value2(value);
 
@@ -185,7 +185,7 @@ mmix::M(unsigned int size, Address address, UnsignedMorsel value)
 /*
   for (int i=0;i<size;i++)
   {
-    cout << " Address: " << (base+i) << " Value: "
+    cout << " UnsignedMorsel: " << (base+i) << " Value: "
               //<< std::hex << setfill('0') << std::setw(2)
               //<< octabyte[i].asString().substr(0,2) << endl;
               << view(base+i) << endl;
@@ -195,12 +195,12 @@ mmix::M(unsigned int size, Address address, UnsignedMorsel value)
   return retvalue;
 }
 
-UnsignedMorsel mmix::R(Address reg)
+UnsignedMorsel mmix::R(UnsignedMorsel reg)
 {
   return regs(reg);
 }
 
-UnsignedMorsel mmix::R(Address reg, UnsignedMorsel value)
+UnsignedMorsel mmix::R(UnsignedMorsel reg, UnsignedMorsel value)
 {
   UnsignedMorsel ret = regs(reg);
   //registers[reg] = value;
@@ -208,21 +208,21 @@ UnsignedMorsel mmix::R(Address reg, UnsignedMorsel value)
   return ret;
 }
 
-UnsignedMorsel mmix::g(Address reg, UnsignedMorsel value)
+UnsignedMorsel mmix::g(UnsignedMorsel reg, UnsignedMorsel value)
 {
   UnsignedMorsel ret = globals[reg];
   globals[reg] = value;
   return ret;
 }
 
-UnsignedMorsel mmix::g(Address reg)
+UnsignedMorsel mmix::g(UnsignedMorsel reg)
 {
   return globals[reg];
 }
 
 void mmix::push(UnsignedMorsel reg)
 {
-  for (Address i(0);i<=reg;i++)
+  for (UnsignedMorsel i(0);i<=reg;i++)
   {
     M(register_stack_top, R(i));
     register_stack_top++;
@@ -233,7 +233,7 @@ void mmix::pop(UnsignedMorsel reg)
 {
   for (unsigned int i=0;i<=reg;i++)
   {
-    R(Address(i), M(8, UnsignedMorsel(register_stack_top-1)));
+    R(UnsignedMorsel(i), M(8, UnsignedMorsel(register_stack_top-1)));
     register_stack_top--;
   }
 }
@@ -556,7 +556,7 @@ void mmix::ldo()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (M(8, a)) );
@@ -575,7 +575,7 @@ void mmix::ldoi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (M(8, uy+z)) );
@@ -594,7 +594,7 @@ void mmix::ldou()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, M(8, a) );
@@ -613,7 +613,7 @@ void mmix::ldoui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, M(8, uy+z) );
@@ -632,7 +632,7 @@ void mmix::ldht()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (M(4, a) << 32));
@@ -651,7 +651,7 @@ void mmix::ldhti()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (M(4, uy+z) << 32));
@@ -670,7 +670,7 @@ void mmix::stb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(1, a, R(x));
@@ -689,7 +689,7 @@ void mmix::stbi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(1, uy+z, R(x));
@@ -708,7 +708,7 @@ void mmix::stw()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(2, a, R(x));
@@ -727,7 +727,7 @@ void mmix::stwi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(2, uy+z, R(x));
@@ -746,7 +746,7 @@ void mmix::stt()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(4, a, R(x));
@@ -765,7 +765,7 @@ void mmix::stti()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(4, uy+z, R(x));
@@ -784,7 +784,7 @@ void mmix::sto()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(8, a, R(x));
@@ -803,7 +803,7 @@ void mmix::stoi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(8, uy+z, R(x));
@@ -822,7 +822,7 @@ void mmix::stbu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(1, a, R(x));
@@ -841,7 +841,7 @@ void mmix::stbui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(1, uy+z, R(x));
@@ -860,7 +860,7 @@ void mmix::stwu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(2, a, R(x));
@@ -879,7 +879,7 @@ void mmix::stwui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(2, uy+z, R(x));
@@ -898,7 +898,7 @@ void mmix::sttu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(4, a, R(x));
@@ -917,7 +917,7 @@ void mmix::sttui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(4, uy+z, R(x));
@@ -936,7 +936,7 @@ void mmix::stou()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(8, a, R(x));
@@ -955,7 +955,7 @@ void mmix::stoui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(8, uy+z, R(x));
@@ -974,7 +974,7 @@ void mmix::stht()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(4, a, ((R(x) & UnsignedMorsel(0xFFFFFFFF00000000)) >> 16));
@@ -993,7 +993,7 @@ void mmix::sthti()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(4, uy+z, ((R(x) & UnsignedMorsel(0xFFFFFFFF00000000)) >> 16));
@@ -1012,7 +1012,7 @@ void mmix::stco()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(8, a, x);
@@ -1031,7 +1031,7 @@ void mmix::stcoi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         M(8, uy+z, x);
@@ -1051,7 +1051,7 @@ void mmix::add()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
        R(x, (R(y)) + R(z));
 }
@@ -1069,7 +1069,7 @@ void mmix::addi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)) + (z));
@@ -1088,7 +1088,7 @@ void mmix::sub()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)) - (R(z)));
@@ -1107,7 +1107,7 @@ void mmix::subi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)) - (z));
@@ -1126,7 +1126,7 @@ void mmix::mul()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)) * (R(z)));
@@ -1145,7 +1145,7 @@ void mmix::muli()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)) * (z));
@@ -1164,12 +1164,12 @@ void mmix::div()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(z) == 0) ? UnsignedMorsel(0) : 
               ((R(y)) / (R(z))));
-        g(Address(rR), (R(z) == 0) ? R(y) :
+        g(UnsignedMorsel(rR), (R(z) == 0) ? R(y) :
               ((R(y)) % (R(z))));
 }
 
@@ -1186,12 +1186,12 @@ void mmix::divi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (z == 0) ? UnsignedMorsel(0) :
               ((R(y)) / (z)));
-        g(Address(rR), (z == 0) ? R(y) :
+        g(UnsignedMorsel(rR), (z == 0) ? R(y) :
               ((R(y)) % (z)));
 }
 
@@ -1208,7 +1208,7 @@ void mmix::addu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, a);
@@ -1239,7 +1239,7 @@ void mmix::subu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y) - R(z)) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1258,7 +1258,7 @@ void mmix::subui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y) - z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1277,14 +1277,14 @@ void mmix::mulu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         {
         UnsignedMorsel carry;
         UnsignedMorsel result;
         wideMult(R(y), R(z), &carry, &result);
-        g(Address(rH), carry);
+        g(UnsignedMorsel(rH), carry);
         R(x, result);
         }
  
@@ -1303,14 +1303,14 @@ void mmix::mului()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         {
         UnsignedMorsel carry;
         UnsignedMorsel result;
         wideMult(R(y), z, &carry, &result);
-        g(Address(rH), carry);
+        g(UnsignedMorsel(rH), carry);
         R(x, result);
         }
  
@@ -1329,7 +1329,7 @@ void mmix::divu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         {
@@ -1339,7 +1339,7 @@ void mmix::divu()
         UnsignedMorsel quotient;
         UnsignedMorsel remainder;
 
-        numerator_hi = g(Address(rD));
+        numerator_hi = g(UnsignedMorsel(rD));
         numerator_lo = R(y);
         divisor = R(z);
 
@@ -1347,10 +1347,10 @@ void mmix::divu()
         {
           wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
           R(x, quotient);
-          g(Address(rR), remainder);
+          g(UnsignedMorsel(rR), remainder);
         } else {
           R(x, numerator_hi);
-          g(Address(rR), numerator_lo );
+          g(UnsignedMorsel(rR), numerator_lo );
         }
   
         }
@@ -1369,7 +1369,7 @@ void mmix::divui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         {
@@ -1379,7 +1379,7 @@ void mmix::divui()
         UnsignedMorsel quotient;
         UnsignedMorsel remainder;
 
-        numerator_hi = g(Address(rD));
+        numerator_hi = g(UnsignedMorsel(rD));
         numerator_lo = R(y);
         divisor = z;
 
@@ -1387,10 +1387,10 @@ void mmix::divui()
         {
           wideDiv(numerator_hi, numerator_lo, divisor, &quotient, &remainder);
           R(x, quotient);
-          g(Address(rR), remainder);
+          g(UnsignedMorsel(rR), remainder);
         } else {
           R(x, numerator_hi);
-          g(Address(rR), numerator_lo );
+          g(UnsignedMorsel(rR), numerator_lo );
         }
   
         }
@@ -1409,7 +1409,7 @@ void mmix::i2addu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*2 + R(z)) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1428,7 +1428,7 @@ void mmix::i2addui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*2 + z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1447,7 +1447,7 @@ void mmix::i4addu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*4 + R(z)) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1466,7 +1466,7 @@ void mmix::i4addui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*4 + z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1485,7 +1485,7 @@ void mmix::i8addu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*8 + R(z)) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1504,7 +1504,7 @@ void mmix::i8addui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*8 + z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1523,7 +1523,7 @@ void mmix::i16addu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*16 + R(z)) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1542,7 +1542,7 @@ void mmix::i16addui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (R(y)*16 + z) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF));
@@ -1561,7 +1561,7 @@ void mmix::neg()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, y-R(z));
@@ -1580,7 +1580,7 @@ void mmix::negi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, y-z);
@@ -1599,7 +1599,7 @@ void mmix::negu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, y - R(z));
@@ -1618,7 +1618,7 @@ void mmix::negui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, y - z);
@@ -1637,7 +1637,7 @@ void mmix::sl()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) << R(z));
@@ -1656,7 +1656,7 @@ void mmix::sli()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) << z);
@@ -1675,7 +1675,7 @@ void mmix::slu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) << R(z));
@@ -1694,7 +1694,7 @@ void mmix::slui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) << z);
@@ -1713,7 +1713,7 @@ void mmix::sr()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) >> R(z) );
@@ -1732,7 +1732,7 @@ void mmix::sri()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) >> z );
@@ -1751,7 +1751,7 @@ void mmix::sru()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) >> R(z) );
@@ -1770,7 +1770,7 @@ void mmix::srui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) >> z );
@@ -1789,7 +1789,7 @@ void mmix::cmp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? 1 : 0)) );
@@ -1808,7 +1808,7 @@ void mmix::cmpi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         //R(x, ((R(y) > z) ? 1 : (R(y) < z ? -1 : 0)) );
@@ -1828,7 +1828,7 @@ void mmix::cmpu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > R(z)) ? 1 : (R(y) < R(z) ? 1 : 0)) );
@@ -1847,7 +1847,7 @@ void mmix::cmpui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > z) ? 1 : (R(y) < z ? 1 : 0)) );
@@ -1866,7 +1866,7 @@ void mmix::csn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? R(z) : R(x)) );
@@ -1885,7 +1885,7 @@ void mmix::csni()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? z : R(x)) );
@@ -1904,7 +1904,7 @@ void mmix::csz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) == 0) ? R(z) : R(x)) );
@@ -1923,7 +1923,7 @@ void mmix::cszi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) == 0) ? z : R(x)) );
@@ -1942,7 +1942,7 @@ void mmix::csp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > 0) ? R(z) : R(x)) );
@@ -1961,7 +1961,7 @@ void mmix::cspi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > 0) ? z : R(x)) );
@@ -1980,7 +1980,7 @@ void mmix::csod()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ( ((R(y) & 0x01) == 1) ? R(z) : R(x)) );
@@ -1999,7 +1999,7 @@ void mmix::csodi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ( ((R(y) & 0x01) == 1) ? z : R(x)) );
@@ -2018,7 +2018,7 @@ void mmix::csnn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) >= 0) ? R(z) : R(x)) );
@@ -2037,7 +2037,7 @@ void mmix::csnni()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) >= 0) ? z : R(x)) );
@@ -2056,7 +2056,7 @@ void mmix::csnz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) != 0) ? R(z) : R(x)) );
@@ -2075,7 +2075,7 @@ void mmix::csnzi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) != 0) ? z : R(x)) );
@@ -2094,7 +2094,7 @@ void mmix::csnp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) <= 0) ? R(z) : R(x)) );
@@ -2113,7 +2113,7 @@ void mmix::csnpi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) <= 0) ? z : R(x)) );
@@ -2132,7 +2132,7 @@ void mmix::csev()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ( ((R(y) & 0x01) == 0) ? R(z) : R(x)) );
@@ -2151,7 +2151,7 @@ void mmix::csevi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ( ((R(y) & 0x01) == 0) ? z : R(x)) );
@@ -2170,7 +2170,7 @@ void mmix::zsn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -2189,7 +2189,7 @@ void mmix::zsni()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? z : 0) );
@@ -2208,7 +2208,7 @@ void mmix::zsz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) == 0) ? R(z) : 0) );
@@ -2227,7 +2227,7 @@ void mmix::zszi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) == 0) ? z : 0) );
@@ -2246,7 +2246,7 @@ void mmix::zsp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > 0) ? R(z) : 0) );
@@ -2265,7 +2265,7 @@ void mmix::zspi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) > 0) ? z : 0) );
@@ -2284,7 +2284,7 @@ void mmix::zsod()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (((R(y) & 0x01) == 1) ? R(z) : 0) );
@@ -2303,7 +2303,7 @@ void mmix::zsodi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, (((R(y) & 0x01) == 1) ? z : 0) );
@@ -2322,7 +2322,7 @@ void mmix::zsnn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -2341,7 +2341,7 @@ void mmix::zsnni()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? z : 0) );
@@ -2360,7 +2360,7 @@ void mmix::zsnz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -2379,7 +2379,7 @@ void mmix::zsnzi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
        R(x, ((R(y) < 0) ? z : 0) );
 }
@@ -2397,7 +2397,7 @@ void mmix::zsnp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -2416,7 +2416,7 @@ void mmix::zsnpi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? z : 0) );
@@ -2435,7 +2435,7 @@ void mmix::zsev()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? R(z) : 0) );
@@ -2454,7 +2454,7 @@ void mmix::zsevi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ((R(y) < 0) ? z : 0) );
@@ -2473,7 +2473,7 @@ void mmix::opcode_AND()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) & R(z));
@@ -2492,7 +2492,7 @@ void mmix::andi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) & z);
@@ -2511,7 +2511,7 @@ void mmix::opcode_OR()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) | R(z));
@@ -2530,7 +2530,7 @@ void mmix::ori()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) | z);
@@ -2549,7 +2549,7 @@ void mmix::opcode_xor()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) ^ R(z));
@@ -2568,7 +2568,7 @@ void mmix::xori()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) ^ z);
@@ -2587,7 +2587,7 @@ void mmix::andn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) & ~R(z));
@@ -2606,7 +2606,7 @@ void mmix::andni()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) & ~z);
@@ -2625,7 +2625,7 @@ void mmix::orn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) | ~R(z));
@@ -2644,7 +2644,7 @@ void mmix::orni()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, R(y) | ~z);
@@ -2663,7 +2663,7 @@ void mmix::nand()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ~( R(y) & R(z)) );
@@ -2682,7 +2682,7 @@ void mmix::nandi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ~( R(y) & z) );
@@ -2701,7 +2701,7 @@ void mmix::nor()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ~( R(y) | R(z)) );
@@ -2720,7 +2720,7 @@ void mmix::nori()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ~( R(y) | z) );
@@ -2739,7 +2739,7 @@ void mmix::nxor()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ~( R(y) ^ R(z)) );
@@ -2758,7 +2758,7 @@ void mmix::nxori()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         R(x, ~( R(y) ^ z) );
@@ -2777,10 +2777,10 @@ void mmix::mux()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
-        R(x, (R(y) & g(Address(rM))) | (R(z) & ~g(Address(rM))) );
+        R(x, (R(y) & g(UnsignedMorsel(rM))) | (R(z) & ~g(UnsignedMorsel(rM))) );
 }
 
 void mmix::muxi()
@@ -2796,10 +2796,10 @@ void mmix::muxi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
-        R(x, (R(y) & g(Address(rM))) | (z & ~g(Address(rM))) );
+        R(x, (R(y) & g(UnsignedMorsel(rM))) | (z & ~g(UnsignedMorsel(rM))) );
 }
 
 void mmix::sadd()
@@ -2815,7 +2815,7 @@ void mmix::sadd()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         UnsignedMorsel temp( R(y) & ~R(z) );
@@ -2836,7 +2836,7 @@ void mmix::saddi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         UnsignedMorsel temp( R(y) & ~z );
@@ -2857,7 +2857,7 @@ void mmix::bdif()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
         UnsignedMorsel b0 = ((R(y)>> 0)&0xFF) - ((R(z)>> 0)&0xFF);
@@ -2893,7 +2893,7 @@ void mmix::bdifi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -2934,7 +2934,7 @@ void mmix::wdif()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
           {
         UnsignedMorsel w0 = ((R(y)>> 0)&0xFFFF) - ((R(z)>> 0)&0xFFFF);
         UnsignedMorsel w1 = ((R(y)>>16)&0xFFFF) - ((R(z)>>16)&0xFFFF);
@@ -2962,7 +2962,7 @@ void mmix::wdifi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -2991,7 +2991,7 @@ void mmix::tdif()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   
         UnsignedMorsel t0 = ((R(y)>> 0)&0xFFFFFFFF) - ((R(z)>> 0)&0xFFFFFFFF);
         UnsignedMorsel t1 = ((R(y)>>32)&0xFFFFFFFF) - ((R(z)>>32)&0xFFFFFFFF);
@@ -3013,7 +3013,7 @@ void mmix::tdifi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3038,7 +3038,7 @@ void mmix::ofif()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         UnsignedMorsel u0 = (R(y)) - R(z);
         u0 = (u0 > R(y)) ? 0 : u0;
@@ -3059,7 +3059,7 @@ void mmix::odifi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
         {
         UnsignedMorsel u0 = (R(y)) - z;
@@ -3085,7 +3085,7 @@ void mmix::mor()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         UnsignedMorsel r;
         for (unsigned int i=0; i<64; i++)
@@ -3113,7 +3113,7 @@ void mmix::mori()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         {
         UnsignedMorsel r;
@@ -3142,7 +3142,7 @@ void mmix::mxor()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         UnsignedMorsel r;
         for (unsigned int i=0; i<8; i++)
@@ -3171,7 +3171,7 @@ void mmix::mxori()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         UnsignedMorsel r;
         for (unsigned int i=0; i<8; i++)
@@ -3200,7 +3200,7 @@ void mmix::fadd()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
 {
         //double t = ( *(dynamic_cast<double*>(&uy)) + *(dynamic_cast<double*>(&uz)) );
@@ -3223,7 +3223,7 @@ void mmix::fsub()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         //double t = ( *(double*)&uy - *(double*)&uz );
         //R(x, *(unsigned long long int *)&t );
@@ -3245,7 +3245,7 @@ void mmix::fmul()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         //double t = ( *(double*)&uy * *(double*)&uz );
         //R(x, *(unsigned long long int *)&t );
@@ -3267,7 +3267,7 @@ void mmix::fdiv()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         //double t = ( *(double*)&uy / *(double*)&uz );
         //R(x, *(unsigned long long int *)&t );
@@ -3289,7 +3289,7 @@ void mmix::frem()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         {
         //double t = fmod( *(double*)&uy , *(double*)&uz );
@@ -3312,7 +3312,7 @@ void mmix::fsqrt()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          {
         //double t = sqrt( *(double*)&uz );
         //R(x, *(unsigned long long int *)&t );
@@ -3334,7 +3334,7 @@ void mmix::fint()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   //R(x, (unsigned long long int)( *(double*)&uz ));
   R(x, 92ull);
@@ -3353,7 +3353,7 @@ void mmix::fcmp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
          //R(x, ((*(double*)&uy > *(double*)&uz) ? 1 : 0) 
            //- ((*(double*)&uy < *(double*)&uz) ? 1 : 0) );
         R(x, 92ull);
@@ -3373,7 +3373,7 @@ void mmix::feql()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         //R(x, *(double*)&uy == *(double*)&uz );
       R(x, 92ull);
@@ -3392,7 +3392,7 @@ void mmix::fun()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         R(x, fy != fy || fz != fz );
 }
@@ -3410,7 +3410,7 @@ void mmix::fcmpe()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         int e;
         frexp(fy.asFloat(), &e);
@@ -3432,7 +3432,7 @@ void mmix::feqle()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         int e;
         frexp(fy.asFloat(), &e);
@@ -3453,7 +3453,7 @@ void mmix::fune()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, fy != fy || fz != fz || frE != frE);
 }
@@ -3471,7 +3471,7 @@ void mmix::fix()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, fz);
 }
@@ -3489,7 +3489,7 @@ void mmix::fixu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, fz);
 }
@@ -3507,7 +3507,7 @@ void mmix::flot()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
         R(x, sz);
 }
@@ -3525,7 +3525,7 @@ void mmix::flotu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, uz);
 }
@@ -3543,7 +3543,7 @@ void mmix::flotui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, z);
 }
@@ -3561,7 +3561,7 @@ void mmix::sflot()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, fz);
 }
@@ -3579,7 +3579,7 @@ void mmix::sfloti()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, z);
 }
@@ -3597,7 +3597,7 @@ void mmix::sflotu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, fz);
 }
@@ -3615,7 +3615,7 @@ void mmix::sflotui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, z);
 }
@@ -3633,7 +3633,7 @@ void mmix::ldsf()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
   R(x, M(4, a));
@@ -3652,7 +3652,7 @@ void mmix::ldsfi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, M(4, uy+z));
 }
@@ -3670,7 +3670,7 @@ void mmix::stsf()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3692,7 +3692,7 @@ void mmix::stsfi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   M(4, uy+z, fx);
 }
@@ -3710,7 +3710,7 @@ void mmix::floti()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   R(x, z);
 }
@@ -3728,7 +3728,7 @@ void mmix::seth()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3750,7 +3750,7 @@ void mmix::setmh()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3771,7 +3771,7 @@ void mmix::setml()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3791,7 +3791,7 @@ void mmix::setl()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3812,7 +3812,7 @@ void mmix::inch()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3833,7 +3833,7 @@ void mmix::incmh()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3854,7 +3854,7 @@ void mmix::incml()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3875,7 +3875,7 @@ void mmix::incl()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3895,7 +3895,7 @@ void mmix::orh()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3915,7 +3915,7 @@ void mmix::ormh()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3935,7 +3935,7 @@ void mmix::orml()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3955,7 +3955,7 @@ void mmix::orl()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3975,7 +3975,7 @@ void mmix::andnh()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -3995,7 +3995,7 @@ void mmix::andnmh()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -4015,7 +4015,7 @@ void mmix::andnml()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -4035,7 +4035,7 @@ void mmix::andnl()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel uxi = x;
   UnsignedMorsel uyi = y;
   UnsignedMorsel uzi = z;
@@ -4055,10 +4055,10 @@ void mmix::go()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
-        R(Address(x), target.asUnsignedMorsel());
+        R(UnsignedMorsel(x), target);
         target = a;
 }
 
@@ -4075,7 +4075,7 @@ void mmix::bn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sx < 0 ) ? ra : target );
@@ -4094,7 +4094,7 @@ void mmix::bz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( uz == 0 ) ? ra : target );
@@ -4113,7 +4113,7 @@ void mmix::bp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz > 0 ) ? ra : target );
@@ -4132,7 +4132,7 @@ void mmix::bod()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( (uz & 1) == 1 ) ? ra : target );
@@ -4151,7 +4151,7 @@ void mmix::bnn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz >= 0 ) ? ra : target );
@@ -4170,7 +4170,7 @@ void mmix::bnz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz != 0 ) ? ra : target );
@@ -4189,7 +4189,7 @@ void mmix::bnp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz <= 0 ) ? ra : target );
@@ -4208,7 +4208,7 @@ void mmix::bev()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( (uz & 1) == 0 ) ? ra : target );
@@ -4227,7 +4227,7 @@ void mmix::pbn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sx < 0 ) ? ra : target );
@@ -4246,7 +4246,7 @@ void mmix::pbz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( uz == 0 ) ? ra : target );
@@ -4265,7 +4265,7 @@ void mmix::pbp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz > 0 ) ? ra : target );
@@ -4284,7 +4284,7 @@ void mmix::pbod()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( (uz & 1) == 1 ) ? ra : target );
@@ -4303,7 +4303,7 @@ void mmix::pbnn()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz >= 0 ) ? ra : target );
@@ -4322,7 +4322,7 @@ void mmix::pbnz()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz != 0 ) ? ra : target );
@@ -4341,7 +4341,7 @@ void mmix::pbnp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( sz <= 0 ) ? ra : target );
@@ -4360,7 +4360,7 @@ void mmix::pbev()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   target = ( ( (uz & 1) == 0 ) ? ra : target );
@@ -4379,7 +4379,7 @@ void mmix::jmpb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = -1*ra;
@@ -4399,7 +4399,7 @@ void mmix::bnb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sx < 0 ) ? -1*ra : target );
@@ -4419,7 +4419,7 @@ void mmix::bzb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( uz == 0 ) ? -1*ra : target );
@@ -4439,7 +4439,7 @@ void mmix::bpb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz > 0 ) ? -1*ra : target );
@@ -4459,7 +4459,7 @@ void mmix::bodb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
@@ -4479,7 +4479,7 @@ void mmix::bnnb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz >= 0 ) ? -1*ra : target );
@@ -4499,7 +4499,7 @@ void mmix::bnzb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz != 0 ) ? -1*ra : target );
@@ -4519,7 +4519,7 @@ void mmix::bnpb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz <= 0 ) ? -1*ra : target );
@@ -4539,7 +4539,7 @@ void mmix::bevb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
@@ -4559,7 +4559,7 @@ void mmix::pbnb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sx < 0 ) ? -1*ra : target );
@@ -4579,7 +4579,7 @@ void mmix::pbzb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( uz == 0 ) ? -1*ra : target );
@@ -4599,7 +4599,7 @@ void mmix::pbpb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz > 0 ) ? -1*ra : target );
@@ -4619,7 +4619,7 @@ void mmix::pbodb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( (uz & 1) == 1 ) ? -1*ra : target );
@@ -4639,7 +4639,7 @@ void mmix::pbnnb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz >= 0 ) ? -1*ra : target );
@@ -4659,7 +4659,7 @@ void mmix::pbnzb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz != 0 ) ? -1*ra : target );
@@ -4679,7 +4679,7 @@ void mmix::pbnpb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( sz <= 0 ) ? -1*ra : target );
@@ -4699,7 +4699,7 @@ void mmix::pbevb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   //target = ( ( (uz & 1) == 0 ) ? -1*ra : target );
@@ -4719,11 +4719,11 @@ void mmix::pushj()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   push(x);
-  R(Address(rJ), (target+4).asUnsignedMorsel());
+  R(UnsignedMorsel(rJ), (target+4));
   target = ra;
 }
 
@@ -4740,11 +4740,11 @@ void mmix::pushjb()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
  
   push(x);
-  R(Address(rJ), (1*(target+4)).asUnsignedMorsel());
+  R(UnsignedMorsel(rJ), (1*(target+4)));
   target = ra;
 }
 
@@ -4761,11 +4761,11 @@ void mmix::pushgo()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
   push(x);
-  R(Address(rJ), (target+4).asUnsignedMorsel());
+  R(UnsignedMorsel(rJ), (target+4));
   target = a;
 }
 
@@ -4782,10 +4782,10 @@ void mmix::pop()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   pop(x);
-  target = R(Address(rJ))+4*((y<<8) & z);
+  target = R(UnsignedMorsel(rJ))+4*((y<<8) & z);
 }
 
 void mmix::save()
@@ -4801,7 +4801,7 @@ void mmix::save()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   push(255);
   R(x, register_stack_top);
@@ -4819,7 +4819,7 @@ void mmix::unsave()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
  
   pop(255);
   R(x, register_stack_top);
@@ -4838,7 +4838,7 @@ void mmix::ldunc()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
   R( x, (M(8, a)) );
@@ -4856,7 +4856,7 @@ void mmix::stunc()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
   M(8, a, R(x));
@@ -4874,7 +4874,7 @@ void mmix::ldunci()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
  
   R( x, (M(8, a)) );
@@ -4893,14 +4893,14 @@ void mmix::cswap()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
-        if (M(8, a) == R(Address(rP))) {
+        if (M(8, a) == R(UnsignedMorsel(rP))) {
           M(8,a,R(x));
           R(x,1);
         } else {
-          R(Address(rP), M(8,a));
+          R(UnsignedMorsel(rP), M(8,a));
           R(x, 0);
         }
  
@@ -4942,7 +4942,7 @@ void mmix::stunci()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   M(8, uy+z, R(x));
 }
@@ -4991,7 +4991,7 @@ void mmix::trap()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
         switch (y.asChar()) {
         case Halt:
@@ -5011,9 +5011,9 @@ void mmix::trap()
           break;
         case Fputs:
           if (z == 1)          
-            for (unsigned int i=0; M(1,R(Address(255)) + i)  != '\0'; i++)
+            for (unsigned int i=0; M(1,R(UnsignedMorsel(255)) + i)  != '\0'; i++)
             {
-              printf( "%c", M(1,R(Address(255)) + i).asChar() );
+              printf( "%c", M(1,R(UnsignedMorsel(255)) + i).asChar() );
             }
           break;
         case Fputws:
@@ -5044,7 +5044,7 @@ void mmix::get()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   R(x, g(z));
 }
@@ -5062,7 +5062,7 @@ void mmix::put()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   g(x, R(z));
 }
@@ -5080,7 +5080,7 @@ void mmix::puti()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   g(x, z);
 }
@@ -5098,7 +5098,7 @@ void mmix::geta()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
   R(x, ra);
@@ -5117,7 +5117,7 @@ void mmix::getab()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   UnsignedMorsel ra = 4*( (uy<<8) & uz);
   //R(x, -1*ra);
@@ -5137,11 +5137,11 @@ void mmix::jmp()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
- // Address 
+ // UnsignedMorsel 
   //target = getip()+stepsize;
-  target = Address( (x<<16) & (y<<8) & (z<<0) );
+  target = UnsignedMorsel( (x<<16) & (y<<8) & (z<<0) );
   setip( target );
 }
 
@@ -5198,7 +5198,7 @@ void mmix::ldbui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   R(x, M(1, (uy+z)));
 }
@@ -5216,7 +5216,7 @@ void mmix::ldw()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
 
   R(x, M(2, a));
@@ -5235,7 +5235,7 @@ void mmix::ldwi()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   R(x, M(2, uy+z));
 }
@@ -5253,7 +5253,7 @@ void mmix::ldwu()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
 
   R(x, M(2, a) );
@@ -5272,7 +5272,7 @@ void mmix::ldwui()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
 
   R(x, M(2, uy+z) );
 }
@@ -5290,7 +5290,7 @@ void mmix::ldt()
   UnsignedMorsel fx = R(x); // signed double values
   UnsignedMorsel fy = R(y);
   UnsignedMorsel fz = R(z);
-  UnsignedMorsel frE = R(Address(rE));
+  UnsignedMorsel frE = R(UnsignedMorsel(rE));
   UnsignedMorsel a = ( (uy + uz) & UnsignedMorsel(0xFFFFFFFFFFFFFFFF) );
 
   R(x, (M(4, a)) );

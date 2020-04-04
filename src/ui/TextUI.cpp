@@ -48,12 +48,12 @@ int TextUI::user_loop()
 	{
     if (0==strcmp("subleq", args[1]))
     {
-		  mycpu = new subleq(8,Address(MAX_MEM_SIZE));
+		  mycpu = new subleq(8,UnsignedMorsel(MAX_MEM_SIZE));
 		  printf("subleq cpu created\n");
     } 
     else if (0==strcmp("mmix", args[1]))
     {
-      mycpu = new mmix(8, Address(65536));
+      mycpu = new mmix(8, UnsignedMorsel(65536));
 		  printf("mmix cpu created\n");
     }
     else
@@ -85,7 +85,7 @@ int TextUI::user_loop()
       UnsignedMorsel value;
       unsigned int v = stoul(args[2]);
       value = v;
-      Address addr;
+      UnsignedMorsel addr;
       addr = static_cast<unsigned int>(atoi(args[1]));
 	    //mycpu->load(atoi(args[1]), atoi(args[2]));
       mycpu->load(addr,value);
@@ -107,7 +107,7 @@ int TextUI::user_loop()
 	    }
 
 	    UnsignedMorsel value;
-      Address i;
+      UnsignedMorsel i;
       i=static_cast<unsigned int>(address1);
 	    for (i=static_cast<unsigned int>(address1); i<=static_cast<unsigned int>(address2); i++)
 	    {
@@ -127,7 +127,7 @@ int TextUI::user_loop()
 		if (mycpu == NULL)
 			printf("No cpu\n");
     else
-	    mycpu->setip(Address(stoul(args[1])));
+	    mycpu->setip(UnsignedMorsel(stoul(args[1])));
 	}
 	else if (0==strcmp("step",args[0]))
 	{

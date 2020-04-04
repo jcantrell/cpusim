@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "SignedMorsel.h"
-class Address;
 class SignedMorsel;
 using namespace std;
 using namespace boost;
@@ -24,6 +23,7 @@ class UnsignedMorsel
   UnsignedMorsel operator-(const UnsignedMorsel& other);
   friend UnsignedMorsel operator-(unsigned int lhsInt, const UnsignedMorsel& other);
   UnsignedMorsel operator-=(const UnsignedMorsel& other);
+  UnsignedMorsel& operator+=(int in);
   UnsignedMorsel& operator++(int);
   UnsignedMorsel& operator=(unsigned long long int in);
   UnsignedMorsel& operator=(const UnsignedMorsel& other);
@@ -66,4 +66,5 @@ class UnsignedMorsel
   unsigned char asChar();
   UnsignedMorsel& resize(unsigned int newsize);
 };
+size_t hash_value(const UnsignedMorsel& in);
 #endif

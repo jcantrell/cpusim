@@ -5,7 +5,7 @@
 
 class subleq : public cpu {
 	public:
-		subleq(unsigned int byte_in, Address address_in);
+		subleq(unsigned int byte_in, UnsignedMorsel address_in);
 		virtual void step(unsigned int inst);
 };
 
