@@ -40,7 +40,8 @@ check: $(BINDIR)/cpusim $(TESTS)
 
 test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
 	@echo 
-	$(BINDIR)/testLoader && echo
+	$(BINDIR)/testLoader
+	@echo 
 	$(BINDIR)/testUnsignedMorsel
 	@echo
 	$(BINDIR)/testSignedMorsel
@@ -50,7 +51,11 @@ test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS)
 	cd tests/functional && mmixal hello.mms && mmixal test.mms
 	@echo
 	cat tests/functional/script | $(BINDIR)/cpusim
+	@echo
 	cat tests/functional/script2 | $(BINDIR)/cpusim
+	@echo
+	cat tests/functional/subleq/test_subleq | $(BINDIR)/cpusim
+	@echo
 	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
 	lcov --remove $(BUILDDIR)/coverage.info -o $(BUILDDIR)/stripped_coverage.info "boost*" "c++*" "/usr/include/*"
 	genhtml $(BUILDDIR)/stripped_coverage.info --output-dir $(DOCDIR)/reports

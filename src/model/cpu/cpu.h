@@ -56,7 +56,7 @@ class cpu {
 		UnsignedMorsel getip();
 		UnsignedMorsel setip(UnsignedMorsel in);
 		string toString();
-		void step(unsigned int inst);
+		virtual void step(unsigned int inst);
     UnsignedMorsel regs(UnsignedMorsel address);
     UnsignedMorsel regs(UnsignedMorsel address, UnsignedMorsel value);
     int loadimage(string filename);
