@@ -10,9 +10,10 @@ class UnsignedMorsel;
 class SignedMorsel 
 {
   private:
-    dynamic_bitset<> bs;
+    UnsignedMorsel um;
+    friend class UnsignedMorsel;
   public:
-  SignedMorsel() : bs(64,0ul) {}
+  SignedMorsel() : um(0ul) {}
   size_t count();
   SignedMorsel(dynamic_bitset<> in);
   SignedMorsel(unsigned long long int in);
@@ -62,5 +63,6 @@ class SignedMorsel
   float asFloat() const;
   unsigned char asChar();
   SignedMorsel& resize(unsigned int newsize);
+  UnsignedMorsel asUnsignedMorsel();
 };
 #endif
