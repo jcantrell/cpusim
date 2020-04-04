@@ -40,13 +40,13 @@ check: $(BINDIR)/cpusim $(TESTS)
 
 test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
 	@echo 
-	$(BINDIR)/testLoader
-	@echo 
 	$(BINDIR)/testUnsignedMorsel
 	@echo
 	$(BINDIR)/testSignedMorsel
 	@echo
 	$(BINDIR)/testcpu
+	@echo
+	$(BINDIR)/testLoader
 	@echo
 	cd tests/functional && mmixal hello.mms && mmixal test.mms
 	@echo
