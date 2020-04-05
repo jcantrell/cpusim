@@ -65,9 +65,6 @@ bool TestLoader::TestLoc() {
     UnsignedMorsel out;
   };
 
-  // read from file
-  // save address
-
   vector<TestCase> tests = {
      {UnsignedMorsel(0), UnsignedMorsel(UnsignedMorsel(0x0200000000000100))}
     ,{UnsignedMorsel(0), UnsignedMorsel(UnsignedMorsel(0xDEADBEEFCAFEBABE))}
@@ -105,8 +102,9 @@ bool TestLoader::TestLine() {
     bool in;
     bool out;
   };
+  line(static_cast<unsigned char>(0xBE),static_cast<unsigned char>(0xEF));
   vector<TestCase> tests = {
-    {true, true}
+    {linenum==static_cast<unsigned>(0xBEEF),true}
   };
   return runCases(tests);
 }
@@ -116,8 +114,11 @@ bool TestLoader::TestFile() {
     bool in;
     bool out;
   };
+  
+  in = std::ifstream("tests/functional/testLoader/testFile1", std::ifstream::binary);
+  file(2,4);
   vector<TestCase> tests = {
-    {true, true}
+    {filenum==2 && fn=="somefilenamefour", true}
   };
   return runCases(tests);
 }
@@ -129,11 +130,12 @@ bool TestLoader::TestPost() {
   };
   in = std::ifstream("tests/functional/testLoader/testPost1", std::ifstream::binary);
   mmix mycpu(8, UnsignedMorsel(65536));
-  post(mycpu, 246);
+  post(mycpu, 253);
 
   vector<TestCase> tests = {
-    {mycpu.regs(UnsignedMorsel(254)), UnsignedMorsel(0x0200000000000000ul)},
-    {mycpu.regs(UnsignedMorsel(255)), UnsignedMorsel(0x0000010000000000ul)}
+    {mycpu.regs(UnsignedMorsel(253)), UnsignedMorsel(0xDEADBEEFCAFEBABEul).resize(64)},
+    {mycpu.regs(UnsignedMorsel(254)), UnsignedMorsel(0x0200000000000000ul).resize(64)},
+    {mycpu.regs(UnsignedMorsel(255)), UnsignedMorsel(0x0000010000000000ul).resize(64)}
   };
   return runCases(tests);
 }
@@ -171,7 +173,6 @@ bool TestLoader::TestPre() {
 
 void TestLoader::runAllTests()
 {
-    //TestLoader tm;
     struct NameResultPair {
       TestLoader tm;
       string funcName;

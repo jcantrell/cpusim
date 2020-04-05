@@ -108,20 +108,25 @@ Loader::fixrx(cpu& c, unsigned char y, unsigned char z)
 }
 
 void
-Loader::file(unsigned char z)
+Loader::file(unsigned char y, unsigned char z)
 {
+  //Y = file number, Z = tetra count of bytes of filename
   union tetra_union tetra;
-          //Y = file number, Z = tetra count of bytes of filename
-          for (;z>0;z--) {
-            if (in.eof()) return;
-            in.read(tetra.ar,4);
-          }
+  filenum = static_cast<unsigned>(y);
+  string n="";
+  for (;z>0;z--) {
+    if (in.eof()) return;
+    in.read(tetra.ar,4);
+    for (int i=0;i<in.gcount();i++)
+      n+=tetra.ar[i];
+  }
+  fn=n;
 }
 
 void
-Loader::line()
+Loader::line(unsigned char y, unsigned char z)
 {
-          //YZ = line number
+  linenum = (static_cast<unsigned long>(y)<<8) | static_cast<unsigned long>(z);
 }
 
 void
@@ -189,8 +194,6 @@ Loader::post(cpu& mycpu,unsigned char z)
   {
     in.read(t1.ar,4);
     in.read(t2.ar,4);
-    // TODO: properly implement endianness
-    // reverse bytes bc endianness
     char t;
     t = t1.ar[0]; t1.ar[0] = t1.ar[3]; t1.ar[3] = t; 
     t = t1.ar[1]; t1.ar[1] = t1.ar[2]; t1.ar[2] = t;
@@ -201,6 +204,7 @@ Loader::post(cpu& mycpu,unsigned char z)
     m1<<=32;
     UnsignedMorsel m2(t2.num);
     UnsignedMorsel m3( m1|m2 );
+    m3.resize(64);
 
     mycpu.regs(UnsignedMorsel(z+static_cast<unsigned int>(i/2)), m3);
   }
@@ -311,11 +315,11 @@ Loader::step(cpu& mycpu, unsigned char w, unsigned char x, unsigned char y, unsi
           break;
 
         case lop_file:
-          file(z);
+          file(y,z);
           break;
 
         case lop_line:
-          line();
+          line(y,z);
           break;
 
         case lop_spec:

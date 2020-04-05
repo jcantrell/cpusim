@@ -14,7 +14,7 @@ class Loader {
     unsigned linenum;
     unsigned long long timestamp;
     UnsignedMorsel lambda;
-//    UnsignedMorsel address;
+    string fn;
     std::ifstream in;
   public:
     Loader() : quoted_flag(false), in_stab(false), lambda(UnsignedMorsel(0)) {};
@@ -28,8 +28,8 @@ class Loader {
     void fixo(cpu& c, unsigned char y, unsigned char z);
     void fixr(cpu& c, unsigned char y, unsigned char z);
     void fixrx(cpu& c, unsigned char y, unsigned char z);
-    void file(unsigned char z);
-    void line();
+    void file(unsigned char y, unsigned char z);
+    void line(unsigned char y, unsigned char z);
     void spec(cpu& c);
     void pre(unsigned char z);
     void post(cpu& mycpu, unsigned char z);
