@@ -1,4 +1,0 @@
-create mmix
-loadobject tests/functional/test.mmo
-memdump
-exit

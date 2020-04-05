@@ -38,27 +38,15 @@ $(BINDIR)/cpusim: $(EX) $(OBJ)
 check: $(BINDIR)/cpusim $(TESTS)
 	cppcheck . --enable=all
 
-test: $(BINDIR)/cpusim $(BINDIR)/testLoader $(TESTS) 
-	@echo 
-	$(BINDIR)/testUnsignedMorsel
+test: $(BINDIR)/cpusim $(TESTS) testUnsignedMorsel testSignedMorsel testCpu testLoader testSubleq testMmix coverageReport
+
+testMmix: $(BINDIR)/cpusim $(TESTS)
+	cd tests/functional/mmix && mmixal hello.mms && mmixal test.mms
 	@echo
-	$(BINDIR)/testSignedMorsel
+	cat tests/functional/mmix/hello.cps | $(BINDIR)/cpusim
 	@echo
-	$(BINDIR)/testcpu
+	cat tests/functional/mmix/test.cps | $(BINDIR)/cpusim
 	@echo
-	$(BINDIR)/testLoader
-	@echo
-	cd tests/functional && mmixal hello.mms && mmixal test.mms
-	@echo
-	cat tests/functional/script | $(BINDIR)/cpusim
-	@echo
-	cat tests/functional/script2 | $(BINDIR)/cpusim
-	@echo
-	cat tests/functional/subleq/test_subleq | $(BINDIR)/cpusim
-	@echo
-	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
-	lcov --remove $(BUILDDIR)/coverage.info -o $(BUILDDIR)/stripped_coverage.info "boost*" "c++*" "/usr/include/*"
-	genhtml $(BUILDDIR)/stripped_coverage.info --output-dir $(DOCDIR)/reports
 
 $(BINDIR)/testcpu: $(BUILDDIR)/tests/unit/handrolled/testcpu.cpp.o $(BUILDDIR)/model/cpu/cpu.cpp.o $(BUILDDIR)/model/cpu/SignedMorsel.cpp.o $(BUILDDIR)/model/cpu/UnsignedMorsel.cpp.o
 #$(BINDIR)/testcpu: $(OBJ) $(TESTS)
@@ -79,6 +67,31 @@ $(BINDIR)/testLoader: $(BUILDDIR)/tests/unit/handrolled/testLoader.cpp.o $(BUILD
 $(BUILDDIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+coverageReport:
+	lcov --capture --directory $(BUILDDIR) -b . --output-file $(BUILDDIR)/coverage.info
+	lcov --remove $(BUILDDIR)/coverage.info -o $(BUILDDIR)/stripped_coverage.info "boost*" "c++*" "/usr/include/*"
+	genhtml $(BUILDDIR)/stripped_coverage.info --output-dir $(DOCDIR)/reports
+
+testSubleq: $(BINDIR)/cpusim $(TESTS)
+	cat tests/functional/subleq/test_subleq | $(BINDIR)/cpusim
+	@echo
+
+testSignedMorsel: $(BINDIR)/cpusim $(TESTS)
+	$(BINDIR)/testSignedMorsel
+	@echo
+
+testUnsignedMorsel: $(BINDIR)/cpusim $(TESTS)
+	$(BINDIR)/testUnsignedMorsel
+	@echo
+
+testLoader: $(BINDIR)/cpusim $(TESTS)
+	$(BINDIR)/testLoader
+	@echo
+
+testCpu: $(BINDIR)/cpusim $(TESTS)
+	$(BINDIR)/testcpu
+	@echo
 
 prereqs:
 	apt install libboost-all-dev lcov
