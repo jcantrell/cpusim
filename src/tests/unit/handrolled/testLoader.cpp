@@ -132,8 +132,8 @@ bool TestLoader::TestPost() {
   post(mycpu, 246);
 
   vector<TestCase> tests = {
-    {mycpu.regs(Address(254)), UnsignedMorsel(0x0200000000000000ul)},
-    {mycpu.regs(Address(255)), UnsignedMorsel(0x0000010000000000ul)}
+    {mycpu.regs(UnsignedMorsel(254)), UnsignedMorsel(0x0200000000000000ul)},
+    {mycpu.regs(UnsignedMorsel(255)), UnsignedMorsel(0x0000010000000000ul)}
   };
   return runCases(tests);
 }
