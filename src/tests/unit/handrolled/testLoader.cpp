@@ -171,6 +171,21 @@ bool TestLoader::TestPre() {
   return runCases(tests);
 }
 
+bool TestLoader::TestFixo()
+{
+  struct TestCase {
+    UnsignedMorsel in;
+    UnsignedMorsel out;
+  };
+  mmix mycpu(8,UnsignedMorsel(65536));
+  setfile("tests/functional/testLoader/testFixo1");
+  fixo(mycpu,0xDE,2);
+  vector<TestCase> tests = {
+    {mycpu.view(UnsignedMorsel(0xDEADBEEFul))==lambda, true}
+  };
+  return runCases(tests);
+}
+
 void TestLoader::runAllTests()
 {
     struct NameResultPair {
@@ -187,6 +202,7 @@ void TestLoader::runAllTests()
       ,{TestLoader(), "TestLine",  &TestLoader::TestLine}
       ,{TestLoader(), "TestFile",  &TestLoader::TestFile}
       ,{TestLoader(), "TestPost",  &TestLoader::TestPost}
+      ,{TestLoader(), "TestFixo", &TestLoader::TestFixo}
       ,{TestLoader(), "TestFixrx", &TestLoader::TestFixrx}
     };
 
