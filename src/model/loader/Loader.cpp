@@ -15,31 +15,20 @@ Loader::quote(unsigned char y, unsigned char z)
 void
 Loader::loc(unsigned char y, unsigned char z)
 {
-  //cout << "START LOC" << endl;
   UnsignedMorsel address(UnsignedMorsel(y).pb(56));
   UnsignedMorsel offset(0);
   char c;
-   // cout << "loc: ";
   for (unsigned i=0; i<4u*z; i++) 
   {
     in.get(c); offset.pb(8); offset = offset | UnsignedMorsel(static_cast<unsigned char>(c));
-    //cout << std::hex << setfill('0') << std::setw(2)
-    //<< static_cast<int>(static_cast<unsigned char>(c));
   }
-  //cout << endl;
-  //cout << "address: " << address << endl << "offset: " << offset << endl << "address+offset: " << address+offset << endl;
   lambda = address + offset;
-  //cout << "LOC END" << endl;
 }
 
 void
 Loader::skip(unsigned char y, unsigned char z)
 {
   UnsignedMorsel address(UnsignedMorsel(y).pb(56));
-  //UnsignedMorsel t;
-  //t = y;
-  //t.resize(64);
-  //t = (t<<8);
   lambda += ((y<<8) | z);
 }
 
@@ -67,13 +56,12 @@ Loader::fixo(cpu& c, unsigned char y, unsigned char z)
 void
 Loader::fixr(cpu& mycpu, unsigned char y, unsigned char z)
 {
-
-          SignedMorsel delta(y);
-          delta = (delta.pb(8))|z;
-          delta.resize(64);
-          SignedMorsel address;
-          address = SignedMorsel(lambda) + (-delta<<2);
-    address.resize(64);
+  SignedMorsel delta(y);
+  delta.resize(64);
+  delta = (delta.pb(8))|z;
+  SignedMorsel address;
+  address = SignedMorsel(lambda) + (-delta<<2);
+  address.resize(64);
   SignedMorsel curLoc(lambda);
   for (int i=1;i>=0;i--) {
     mycpu.load((address+i+2).asUnsignedMorsel(), (delta&0xFF).asUnsignedMorsel());
@@ -132,13 +120,15 @@ Loader::line(unsigned char y, unsigned char z)
 void
 Loader::spec(cpu& c)
 {
-          //YZ = type. Subsequent tetras, until next loader operation
-          //other than lop_quote, comprise the special data.
+  //YZ = type. Subsequent tetras, until next loader operation
+  //other than lop_quote, comprise the special data.
   union tetra_union tetra;
   while (in.read(tetra.ar,4) && !((tetra.ar[0] == static_cast<char>(mmo_escape)) && !(tetra.ar[1] == lop_quote))
 )
   {
   }
+
+  //TODO: we shouldn't be calling step here, thats loadobject's job
   unsigned char w = static_cast<unsigned char>(tetra.ar[0]);
   unsigned char x = static_cast<unsigned char>(tetra.ar[1]);
   unsigned char y = static_cast<unsigned char>(tetra.ar[2]);
@@ -166,19 +156,7 @@ Loader::pre(unsigned char z)
   for (;z > 0;z--) {
     if (in.eof()) return;
     in.read(tetra.ar,4);
-
-/*
-    cout << std::hex << setfill('0') << std::setw(2)
-    << static_cast<int>(static_cast<unsigned char>(tetra.ar[0]));
-    cout << std::hex << setfill('0') << std::setw(2)
-    << static_cast<int>(static_cast<unsigned char>(tetra.ar[1]));
-    cout << std::hex << setfill('0') << std::setw(2)
-    << static_cast<int>(static_cast<unsigned char>(tetra.ar[2]));
-    cout << std::hex << setfill('0') << std::setw(2)
-    << static_cast<int>(static_cast<unsigned char>(tetra.ar[3]));
-*/
   }
-//  cout << endl;
 }
 
 void
@@ -189,7 +167,7 @@ Loader::post(cpu& mycpu,unsigned char z)
   union tetra_union t1;
   union tetra_union t2;
   UnsignedMorsel rG(6);
-  mycpu.regs(UnsignedMorsel(rG),UnsignedMorsel(z)); // TODO: this should be rG
+  mycpu.regs(UnsignedMorsel(rG),UnsignedMorsel(z));
   for (unsigned int i=0;(256-mycpu.regs(rG))*2u>i;i+=2)
   {
     in.read(t1.ar,4);
@@ -243,21 +221,6 @@ Loader::loadobject(cpu& mycpu, string filename)
   unsigned char w,x,y,z;
  
   while (in.read(tetra.ar,4)) {
-/*
-    std::cout << "Tetra: "
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(tetra.ar[0]))
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(tetra.ar[1]))
-              << " "  
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(tetra.ar[2]))
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(tetra.ar[3]))
-              << "\n";
-*/
-
-
     w = static_cast<unsigned char>(tetra.ar[0]);
     x = static_cast<unsigned char>(tetra.ar[1]);
     y = static_cast<unsigned char>(tetra.ar[2]);
@@ -272,20 +235,6 @@ Loader::loadobject(cpu& mycpu, string filename)
 void
 Loader::step(cpu& mycpu, unsigned char w, unsigned char x, unsigned char y, unsigned char z)
 {
-/*
-      cout << "step called: "
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(w))
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(x))
-              << " "  
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(y))
-              << std::hex << setfill('0') << std::setw(2)
-        << static_cast<int>(static_cast<unsigned char>(z))
-        << " to " << lambda
-              << "\n";
-*/
     if ((static_cast<unsigned char>(mmo_escape) == w) && !quoted_flag)
 	  {
       switch (x)

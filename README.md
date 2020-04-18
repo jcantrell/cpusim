@@ -141,7 +141,7 @@ following the `lop_fixrx` instruction.
 
 ### test.mmo listing
 | Number | Code | Comments |
-|:-:|:-|:-:|
+|:-:|:-:|:-:|
 | 1 | 9809 0101 5de9 484a | |
 | 2 | 9801 2001 0000 0000 | |
 | 3 | 0000 0000 | |
@@ -181,7 +181,7 @@ following the `lop_fixrx` instruction.
 
 #### State after running test.mmo
 | Address | Contents |
-|:-|:-:|
+|:-:|:-:|
 | 2000 0000 0000 0000 | 0000 0000 |
 | 2000 0000 0000 0004 | 0000 0000 |
 | 2000 0000 0000 0008 | 6162 0000 |
@@ -257,6 +257,7 @@ parse tree nodes:
 - [ ] write tests for mmix
 - [x] lop_fixrx currently functions similarly to other simulators, but the output is wrong compared to mmotype\
 - [x] convert uses of Addresss and UnsignedMorsel into uses of SignedMorsel
-- [ ] Check that loading test.mmo properly sets registers
+- [x] Check that loading test.mmo properly sets registers
 - [ ] Load and run hello.mmo
 - [ ] Load and run test.mmo
+- [ ] Add ability to view/load by a morsel at a time

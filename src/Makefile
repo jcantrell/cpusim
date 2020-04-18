@@ -86,6 +86,7 @@ testUnsignedMorsel: $(BINDIR)/cpusim $(TESTS)
 	@echo
 
 testLoader: $(BINDIR)/cpusim $(TESTS)
+	cd tests/functional/mmix && mmixal test.mms
 	$(BINDIR)/testLoader
 	@echo
 
