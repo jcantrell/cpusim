@@ -261,3 +261,42 @@ parse tree nodes:
 - [ ] Load and run hello.mmo
 - [ ] Load and run test.mmo
 - [ ] Add ability to view/load by a morsel at a time
+
+- [ ] Generic CPU needs memory, IP, instrution set.
+- [ ] LOAD instruction set
+- [ ] LOAD memory image
+- [ ] start,step,stop
+- [ ] DUMP current memory image, or address range
+
+Instruction set also declares 'special' memory addresses,
+for example we might use adress 0x0 as register A, etc.
+
+Commands:
+- [x]               create  Creates a new cpu
+- [x]               load <address> <value>  loads value at given address
+- [ ]         iobase <base>   sets base to display numbers (0b, 10, 0x)
+- [x]               view <address1> <address2>      view values stored in the address range
+- [x]                       given
+- [ ]        loadinst <file> load a file which maps integer values to instructions
+- [x]               viewip  prints current value of ip
+- [ ]        step    executes only the instruction at the location pointed to by
+- [ ]                the current value of ip
+- [ ] In MMIX, implement
+- [ ]        g(reg, value)
+- [ ]        g(reg)
+- [ ]        R(reg)
+- [ ]        R(reg, value)
+- [ ]        M(size,address,value)
+- [ ]        FCMPE
+- [ ] Unit test MMIX cpu
+- [ ] Automatically verify all methods have unit tests
+
+MMIX resources:
+http://mmix.cs.hm.edu
+http://mmix.cs.hm.edu/doc/fasc1.pdf
+http://mmix.cs.hm.edu/doc/opcodes.html
+http://mmix.cs.hm.edu/doc/mmix-doc.pdf
+http://mmix.cs.hm.edu/examples/hellognu.html
+http://mmix.cs.hm.edu/doc/mmixal.pdf
+http://mmix.cs.hm.edu/doc/instructions-en.html
+http://mmix.cs.hm.edu/doc/mmix-sim.pdf
